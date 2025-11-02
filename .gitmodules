@@ -1,0 +1,3 @@
+[submodule "rustplus_rs"]
+	path = rustplus_rs
+	url = git@me.github.com:Drigster/rustplus_rs.git
