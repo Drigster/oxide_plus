@@ -5,7 +5,10 @@ use freya_radio::prelude::*;
 use freya_router::prelude::{Routable, RouterConfig, RouterContext, outlet, router};
 use rustplus_rs::{AppInfo, AppMap, AppMapMarkers, RustPlus};
 
-use crate::{components::Navbar, components::Sidebar, pages::Map, pages::Team};
+use crate::{
+    components::{Navbar, Sidebar},
+    pages::{Map, Shops, Team},
+};
 
 #[derive(Default)]
 pub struct Data {
@@ -49,6 +52,8 @@ pub enum Route {
         Map,
         #[route("/team")]
         Team,
+        #[route("/shops")]
+        Shops,
         #[route("/settings")]
         Settings,
 }
@@ -156,6 +161,10 @@ impl Render for Layout {
                             .error_state = err_msg;
                     }
                 }
+                println!("Done...");
+                radio
+                    .write_channel(DataChannel::ConnectionStateUpdate)
+                    .connection_state = "Done...".to_string();
             })
         });
 
