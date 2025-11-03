@@ -82,14 +82,14 @@ impl Render for Sidebar {
             .background_linear_gradient(
                 LinearGradient::new()
                     .angle(0.0)
-                    .stop((Color::from_hex("#51241C00").unwrap(), 5.0))
+                    .stop((Color::from_hex("#0051241C").unwrap(), 5.0))
                     .stop((Color::from_hex("#51241C").unwrap(), 100.0)),
             )
             .children([
                 SidebarButton::new(INFO, "SERVER".to_string(), Route::Settings).into(),
                 SidebarButton::new(MAP_LIGHT, "MAP".to_string(), Route::Map).into(),
                 SidebarButton::new(STORE, "SHOPS".to_string(), Route::Settings).into(),
-                SidebarButton::new(USERS_ROUND, "TEAM".to_string(), Route::Settings).into(),
+                SidebarButton::new(USERS_ROUND, "TEAM".to_string(), Route::Team).into(),
             ])
             .into()
     }
@@ -98,10 +98,6 @@ impl Render for Sidebar {
 static INFO: (&'static str, &'static [u8]) = (
     "info_dark",
     include_bytes!("./../assets/lucide/info_dark.png"),
-);
-static MAP_DARK: (&'static str, &'static [u8]) = (
-    "map_dark",
-    include_bytes!("./../assets/lucide/map_dark.png"),
 );
 static MAP_LIGHT: (&'static str, &'static [u8]) = (
     "map_light",

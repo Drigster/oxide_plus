@@ -1,5 +1,8 @@
+use std::str::FromStr;
+
 use freya::prelude::*;
 use freya_radio::prelude::*;
+use http::Uri;
 
 use crate::app::{Data, DataChannel};
 
@@ -22,7 +25,7 @@ impl DropdownItem {
         self
     }
 
-    pub fn on_press(mut self, on_press: impl FnMut(Event<PressEventData>) + 'static) -> Self {
+    pub fn _on_press(mut self, on_press: impl FnMut(Event<PressEventData>) + 'static) -> Self {
         self.on_press = Some(EventHandler::new(on_press));
         self
     }
@@ -98,6 +101,16 @@ impl Render for Dropdown {
         let mut hovering = use_state(|| false);
         let mut hovering2 = use_state(|| false);
 
+        let image_uri: String = if let Some(info) = info_state.clone() {
+            if let Some(logo_image) = info.logo_image.clone() {
+                logo_image
+            } else {
+                String::new()
+            }
+        } else {
+            String::new()
+        };
+
         use_drop(move || {
             if hovering() || hovering2() {
                 Cursor::set(CursorIcon::default());
@@ -128,15 +141,29 @@ impl Render for Dropdown {
                     .main_align(Alignment::SpaceBetween)
                     .cross_align(Alignment::Center)
                     .children([
-                        label()
-                            .font_size(12.0)
-                            .font_weight(FontWeight::BOLD)
-                            .color(Color::from_hex("#E4DAD1").unwrap())
-                            .text(if let Some(state) = info_state {
-                                format!("{}", state.name)
-                            } else {
-                                "Loading...".to_string()
-                            })
+                        rect()
+                            .direction(Direction::Horizontal)
+                            .cross_align(Alignment::Center)
+                            .spacing(8.0)
+                            .children([
+                                if !image_uri.is_empty() {
+                                    ImageViewer::new(Uri::from_str(image_uri.as_str()).expect(""))
+                                        .into()
+                                } else {
+                                    rect().into()
+                                },
+                                label()
+                                    .font_size(12.0)
+                                    .font_weight(FontWeight::BOLD)
+                                    .color(Color::from_hex("#E4DAD1").unwrap())
+                                    .font_size(12.0)
+                                    .text(if let Some(state) = info_state {
+                                        format!("{}", state.name)
+                                    } else {
+                                        "Loading...".to_string()
+                                    })
+                                    .into(),
+                            ])
                             .into(),
                         ImageViewer::new(CHEVRON_DOWN)
                             .width(Size::px(16.0))
@@ -147,9 +174,9 @@ impl Render for Dropdown {
                 if hovering() || hovering2() {
                     rect()
                         .width(Size::px(250.0))
-                        .background(Color::RED)
                         .layer(100)
                         .position(Position::new_absolute().top(47.0))
+                        .background(Color::from_hex("#222222").unwrap())
                         .on_press(move |_| {
                             if hovering2() {
                                 Cursor::set(CursorIcon::default());

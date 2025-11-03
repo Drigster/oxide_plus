@@ -1523,6 +1523,7 @@ dependencies = [
  "paste",
  "torin",
  "typed-builder",
+ "ureq",
 ]
 
 [[package]]
@@ -3608,6 +3609,7 @@ dependencies = [
  "freya",
  "freya-radio",
  "freya-router",
+ "http",
  "rustplus_rs",
 ]
 
