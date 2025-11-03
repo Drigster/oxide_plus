@@ -3,9 +3,9 @@ use std::sync::Arc;
 use freya::prelude::*;
 use freya_radio::prelude::*;
 use freya_router::prelude::{Routable, RouterConfig, RouterContext, outlet, router};
-use rustplus_rs::{AppInfo, AppMap, AppMapMarkers, RustPlus, RustPlusEvent};
+use rustplus_rs::{AppInfo, AppMap, AppMapMarkers, RustPlus};
 
-use crate::{components::Navbar, components::Sidebar, pages::Map};
+use crate::{components::Navbar, components::Sidebar, pages::Map, pages::Team};
 
 #[derive(Default)]
 pub struct Data {
@@ -47,6 +47,8 @@ pub enum Route {
     #[layout(Layout)]
         #[route("/")]
         Map,
+        #[route("/team")]
+        Team,
         #[route("/settings")]
         Settings,
 }
