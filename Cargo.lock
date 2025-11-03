@@ -3611,6 +3611,8 @@ dependencies = [
  "freya-router",
  "http",
  "rustplus_rs",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

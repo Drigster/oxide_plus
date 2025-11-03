@@ -88,7 +88,7 @@ impl Render for Sidebar {
             .children([
                 SidebarButton::new(INFO, "SERVER".to_string(), Route::Settings).into(),
                 SidebarButton::new(MAP_LIGHT, "MAP".to_string(), Route::Map).into(),
-                SidebarButton::new(STORE, "SHOPS".to_string(), Route::Settings).into(),
+                SidebarButton::new(STORE, "SHOPS".to_string(), Route::Shops).into(),
                 SidebarButton::new(USERS_ROUND, "TEAM".to_string(), Route::Team).into(),
             ])
             .into()
