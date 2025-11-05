@@ -5427,7 +5427,7 @@
     {
         "shortName": "ammo.snowballgun",
         "id": 550753330,
-        "displayName": null,
+        "displayName": "ammo.snowballgun",
         "description": null,
         "iconUrl": "https://cdn.rusthelp.com/images/public/ammo.snowballgun.png"
     },

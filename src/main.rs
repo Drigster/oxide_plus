@@ -6,6 +6,7 @@
 mod app;
 mod components;
 mod pages;
+mod utils;
 
 use app::App;
 use freya::prelude::*;

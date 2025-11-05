@@ -75,4 +75,4 @@ impl Render for Navbar {
 }
 
 static PROFILE_ICON: (&'static str, &'static [u8]) =
-    ("Drigster", include_bytes!("./../Drigster.png"));
+    ("Drigster", include_bytes!("../assets/Drigster.png"));
