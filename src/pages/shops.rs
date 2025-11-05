@@ -4,20 +4,106 @@ use rustplus_rs::AppMarkerType;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use crate::app::{Data, DataChannel};
+use crate::{
+    app::{Data, DataChannel},
+    components::CachedImage,
+};
 
 static ITEM_DATA: &'static [u8] = include_bytes!("./../assets/item_data.json");
+
+#[derive(PartialEq)]
+enum OrderPartType {
+    Stock(i32),
+    Price,
+}
+
+#[derive(PartialEq)]
+struct OrderPart {
+    icon_url: String,
+    order_part_type: OrderPartType,
+    amount: i32,
+}
+
+impl OrderPart {
+    fn new(icon_url: String, order_part_type: OrderPartType, amount: i32) -> Self {
+        Self {
+            icon_url: icon_url,
+            order_part_type,
+            amount,
+        }
+    }
+}
+
+impl Render for OrderPart {
+    fn render(&self) -> Element {
+        rect()
+            .width(Size::percent(50.0))
+            .height(Size::Fill)
+            .spacing(4.0)
+            .direction(Direction::Horizontal)
+            .cross_align(Alignment::Center)
+            .child(
+                CachedImage::new(self.icon_url.clone())
+                    .width(Size::px(48.0))
+                    .height(Size::px(48.0)),
+            )
+            .maybe_child(
+                if let OrderPartType::Stock(quantity) = self.order_part_type {
+                    Some(
+                        rect()
+                            .width(Size::px(48.0))
+                            .height(Size::px(48.0))
+                            .position(Position::new_absolute())
+                            .layer(5)
+                            .main_align(Alignment::End)
+                            .cross_align(Alignment::End)
+                            .font_size(12.0)
+                            .font_weight(FontWeight::EXTRA_BOLD)
+                            .color(Color::from_hex("#E4DAD1").unwrap()), // .child(format!("x{}", quantity)),
+                    )
+                } else {
+                    None
+                },
+            )
+            .child(
+                rect()
+                    .width(Size::Fill)
+                    .height(Size::Fill)
+                    .padding(4.0)
+                    .spacing(4.0)
+                    .children([
+                        // label()
+                        //     .color(Color::from_hex("#818181").unwrap())
+                        //     .font_size(12.0)
+                        //     .font_weight(FontWeight::BOLD)
+                        //     .text(if matches!(self.order_part_type, OrderPartType::Stock(_)) {
+                        //         "STOCK"
+                        //     } else {
+                        //         "COST"
+                        //     })
+                        //     .into(),
+                        // label()
+                        //     .color(Color::from_hex("#E4DAD1").unwrap())
+                        //     .font_size(16.0)
+                        //     .font_weight(FontWeight::BOLD)
+                        //     .text(self.amount.to_string())
+                        //     .into(),
+                    ]),
+            )
+            .into()
+    }
+}
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct Item {
     id: i32,
     #[serde(rename = "shortName")]
-    short_name: Option<String>,
+    short_name: String,
     #[serde(rename = "displayName")]
-    display_name: Option<String>,
+    display_name: String,
     description: Option<String>,
     #[serde(rename = "iconUrl")]
-    icon_url: Option<String>,
+    icon_url: String,
 }
 
 #[derive(PartialEq)]
@@ -51,7 +137,7 @@ impl Render for Shops {
                 ScrollView::new()
                     .width(Size::Fill)
                     .height(Size::Fill)
-                    .spacing(6.)
+                    .spacing(8.0)
                     .children_iter(map_markers.markers.iter().filter_map(|marker| {
                         if AppMarkerType::try_from(marker.marker_type).unwrap_or_default()
                             != AppMarkerType::VendingMachine
@@ -90,166 +176,48 @@ impl Render for Shops {
                                         .width(Size::percent(50.0))
                                         .padding(8.0)
                                         .spacing(8.0)
-                                        .children_iter(marker.sell_orders.iter().map(
+                                        .children_iter(marker.sell_orders.iter().filter_map(
                                             |sell_order| {
-                                                let selling_item = map
-                                                    .get(&sell_order.item_id)
-                                                    .cloned()
-                                                    .unwrap_or(Item {
-                                                        short_name: None,
-                                                        id: sell_order.item_id,
-                                                        display_name: None,
-                                                        description: None,
-                                                        icon_url: None,
-                                                    });
+                                                let selling_item = map.get(&sell_order.item_id);
 
-                                                let selling_item_uri = selling_item.clone().icon_url;
+                                                let buying_item = map.get(&sell_order.currency_id);
 
-                                                let buying_item = map
-                                                    .get(&sell_order.currency_id)
-                                                    .cloned()
-                                                    .unwrap_or(Item {
-                                                        short_name: None,
-                                                        id: sell_order.item_id,
-                                                        display_name: None,
-                                                        description: None,
-                                                        icon_url: None,
-                                                    });
+                                                if selling_item.is_none() || buying_item.is_none() {
+                                                    return None;
+                                                }
 
-                                                let buying_item_uri = buying_item.clone().icon_url;
+                                                let selling_item = selling_item.unwrap();
+                                                let buying_item = buying_item.unwrap();
 
-                                                rect()
-                                                    .width(Size::Fill)
-                                                    .height(Size::px(56.0))
-                                                    .background(Color::from_hex("#5D5D5D").unwrap())
-                                                    .corner_radius(CornerRadius::new_all(8.0))
-                                                    .direction(Direction::Horizontal)
-                                                    .padding(4.0)
-                                                    .spacing(4.0)
-                                                    .children([rect()
-                                                        .width(Size::percent(50.0))
-                                                        .height(Size::Fill)
-                                                        .spacing(4.0)
+                                                Some(
+                                                    rect()
+                                                        .width(Size::Fill)
+                                                        .height(Size::px(56.0))
+                                                        .background(
+                                                            Color::from_hex("#5D5D5D").unwrap(),
+                                                        )
+                                                        .corner_radius(CornerRadius::new_all(8.0))
                                                         .direction(Direction::Horizontal)
-                                                        .cross_align(Alignment::Center)
+                                                        .padding(4.0)
+                                                        .spacing(4.0)
                                                         .children([
-                                                            rect()
-                                                                .width(Size::px(48.0))
-                                                                .height(Size::px(48.0))
-                                                                .background(
-                                                                    Color::from_hex(
-                                                                        "#000000",
-                                                                    )
-                                                                    .unwrap(),
-                                                                )
-                                                                .maybe(
-                                                                    selling_item_uri
-                                                                        .is_some(),
-                                                                    |rect| {
-                                                                        let selling_item_uri_static: &'static str = Box::leak(selling_item_uri.unwrap().into_boxed_str());
-
-                                                                        rect.child(ImageViewer::new(selling_item_uri_static))
-                                                                    },
-                                                                )
-                                                                .child(
-                                                                    rect()
-                                                                        .width(Size::Fill)
-                                                                        .height(Size::Fill)
-                                                                        .position(
-                                                                            Position::new_absolute()
-                                                                                .bottom(0.0)
-                                                                                .right(3.0),
-                                                                        )
-                                                                        .main_align(Alignment::End)
-                                                                        .cross_align(Alignment::End)
-                                                                        .child(
-                                                                            label()
-                                                                                .font_size(12.0)
-                                                                                .font_weight(FontWeight::EXTRA_BOLD)
-                                                                                .color(Color::from_hex("#E4DAD1").unwrap())
-                                                                                .text(format!("x{}", sell_order.quantity))
-                                                                        )
-                                                                )
-                                                                .into(),
-                                                            rect()
-                                                                .width(Size::Fill)
-                                                                .height(Size::Fill)
-                                                                .padding(4.0)
-                                                                .spacing(4.0)
-                                                                .children([
-                                                                    label()
-                                                                        .color(Color::from_hex("#818181").unwrap())
-                                                                        .font_size(12.0)
-                                                                        .font_weight(FontWeight::BOLD)
-                                                                        .text("STOCK")
-                                                                        .into(),
-                                                                    label()
-                                                                        .color(Color::from_hex("#E4DAD1").unwrap())
-                                                                        .font_size(16.0)
-                                                                        .font_weight(FontWeight::BOLD)
-                                                                        .text(
-                                                                            sell_order
-                                                                                .amount_in_stock
-                                                                                .to_string(),
-                                                                        )
-                                                                        .into(),
-                                                                ])
-                                                                .into(),
+                                                            OrderPart::new(
+                                                                selling_item.icon_url.clone(),
+                                                                OrderPartType::Stock(
+                                                                    sell_order.quantity,
+                                                                ),
+                                                                sell_order.amount_in_stock,
+                                                            )
+                                                            .into(),
+                                                            OrderPart::new(
+                                                                buying_item.icon_url.clone(),
+                                                                OrderPartType::Price,
+                                                                sell_order.cost_per_item,
+                                                            )
+                                                            .into(),
                                                         ])
                                                         .into(),
-                                                        rect()
-                                                        .width(Size::percent(50.0))
-                                                        .height(Size::Fill)
-                                                        .spacing(4.0)
-                                                        .direction(Direction::Horizontal)
-                                                        .cross_align(Alignment::Center)
-                                                        .children([
-                                                            rect()
-                                                                .width(Size::px(48.0))
-                                                                .height(Size::px(48.0))
-                                                                .background(
-                                                                    Color::from_hex(
-                                                                        "#000000",
-                                                                    )
-                                                                    .unwrap(),
-                                                                )
-                                                                .maybe(
-                                                                    buying_item_uri
-                                                                        .is_some(),
-                                                                    |rect| {
-                                                                        let buying_item_uri_static: &'static str = Box::leak(buying_item_uri.unwrap().into_boxed_str());
-
-                                                                        rect.child(ImageViewer::new(buying_item_uri_static))
-                                                                    },
-                                                                )
-                                                                .into(),
-                                                            rect()
-                                                                .width(Size::Fill)
-                                                                .height(Size::Fill)
-                                                                .padding(4.0)
-                                                                .spacing(4.0)
-                                                                .children([
-                                                                    label()
-                                                                        .color(Color::from_hex("#818181").unwrap())
-                                                                        .font_size(12.0)
-                                                                        .font_weight(FontWeight::BOLD)
-                                                                        .text("COST")
-                                                                        .into(),
-                                                                    label()
-                                                                        .color(Color::from_hex("#E4DAD1").unwrap())
-                                                                        .font_size(16.0)
-                                                                        .font_weight(FontWeight::BOLD)
-                                                                        .text(
-                                                                            sell_order
-                                                                                .cost_per_item
-                                                                                .to_string(),
-                                                                        )
-                                                                        .into(),
-                                                                ])
-                                                                .into(),
-                                                        ])
-                                                        .into()])
-                                                    .into()
+                                                )
                                             },
                                         ))
                                         .into(),
@@ -258,104 +226,6 @@ impl Render for Shops {
                         )
                     }))
                     .into(),
-                // rect()
-                //     .width(Size::Fill)
-                //     .height(Size::Fill)
-                //     .children(
-                //         map_markers
-                //             .markers
-                //             .iter()
-                //             .filter_map(|marker| {
-                //                 if AppMarkerType::try_from(marker.marker_type)
-                //                     .unwrap_or_default()
-                //                     != AppMarkerType::VendingMachine
-                //                 {
-                //                     println!("Marker type: {:?}", marker.marker_type);
-                //                     return None;
-                //                 }
-                //                 Some(
-                //                     rect()
-                //                         .width(Size::Fill)
-                //                         .height(Size::Fill)
-                //                         .corner_radius(CornerRadius::new_all(8.0))
-                //                         .background(Color::RED)
-                //                         .main_align(Alignment::Center)
-                //                         .cross_align(Alignment::Center)
-                //                         .children([
-                //                             rect()
-                //                                 .width(Size::Fill)
-                //                                 .padding(Gaps::new(4.0, 8.0, 4.0, 8.0))
-                //                                 .main_align(Alignment::SpaceBetween)
-                //                                 .cross_align(Alignment::Center)
-                //                                 .children([])
-                //                                 .into(),
-                //                             ScrollView::new()
-                //                                 .width(Size::Fill)
-                //                                 .height(Size::Fill)
-                //                                 .spacing(6.)
-                //                                 .children_iter(marker
-                //                                         .sell_orders
-                //                                         .iter()
-                //                                         .map(|sell_order| {
-                //                                             let item = map
-                //                                                 .get(&sell_order.item_id)
-                //                                                 .cloned()
-                //                                                 .unwrap_or(Item {
-                //                                                     short_name: None,
-                //                                                     id: sell_order.item_id,
-                //                                                     display_name: None,
-                //                                                     description: None,
-                //                                                     icon_url: None,
-                //                                                 });
-
-                //                                             let image_uri = item.clone().icon_url;
-
-                //                                             rect()
-                //                                                 .width(Size::Fill)
-                //                                                 .height(Size::px(56.0))
-                //                                                 .corner_radius(
-                //                                                     CornerRadius::new_all(8.0),
-                //                                                 )
-                //                                                 .padding(4.0)
-                //                                                 .background(Color::BLUE)
-                //                                                 .children([rect()
-                //                                                     .width(Size::percent(50.0))
-                //                                                     .height(Size::Fill)
-                //                                                     .children([rect()
-                //                                                         .background(
-                //                                                             Color::from_hex(
-                //                                                                 "#000000",
-                //                                                             )
-                //                                                             .unwrap(),
-                //                                                         )
-                //                                                         .maybe(
-                //                                                             image_uri
-                //                                                                 .is_some(),
-                //                                                             |rect| {
-                //                                                                 let image_uri_static: &'static str = Box::leak(image_uri.unwrap().into_boxed_str());
-                //                                                                 rect.children([
-                //                                                                     ImageViewer::new(image_uri_static).into(),
-                //                                                                     label()
-                //                                                                         .text(
-                //                                                                             item.display_name
-                //                                                                                 .unwrap_or(item.id.to_string()),
-                //                                                                         ).into()
-                //                                                                 ])
-                //                                                             },
-                //                                                         )
-                //                                                         .into()]).into()
-                //                                                     ])
-                //                                                 .into()
-                //                                         })
-                //                                     )
-                //                                 .into(),
-                //                         ])
-                //                         .into(),
-                //                 )
-                //             })
-                //             .collect::<Vec<Element>>(),
-                //     )
-                //     .into()
             ])
             .into()
     }

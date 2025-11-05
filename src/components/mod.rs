@@ -6,3 +6,5 @@ mod navbar;
 pub use navbar::*;
 mod sidebar;
 pub use sidebar::*;
+mod cached_image;
+pub use cached_image::*;
