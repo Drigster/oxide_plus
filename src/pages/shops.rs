@@ -13,7 +13,7 @@ static ITEM_DATA: &'static [u8] = include_bytes!("./../assets/item_data.json");
 
 #[derive(PartialEq)]
 enum OrderPartType {
-    Stock(i32),
+    Selling,
     Price,
 }
 
@@ -22,6 +22,8 @@ struct OrderPart {
     icon_url: String,
     order_part_type: OrderPartType,
     amount: i32,
+
+    width: Size,
 }
 
 impl OrderPart {
@@ -30,14 +32,20 @@ impl OrderPart {
             icon_url: icon_url,
             order_part_type,
             amount,
+            width: Size::default(),
         }
+    }
+
+    fn width(mut self, width: Size) -> Self {
+        self.width = width;
+        self
     }
 }
 
 impl Render for OrderPart {
     fn render(&self) -> Element {
         rect()
-            .width(Size::percent(50.0))
+            .width(self.width.clone())
             .height(Size::Fill)
             .spacing(4.0)
             .direction(Direction::Horizontal)
@@ -47,24 +55,6 @@ impl Render for OrderPart {
                     .width(Size::px(48.0))
                     .height(Size::px(48.0)),
             )
-            .maybe_child(
-                if let OrderPartType::Stock(quantity) = self.order_part_type {
-                    Some(
-                        rect()
-                            .width(Size::px(48.0))
-                            .height(Size::px(48.0))
-                            .position(Position::new_absolute())
-                            .layer(5)
-                            .main_align(Alignment::End)
-                            .cross_align(Alignment::End)
-                            .font_size(12.0)
-                            .font_weight(FontWeight::EXTRA_BOLD)
-                            .color(Color::from_hex("#E4DAD1").unwrap()), // .child(format!("x{}", quantity)),
-                    )
-                } else {
-                    None
-                },
-            )
             .child(
                 rect()
                     .width(Size::Fill)
@@ -72,22 +62,22 @@ impl Render for OrderPart {
                     .padding(4.0)
                     .spacing(4.0)
                     .children([
-                        // label()
-                        //     .color(Color::from_hex("#818181").unwrap())
-                        //     .font_size(12.0)
-                        //     .font_weight(FontWeight::BOLD)
-                        //     .text(if matches!(self.order_part_type, OrderPartType::Stock(_)) {
-                        //         "STOCK"
-                        //     } else {
-                        //         "COST"
-                        //     })
-                        //     .into(),
-                        // label()
-                        //     .color(Color::from_hex("#E4DAD1").unwrap())
-                        //     .font_size(16.0)
-                        //     .font_weight(FontWeight::BOLD)
-                        //     .text(self.amount.to_string())
-                        //     .into(),
+                        label()
+                            .color(Color::from_hex("#818181").unwrap())
+                            .font_size(12.0)
+                            .font_weight(FontWeight::BOLD)
+                            .text(if self.order_part_type == OrderPartType::Selling {
+                                "SELLING"
+                            } else {
+                                "COST"
+                            })
+                            .into(),
+                        label()
+                            .color(Color::from_hex("#E4DAD1").unwrap())
+                            .font_size(16.0)
+                            .font_weight(FontWeight::BOLD)
+                            .text(self.amount.to_string())
+                            .into(),
                     ]),
             )
             .into()
@@ -200,21 +190,46 @@ impl Render for Shops {
                                                         .direction(Direction::Horizontal)
                                                         .padding(4.0)
                                                         .spacing(4.0)
+                                                        .content(Content::Flex)
                                                         .children([
                                                             OrderPart::new(
                                                                 selling_item.icon_url.clone(),
-                                                                OrderPartType::Stock(
-                                                                    sell_order.quantity,
-                                                                ),
-                                                                sell_order.amount_in_stock,
+                                                                OrderPartType::Selling,
+                                                                sell_order.quantity,
                                                             )
+                                                            .width(Size::flex(1.0))
                                                             .into(),
                                                             OrderPart::new(
                                                                 buying_item.icon_url.clone(),
                                                                 OrderPartType::Price,
                                                                 sell_order.cost_per_item,
                                                             )
+                                                            .width(Size::flex(1.0))
                                                             .into(),
+                                                            rect()
+                                                                .width(Size::flex(1.0))
+                                                                .height(Size::Fill)
+                                                                .main_align(Alignment::Center)
+                                                                .cross_align(Alignment::Center)
+                                                                .child(
+                                                                    label()
+                                                                        .color(
+                                                                            Color::from_hex(
+                                                                                "#FFFFFF",
+                                                                            )
+                                                                            .unwrap(),
+                                                                        )
+                                                                        .font_size(14.0)
+                                                                        .font_weight(
+                                                                            FontWeight::EXTRA_BOLD,
+                                                                        )
+                                                                        .text(format!(
+                                                                            "{} IN STOCK",
+                                                                            sell_order
+                                                                                .amount_in_stock
+                                                                        )),
+                                                                )
+                                                                .into(),
                                                         ])
                                                         .into(),
                                                 )
