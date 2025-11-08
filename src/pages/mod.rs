@@ -4,3 +4,5 @@ mod team;
 pub use team::*;
 mod shops;
 pub use shops::*;
+mod info;
+pub use info::*;
