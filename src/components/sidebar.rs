@@ -86,7 +86,7 @@ impl Render for Sidebar {
                     .stop((Color::from_hex("#51241C").unwrap(), 100.0)),
             )
             .children([
-                SidebarButton::new(INFO, "SERVER".to_string(), Route::Settings).into(),
+                SidebarButton::new(INFO, "INFO".to_string(), Route::Info).into(),
                 SidebarButton::new(MAP_LIGHT, "MAP".to_string(), Route::Map).into(),
                 SidebarButton::new(STORE, "SHOPS".to_string(), Route::Shops).into(),
                 SidebarButton::new(USERS_ROUND, "TEAM".to_string(), Route::Team).into(),

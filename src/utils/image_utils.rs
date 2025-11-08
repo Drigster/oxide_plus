@@ -1,8 +1,6 @@
-use bytes::Bytes;
 use image::DynamicImage;
 use image::imageops::FilterType;
 use std::fs;
-use std::io::Write;
 use std::path::PathBuf;
 
 /// Gets the local image path from the assets/images directory.
