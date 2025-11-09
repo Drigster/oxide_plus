@@ -6,7 +6,7 @@ use freya_router::prelude::RouterContext;
 
 use crate::{
     app::{Data, DataChannel, Route},
-    components::{ServerCard, UserCard},
+    components::ServerCard,
     utils::settings::{ServerData, save_servers},
 };
 
