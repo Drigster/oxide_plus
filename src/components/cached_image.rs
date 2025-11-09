@@ -59,7 +59,7 @@ impl Render for CachedImage {
             rect()
                 .width(self.width.clone())
                 .height(self.height.clone())
-                .background(Color::BLUE)
+                .background(Color::TRANSPARENT)
                 .center()
                 .into()
         }

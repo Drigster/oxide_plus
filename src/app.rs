@@ -7,7 +7,8 @@ use rustplus_rs::{AppInfo, AppMap, AppMapMarkers, RustPlus};
 
 use crate::{
     components::{Navbar, Sidebar},
-    pages::{Info, Map, Shops, Team},
+    pages::{Info, Map, ServerSelect, Shops, Team},
+    utils::settings::{ServerData, load_servers},
 };
 
 #[derive(Default)]
@@ -17,6 +18,7 @@ pub struct Data {
     pub map_markers: Option<AppMapMarkers>,
     pub connection_state: String,
     pub error_state: String,
+    pub servers: Vec<ServerData>,
 }
 
 #[derive(PartialEq, Eq, Clone, Debug, Copy, Hash)]
@@ -27,6 +29,7 @@ pub enum DataChannel {
     MapMarkersUpdate,
     ConnectionStateUpdate,
     ErrorStateUpdate,
+    ServersUpdate,
 }
 
 impl RadioChannel<Data> for DataChannel {}
@@ -46,12 +49,20 @@ impl Render for Loading {
                     .stop((Color::from_hex("#1D1D1B").unwrap(), 0.0))
                     .stop((Color::from_hex("#0E0E0D").unwrap(), 100.0)),
             )
-            .children([label()
-                .font_size(20.0)
-                .font_weight(FontWeight::BOLD)
-                .color(Color::from_hex("#E4DAD1").unwrap())
-                .text("Loading...")
-                .into()])
+            .children([
+                label()
+                    .font_size(20.0)
+                    .font_weight(FontWeight::BOLD)
+                    .color(Color::from_hex("#E4DAD1").unwrap())
+                    .text("Loading...")
+                    .into(),
+                Button::new()
+                    .on_press(|_| {
+                        RouterContext::get().replace(Route::ServerSelect);
+                    })
+                    .child("Go Map")
+                    .into(),
+            ])
             .into()
     }
 }
@@ -59,9 +70,11 @@ impl Render for Loading {
 #[derive(Routable, Clone, PartialEq)]
 #[rustfmt::skip]
 pub enum Route {
+    #[route("/")]
+    Loading,
+    #[route("/select_server")]
+    ServerSelect,
     #[layout(TopbarLayout)]
-        #[route("/")]
-        Loading,
         #[layout(SidebarLayout)]
             #[route("/info")]
             Info,
@@ -82,7 +95,24 @@ pub fn App() -> Element {
 
     use_hook(|| {
         spawn(async move {
+            let servers = load_servers().unwrap();
+            radio.write_channel(DataChannel::ServersUpdate).servers = servers;
+        })
+    });
+
+    // use_side_effect(move || {
+    //     let radio = use_radio::<Data, DataChannel>(DataChannel::ServersUpdate);
+
+    //     // TODO: Add error handling. Toast maybe?
+    //     let _ = save_servers(radio.read().servers.clone());
+    // });
+
+    use_hook(|| {
+        spawn(async move {
             println!("Creating RustPlus client...");
+            radio
+                .write_channel(DataChannel::ConnectionStateUpdate)
+                .connection_state = "Setting up...".to_string();
             // Create a new RustPlus client
             let rustplus = Arc::new(
                 match RustPlus::new(
@@ -124,7 +154,7 @@ pub fn App() -> Element {
             println!("✅ Connected to Rust server!");
             radio
                 .write_channel(DataChannel::ConnectionStateUpdate)
-                .connection_state = "Connected".to_string();
+                .connection_state = "Connected, loading data.".to_string();
 
             println!("Requesting server data...");
             match rustplus.get_info().await {
@@ -139,6 +169,9 @@ pub fn App() -> Element {
                         .error_state = err_msg;
                 }
             }
+            radio
+                .write_channel(DataChannel::ConnectionStateUpdate)
+                .connection_state = "Connected, loading data..".to_string();
 
             // Get map data
             println!("Requesting map data...");
@@ -155,7 +188,12 @@ pub fn App() -> Element {
                         .error_state = err_msg;
                 }
             }
+
             println!("Requesting markers data...");
+            radio
+                .write_channel(DataChannel::ConnectionStateUpdate)
+                .connection_state = "Connected, loading data...".to_string();
+
             match rustplus.get_map_markers().await {
                 Ok(markers) => {
                     radio
@@ -170,6 +208,7 @@ pub fn App() -> Element {
                         .error_state = err_msg;
                 }
             }
+
             println!("Done...");
             radio
                 .write_channel(DataChannel::ConnectionStateUpdate)
@@ -219,6 +258,3 @@ impl Render for SidebarLayout {
             .into()
     }
 }
-
-static PROFILE_ICON: (&'static str, &'static [u8]) =
-    ("Drigster", include_bytes!("./assets/Drigster.png"));
