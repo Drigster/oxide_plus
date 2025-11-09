@@ -1519,7 +1519,7 @@ dependencies = [
 [[package]]
 name = "freya"
 version = "0.4.0"
-source = "git+https://github.com/marc2332/freya?branch=a-new-begining#be04984a4d52d4e5d120c0cb6ad16d5331993e03"
+source = "git+https://github.com/marc2332/freya?branch=a-new-begining#6c5fec5a265cbbbd036df167a51526cb915ec895"
 dependencies = [
  "cfg-if",
  "freya-animation",
@@ -1534,7 +1534,7 @@ dependencies = [
 [[package]]
 name = "freya-animation"
 version = "0.4.0"
-source = "git+https://github.com/marc2332/freya?branch=a-new-begining#be04984a4d52d4e5d120c0cb6ad16d5331993e03"
+source = "git+https://github.com/marc2332/freya?branch=a-new-begining#6c5fec5a265cbbbd036df167a51526cb915ec895"
 dependencies = [
  "easer",
  "freya-core",
@@ -1543,7 +1543,7 @@ dependencies = [
 [[package]]
 name = "freya-clipboard"
 version = "0.4.0"
-source = "git+https://github.com/marc2332/freya?branch=a-new-begining#be04984a4d52d4e5d120c0cb6ad16d5331993e03"
+source = "git+https://github.com/marc2332/freya?branch=a-new-begining#6c5fec5a265cbbbd036df167a51526cb915ec895"
 dependencies = [
  "copypasta",
  "freya-core",
@@ -1552,7 +1552,7 @@ dependencies = [
 [[package]]
 name = "freya-components"
 version = "0.4.0"
-source = "git+https://github.com/marc2332/freya?branch=a-new-begining#be04984a4d52d4e5d120c0cb6ad16d5331993e03"
+source = "git+https://github.com/marc2332/freya?branch=a-new-begining#6c5fec5a265cbbbd036df167a51526cb915ec895"
 dependencies = [
  "anyhow",
  "async-io",
@@ -1572,7 +1572,7 @@ dependencies = [
 [[package]]
 name = "freya-core"
 version = "0.4.0"
-source = "git+https://github.com/marc2332/freya?branch=a-new-begining#be04984a4d52d4e5d120c0cb6ad16d5331993e03"
+source = "git+https://github.com/marc2332/freya?branch=a-new-begining#6c5fec5a265cbbbd036df167a51526cb915ec895"
 dependencies = [
  "accesskit",
  "async-broadcast",
@@ -1599,7 +1599,7 @@ dependencies = [
 [[package]]
 name = "freya-edit"
 version = "0.4.0"
-source = "git+https://github.com/marc2332/freya?branch=a-new-begining#be04984a4d52d4e5d120c0cb6ad16d5331993e03"
+source = "git+https://github.com/marc2332/freya?branch=a-new-begining#6c5fec5a265cbbbd036df167a51526cb915ec895"
 dependencies = [
  "bitflags 2.10.0",
  "freya-clipboard",
@@ -1612,7 +1612,7 @@ dependencies = [
 [[package]]
 name = "freya-engine"
 version = "0.4.0"
-source = "git+https://github.com/marc2332/freya?branch=a-new-begining#be04984a4d52d4e5d120c0cb6ad16d5331993e03"
+source = "git+https://github.com/marc2332/freya?branch=a-new-begining#6c5fec5a265cbbbd036df167a51526cb915ec895"
 dependencies = [
  "bitflags 2.10.0",
  "glutin",
@@ -1622,7 +1622,7 @@ dependencies = [
 [[package]]
 name = "freya-radio"
 version = "0.4.0"
-source = "git+https://github.com/marc2332/freya?branch=a-new-begining#be04984a4d52d4e5d120c0cb6ad16d5331993e03"
+source = "git+https://github.com/marc2332/freya?branch=a-new-begining#6c5fec5a265cbbbd036df167a51526cb915ec895"
 dependencies = [
  "freya-core",
 ]
@@ -1630,7 +1630,7 @@ dependencies = [
 [[package]]
 name = "freya-router"
 version = "0.4.0"
-source = "git+https://github.com/marc2332/freya?branch=a-new-begining#be04984a4d52d4e5d120c0cb6ad16d5331993e03"
+source = "git+https://github.com/marc2332/freya?branch=a-new-begining#6c5fec5a265cbbbd036df167a51526cb915ec895"
 dependencies = [
  "freya-core",
  "freya-router-macro",
@@ -1642,7 +1642,7 @@ dependencies = [
 [[package]]
 name = "freya-router-macro"
 version = "0.4.0"
-source = "git+https://github.com/marc2332/freya?branch=a-new-begining#be04984a4d52d4e5d120c0cb6ad16d5331993e03"
+source = "git+https://github.com/marc2332/freya?branch=a-new-begining#6c5fec5a265cbbbd036df167a51526cb915ec895"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1653,10 +1653,11 @@ dependencies = [
 [[package]]
 name = "freya-winit"
 version = "0.4.0"
-source = "git+https://github.com/marc2332/freya?branch=a-new-begining#be04984a4d52d4e5d120c0cb6ad16d5331993e03"
+source = "git+https://github.com/marc2332/freya?branch=a-new-begining#6c5fec5a265cbbbd036df167a51526cb915ec895"
 dependencies = [
  "accesskit",
  "accesskit_winit",
+ "bytes",
  "freya-components",
  "freya-core",
  "freya-engine",
@@ -1666,6 +1667,7 @@ dependencies = [
  "glutin",
  "glutin-winit",
  "hotpath",
+ "image",
  "keyboard-types",
  "ragnarok",
  "raw-window-handle",
@@ -3070,7 +3072,7 @@ checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
 [[package]]
 name = "pathmap"
 version = "0.4.0"
-source = "git+https://github.com/marc2332/freya?branch=a-new-begining#be04984a4d52d4e5d120c0cb6ad16d5331993e03"
+source = "git+https://github.com/marc2332/freya?branch=a-new-begining#6c5fec5a265cbbbd036df167a51526cb915ec895"
 
 [[package]]
 name = "percent-encoding"
@@ -3394,7 +3396,7 @@ checksum = "69cdb34c158ceb288df11e18b4bd39de994f6657d83847bdffdbd7f346754b0f"
 [[package]]
 name = "ragnarok"
 version = "0.4.0"
-source = "git+https://github.com/marc2332/freya?branch=a-new-begining#be04984a4d52d4e5d120c0cb6ad16d5331993e03"
+source = "git+https://github.com/marc2332/freya?branch=a-new-begining#6c5fec5a265cbbbd036df167a51526cb915ec895"
 dependencies = [
  "euclid",
  "hotpath",
@@ -4389,7 +4391,7 @@ checksum = "5d99f8c9a7727884afe522e9bd5edbfc91a3312b36a77b5fb8926e4c31a41801"
 [[package]]
 name = "torin"
 version = "0.4.0"
-source = "git+https://github.com/marc2332/freya?branch=a-new-begining#be04984a4d52d4e5d120c0cb6ad16d5331993e03"
+source = "git+https://github.com/marc2332/freya?branch=a-new-begining#6c5fec5a265cbbbd036df167a51526cb915ec895"
 dependencies = [
  "euclid",
  "rustc-hash",
@@ -4515,9 +4517,9 @@ checksum = "8ecb6da28b8a351d773b68d5825ac39017e680750f980f3a1a85cd8dd28a47c1"
 
 [[package]]
 name = "ureq"
-version = "3.1.3"
+version = "3.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c42979584bacf4cff2f090f93b6a5348b9d5aad9107f41688956b88442b93331"
+checksum = "d39cb1dbab692d82a977c0392ffac19e188bd9186a9f32806f0aaa859d75585a"
 dependencies = [
  "base64",
  "cookie_store",
