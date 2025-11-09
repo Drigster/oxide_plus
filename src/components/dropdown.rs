@@ -93,9 +93,9 @@ impl Render for Dropdown {
                                     .into(),
                             ])
                             .into(),
-                        ImageViewer::new(CHEVRON_DOWN)
-                            .width(Size::px(16.0))
-                            .height(Size::px(16.0))
+                        svg(freya_icons::lucide::chevron_up())
+                            .height(Size::Fill)
+                            .color(Color::from_hex("#E4DAD1").unwrap())
                             .into(),
                     ])
                     .into(),
@@ -143,11 +143,6 @@ impl Render for Dropdown {
             .into()
     }
 }
-
-static CHEVRON_DOWN: (&'static str, &'static [u8]) = (
-    "chevron-down",
-    include_bytes!("./../assets/lucide/chevron-down.png"),
-);
 
 static PROFILE_ICON: (&'static str, &'static [u8]) =
     ("Drigster", include_bytes!("../assets/Drigster.png"));
