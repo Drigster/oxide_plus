@@ -1620,6 +1620,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "freya-icons"
+version = "0.4.0"
+source = "git+https://github.com/marc2332/freya?branch=a-new-begining#6c5fec5a265cbbbd036df167a51526cb915ec895"
+dependencies = [
+ "bytes",
+ "freya-core",
+ "freya-engine",
+]
+
+[[package]]
 name = "freya-radio"
 version = "0.4.0"
 source = "git+https://github.com/marc2332/freya?branch=a-new-begining#6c5fec5a265cbbbd036df167a51526cb915ec895"
@@ -3043,6 +3053,7 @@ dependencies = [
  "chrono",
  "dirs",
  "freya",
+ "freya-icons",
  "freya-radio",
  "freya-router",
  "http",

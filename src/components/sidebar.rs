@@ -1,17 +1,18 @@
 use freya::prelude::*;
+use freya_icons::lucide;
 use freya_router::prelude::*;
 
 use crate::app::Route;
 
 #[derive(Clone, PartialEq)]
 pub struct SidebarButton {
-    pub icon: (&'static str, &'static [u8]),
+    pub icon: Bytes,
     pub text: String,
     pub target_route: Route,
 }
 
 impl SidebarButton {
-    pub fn new(icon: (&'static str, &'static [u8]), text: String, target_route: Route) -> Self {
+    pub fn new(icon: Bytes, text: String, target_route: Route) -> Self {
         Self {
             icon,
             text,
@@ -51,7 +52,10 @@ impl Render for SidebarButton {
                 RouterContext::get().replace(target_route.clone());
             })
             .children([
-                ImageViewer::new(self.icon).into(),
+                svg(self.icon.clone())
+                    .height(Size::Fill)
+                    .color(Color::from_hex("#E4DAD1").unwrap())
+                    .into(),
                 label()
                     .font_size(15.0)
                     .font_weight(FontWeight::BOLD)
@@ -86,28 +90,23 @@ impl Render for Sidebar {
                     .stop((Color::from_hex("#51241C").unwrap(), 100.0)),
             )
             .children([
-                SidebarButton::new(INFO, "INFO".to_string(), Route::Info).into(),
-                SidebarButton::new(MAP_LIGHT, "MAP".to_string(), Route::Map).into(),
-                SidebarButton::new(STORE, "SHOPS".to_string(), Route::Shops).into(),
-                SidebarButton::new(USERS_ROUND, "TEAM".to_string(), Route::Team).into(),
+                SidebarButton::new(freya_icons::lucide::info(), "INFO".to_string(), Route::Info)
+                    .into(),
+                SidebarButton::new(freya_icons::lucide::map(), "MAP".to_string(), Route::Map)
+                    .into(),
+                SidebarButton::new(
+                    freya_icons::lucide::store(),
+                    "SHOPS".to_string(),
+                    Route::Shops,
+                )
+                .into(),
+                SidebarButton::new(
+                    freya_icons::lucide::users_round(),
+                    "TEAM".to_string(),
+                    Route::Team,
+                )
+                .into(),
             ])
             .into()
     }
 }
-
-static INFO: (&'static str, &'static [u8]) = (
-    "info_dark",
-    include_bytes!("./../assets/lucide/info_dark.png"),
-);
-static MAP_LIGHT: (&'static str, &'static [u8]) = (
-    "map_light",
-    include_bytes!("./../assets/lucide/map_light.png"),
-);
-static STORE: (&'static str, &'static [u8]) = (
-    "store_dark",
-    include_bytes!("./../assets/lucide/store_dark.png"),
-);
-static USERS_ROUND: (&'static str, &'static [u8]) = (
-    "users-round_dark",
-    include_bytes!("./../assets/lucide/users-round_dark.png"),
-);
