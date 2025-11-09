@@ -31,7 +31,6 @@ impl Render for MainLayout {
                         rect()
                             .height(Size::percent(100.0))
                             .width(Size::Fill)
-                            .padding(8.0)
                             .child(outlet::<Route>())
                             .into(),
                     ])

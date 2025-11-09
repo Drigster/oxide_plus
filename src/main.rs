@@ -3,9 +3,6 @@
     windows_subsystem = "windows"
 )]
 
-#[cfg(target_os = "linux")]
-use freya::winit::platform::wayland::WindowAttributesExtWayland;
-
 mod app;
 mod components;
 mod layouts;
@@ -14,6 +11,9 @@ mod utils;
 
 use app::App;
 use freya::prelude::*;
+
+#[cfg(target_os = "linux")]
+use freya::winit::platform::wayland::WindowAttributesExtWayland;
 
 fn main() {
     launch(
