@@ -2,11 +2,11 @@ use std::sync::Arc;
 
 use freya::prelude::*;
 use freya_radio::prelude::*;
-use freya_router::prelude::{Routable, RouterConfig, RouterContext, outlet, router};
+use freya_router::prelude::{Routable, RouterConfig, RouterContext, router};
 use rustplus_rs::{AppInfo, AppMap, AppMapMarkers, RustPlus};
 
 use crate::{
-    components::{Navbar, Sidebar},
+    layouts::{LoginLayout, MainLayout},
     pages::{Info, Map, ServerSelect, Shops, Team},
     utils::settings::{ServerData, load_servers},
 };
@@ -70,22 +70,23 @@ impl Render for Loading {
 #[derive(Routable, Clone, PartialEq)]
 #[rustfmt::skip]
 pub enum Route {
-    #[route("/")]
-    Loading,
-    #[route("/select_server")]
-    ServerSelect,
-    #[layout(TopbarLayout)]
-        #[layout(SidebarLayout)]
-            #[route("/info")]
-            Info,
-            #[route("/map")]
-            Map,
-            #[route("/team")]
-            Team,
-            #[route("/shops")]
-            Shops,
-            // #[route("/settings")]
-            // Settings,
+    #[layout(LoginLayout)]
+        #[route("/")]
+        Loading,
+        #[route("/select_server")]
+        ServerSelect,
+    #[end_layout]
+    #[layout(MainLayout)]
+        #[route("/info")]
+        Info,
+        #[route("/map")]
+        Map,
+        #[route("/team")]
+        Team,
+        #[route("/shops")]
+        Shops,
+        // #[route("/settings")]
+        // Settings,
 }
 
 #[allow(non_snake_case)]
@@ -217,44 +218,4 @@ pub fn App() -> Element {
     });
 
     router::<Route>(|| RouterConfig::default().with_initial_path(Route::Loading))
-}
-
-#[derive(PartialEq)]
-struct TopbarLayout;
-impl Render for TopbarLayout {
-    fn render(&self) -> Element {
-        rect()
-            .width(Size::percent(100.0))
-            .height(Size::percent(100.0))
-            .background(Color::from_hex("#1e1e1e").unwrap())
-            .children([Navbar::new().into(), outlet::<Route>().into()])
-            .into()
-    }
-}
-
-#[derive(PartialEq)]
-struct SidebarLayout;
-impl Render for SidebarLayout {
-    fn render(&self) -> Element {
-        rect()
-            .width(Size::percent(100.0))
-            .height(Size::Fill)
-            .background_linear_gradient(
-                LinearGradient::new()
-                    .angle(0.0)
-                    .stop((Color::from_hex("#1D1D1B").unwrap(), 0.0))
-                    .stop((Color::from_hex("#0E0E0D").unwrap(), 100.0)),
-            )
-            .direction(Direction::Horizontal)
-            .children([
-                Sidebar::new().into(),
-                rect()
-                    .height(Size::percent(100.0))
-                    .width(Size::Fill)
-                    .padding(8.0)
-                    .child(outlet::<Route>())
-                    .into(),
-            ])
-            .into()
-    }
 }
