@@ -31,11 +31,17 @@ impl Render for Info {
                 rect()
                     .corner_radius(8.0)
                     .background(Color::from_hex("#1D1D1B").unwrap())
+                    .maybe_child(
+                        if let Ok(image_url) = Uri::try_from(info_state.header_image) {
+                            Some(ImageViewer::new(image_url)
+                                .width(Size::px(400.0))
+                                .height(Size::px(200.0))
+                            )
+                        } else {
+                            None
+                        }
+                    )
                     .children([
-                        ImageViewer::new(Uri::try_from(info_state.header_image).unwrap())
-                            .width(Size::px(400.0))
-                            .height(Size::px(200.0))
-                            .into(),
                         rect()
                             .width(Size::percent(100.0))
                             .padding(Gaps::from((8.0, 16.0)))
