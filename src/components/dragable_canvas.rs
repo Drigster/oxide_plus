@@ -3,13 +3,21 @@ use freya::prelude::*;
 #[derive(Clone, PartialEq)]
 pub struct DragableCanvas {
     elements: Vec<Element>,
+
+    on_zoom: Option<EventHandler<f64>>,
 }
 
 impl DragableCanvas {
     pub fn new() -> Self {
         Self {
             elements: Vec::new(),
+            on_zoom: None,
         }
+    }
+
+    pub fn on_zoom(mut self, on_zoom: impl Into<EventHandler<f64>>) -> Self {
+        self.on_zoom = Some(on_zoom.into());
+        self
     }
 }
 
@@ -23,9 +31,24 @@ impl Render for DragableCanvas {
     fn render(&self) -> Element {
         let mut pos = use_state(|| CursorPoint::new(0.0, 0.0));
         let mut dragging = use_state(|| false);
+        let mut hover = use_state(|| false);
         let mut mouse_coords_global = use_state(|| CursorPoint::new(0.0, 0.0));
         let mut mouse_coords_local = use_state(|| CursorPoint::new(0.0, 0.0));
-        let mut zoom = use_state(|| 1.0);
+        let mut zoom = use_state(|| 1.0_f64);
+
+        let on_zoom = self.on_zoom.clone();
+        use_side_effect(move || {
+            if let Some(on_zoom) = &on_zoom {
+                let zoom = zoom();
+                on_zoom.call(zoom);
+            }
+        });
+
+        use_drop(move || {
+            if hover() || dragging() {
+                Cursor::set(CursorIcon::default());
+            }
+        });
 
         rect()
             .overflow_mode(OverflowMode::Clip)
@@ -37,16 +60,27 @@ impl Render for DragableCanvas {
                 }
                 *dragging.write() = true;
                 *mouse_coords_global.write() = e.global_location;
+                Cursor::set(CursorIcon::Grabbing);
             })
             .on_mouse_up(move |e: Event<MouseEventData>| {
                 if e.button != Some(MouseButton::Left) {
                     return;
                 }
                 *dragging.write() = false;
+                if hover() {
+                    Cursor::set(CursorIcon::Grab);
+                } else {
+                    Cursor::set(CursorIcon::default());
+                }
             })
-            // onmouseleave: move |_| {
-            //     *dragging.write() = false;
-            // },
+            .on_pointer_enter(move |_| {
+                *hover.write() = true;
+                Cursor::set(CursorIcon::Grab);
+            })
+            .on_pointer_leave(move |_| {
+                *hover.write() = false;
+                Cursor::set(CursorIcon::default());
+            })
             .on_mouse_move(move |e: Event<MouseEventData>| {
                 if *dragging.read() {
                     *pos.write() += e.global_location - *mouse_coords_global.read();
@@ -71,7 +105,15 @@ impl Render for DragableCanvas {
                 //     current_pos.x + (mouse_img_pos.x - new_mouse_pos_x),
                 //     current_pos.y + (mouse_img_pos.y - new_mouse_pos_y),
                 // );
-                *zoom.write() = current_zoom + change;
+
+                let new_zoom = current_zoom + change;
+                if new_zoom < 0.3 {
+                    *zoom.write() = 0.3;
+                } else if new_zoom > 2.5 {
+                    *zoom.write() = 2.5;
+                } else {
+                    *zoom.write() = new_zoom;
+                }
             })
             .children(
                 self.elements

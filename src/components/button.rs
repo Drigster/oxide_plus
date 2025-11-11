@@ -164,7 +164,7 @@ impl Render for Button {
             .maybe_child(if let Some(text) = &self.text {
                 Some(
                     label()
-                        .font_size(15.0)
+                        .font_size(16.0)
                         .font_weight(FontWeight::BOLD)
                         .color(Color::from_hex("#E4DAD1").unwrap())
                         .text(text.clone()),

@@ -23,6 +23,9 @@ fn main() {
                 "WDXL Lubrifont",
                 Bytes::from_static(include_bytes!("./assets/WDXLLubrifontSC-Regular.ttf")),
             )
+            .with_font("PermanentMarker",
+                Bytes::from_static(include_bytes!("./assets/PermanentMarker-Regular.ttf"))
+            )
             .with_window(
                 WindowConfig::new(App)
                     .with_size(1200.0, 800.0)
@@ -31,6 +34,9 @@ fn main() {
                     .with_window_attributes(|window_attributes| {
                         #[cfg(target_os = "linux")]
                         window_attributes.with_name("oxide_plus", "oxide_plus")
+
+                        #[cfg(target_os = "windows")]
+                        window_attributes
                     }),
             ),
     );
