@@ -1,5 +1,5 @@
 use freya::prelude::*;
-use freya_router::prelude::RouterContext;
+use freya_router::prelude::{Routable, RouterContext};
 
 use crate::{app::Route, components::Button};
 
@@ -44,7 +44,7 @@ impl Render for Sidebar {
                     .on_press(move |_| {
                         RouterContext::get().replace(Route::Map);
                     })
-                    .active(RouterContext::get().current::<Route>() == Route::Map)
+                    .active(use_activable_route())
                     .into(),
                 Button::new()
                     .width(Size::Fill)
