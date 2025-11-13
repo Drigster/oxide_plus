@@ -8,3 +8,7 @@ mod info;
 pub use info::*;
 mod server_select;
 pub use server_select::*;
+mod minimap_overlay;
+pub use minimap_overlay::*;
+mod minimap_settings;
+pub use minimap_settings::*;

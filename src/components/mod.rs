@@ -18,3 +18,5 @@ mod setting;
 pub use setting::*;
 mod grid;
 pub use grid::*;
+mod map;
+pub use map::*;

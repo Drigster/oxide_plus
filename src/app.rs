@@ -6,8 +6,8 @@ use freya_router::prelude::{Routable, RouterConfig, RouterContext, router};
 use rustplus_rs::{AppInfo, AppMap, AppMapMarkers, RustPlus};
 
 use crate::{
-    layouts::{LoginLayout, MainLayout},
-    pages::{Info, Map, ServerSelect, Shops, Team},
+    layouts::{LoginLayout, MainLayout, MapLayout},
+    pages::{Info, Map, MinimapSettings, ServerSelect, Shops, Team},
     utils::settings::{ServerData, load_servers},
 };
 
@@ -79,8 +79,14 @@ pub enum Route {
     #[layout(MainLayout)]
         #[route("/info")]
         Info,
-        #[route("/map")]
-        Map,
+        #[nest("/map")]
+            #[layout(MapLayout)]
+                #[route("/")]
+                Map,
+                #[route("/minimap_settings")]
+                MinimapSettings,
+            #[end_layout]
+        #[end_nest]
         #[route("/team")]
         Team,
         #[route("/shops")]
