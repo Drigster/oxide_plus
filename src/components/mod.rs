@@ -20,3 +20,5 @@ mod grid;
 pub use grid::*;
 mod map;
 pub use map::*;
+mod slider;
+pub use slider::*;

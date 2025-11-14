@@ -43,12 +43,6 @@ impl Render for Loading {
             .height(Size::Fill)
             .main_align(Alignment::Center)
             .cross_align(Alignment::Center)
-            .background_linear_gradient(
-                LinearGradient::new()
-                    .angle(0.0)
-                    .stop((Color::from_hex("#1D1D1B").unwrap(), 0.0))
-                    .stop((Color::from_hex("#0E0E0D").unwrap(), 100.0)),
-            )
             .children([
                 label()
                     .font_size(20.0)

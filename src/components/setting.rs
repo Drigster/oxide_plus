@@ -2,20 +2,26 @@ use std::borrow::Cow;
 
 use freya::prelude::*;
 
-use crate::components::Button;
+use crate::components::{Button, Slider};
 
 #[derive(PartialEq)]
-pub struct SettingSlider {
-    value: f32,
-    min: f32,
-    max: f32,
-    step: f32,
+pub struct ToggleSettings {
+    pub on_change: Option<EventHandler<bool>>,
+}
+
+#[derive(PartialEq)]
+pub struct SliderSettings {
+    pub value: f32,
+    pub min: f32,
+    pub max: f32,
+    pub step: f32,
+    pub on_change: Option<EventHandler<f32>>,
 }
 
 #[derive(PartialEq)]
 pub enum SettingType {
-    Toggle,
-    Slider(SettingSlider),
+    Toggle(ToggleSettings),
+    Slider(SliderSettings),
     Dropdown,
 }
 
@@ -23,7 +29,6 @@ pub enum SettingType {
 pub struct Setting {
     pub setting_type: SettingType,
     pub text: Cow<'static, str>,
-    pub on_change: Option<EventHandler<bool>>,
 }
 
 impl Setting {
@@ -31,18 +36,12 @@ impl Setting {
         Self {
             setting_type,
             text: Cow::from(""),
-            on_change: None,
         }
     }
 
     pub fn text(mut self, text: impl Into<Cow<'static, str>>) -> Self {
         let text = text.into();
         self.text = text;
-        self
-    }
-
-    pub fn on_change(mut self, on_change: impl FnMut(bool) + 'static) -> Self {
-        self.on_change = Some(EventHandler::new(on_change));
         self
     }
 }
@@ -65,7 +64,7 @@ impl Render for Setting {
                     .text(self.text.clone())
                     .into(),
                 match &self.setting_type {
-                    SettingType::Toggle => {
+                    SettingType::Toggle(settings) => {
                         let mut toggle = use_state(|| false);
 
                         Button::new()
@@ -77,7 +76,7 @@ impl Render for Setting {
                             .background_active(Color::from_hex("#434140").unwrap())
                             .text(if toggle() { "ON" } else { "OFF" })
                             .on_press({
-                                let on_change = self.on_change.clone();
+                                let on_change = settings.on_change.clone();
                                 move |_| {
                                     if let Some(on_change) = &on_change {
                                         let new_state = !toggle();
@@ -88,9 +87,20 @@ impl Render for Setting {
                             })
                             .into()
                     }
-                    SettingType::Slider(_) => {
-                        rect().width(Size::px(250.0)).height(Size::Fill).into()
-                    }
+                    SettingType::Slider(settings) => Slider::new()
+                        .value(settings.value)
+                        .min(settings.min)
+                        .max(settings.max)
+                        .step(settings.step)
+                        .on_change({
+                            let on_change = settings.on_change.clone();
+                            move |value| {
+                                if let Some(on_change) = &on_change {
+                                    on_change.call(value);
+                                }
+                            }
+                        })
+                        .into(),
                     SettingType::Dropdown => {
                         rect().width(Size::px(250.0)).height(Size::Fill).into()
                     }
