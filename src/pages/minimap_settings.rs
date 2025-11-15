@@ -8,6 +8,7 @@ use crate::{
     pages::{Minimap, Shape},
 };
 
+#[derive(Clone)]
 enum Position {
     TopLeft,
     TopRight,
@@ -15,16 +16,39 @@ enum Position {
     BottomRight,
 }
 
-#[derive(PartialEq)]
-pub struct MinimapSettings {}
+#[derive(Clone)]
+pub struct MinimapSettings {
+    pub enabled: bool,
+    pub position: Position,
+    pub shape: Shape,
+    pub size: f32,
+    pub offset: f32,
+    pub opacity: f32,
+}
 
-impl MinimapSettings {
+impl Default for MinimapSettings {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            position: Position::TopRight,
+            shape: Shape::Circle,
+            size: 250.0,
+            offset: 0.0,
+            opacity: 100.0,
+        }
+    }
+}
+
+#[derive(PartialEq)]
+pub struct MinimapSettingsPage {}
+
+impl MinimapSettingsPage {
     pub fn new() -> Self {
         Self {}
     }
 }
 
-impl Render for MinimapSettings {
+impl Render for MinimapSettingsPage {
     fn render(&self) -> Element {
         let radio_station = use_radio_station::<Data, DataChannel>();
 

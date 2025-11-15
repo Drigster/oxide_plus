@@ -7,9 +7,17 @@ use rustplus_rs::{AppInfo, AppMap, AppMapMarkers, RustPlus};
 
 use crate::{
     layouts::{LoginLayout, MainLayout, MapLayout},
-    pages::{Info, Map, MinimapSettings, ServerSelect, Shops, Team},
+    pages::{
+        Info, Map, MapSettings, MinimapSettings, MinimapSettingsPage, ServerSelect, Shops, Team,
+    },
     utils::settings::{ServerData, load_servers},
 };
+
+#[derive(Default, Clone)]
+pub struct Settings {
+    pub map_settings: MapSettings,
+    pub minimap_settings: MinimapSettings,
+}
 
 #[derive(Default)]
 pub struct Data {
@@ -19,6 +27,8 @@ pub struct Data {
     pub connection_state: String,
     pub error_state: String,
     pub servers: Vec<ServerData>,
+
+    pub settings: Settings,
 }
 
 #[derive(PartialEq, Eq, Clone, Debug, Copy, Hash)]
@@ -30,6 +40,9 @@ pub enum DataChannel {
     ConnectionStateUpdate,
     ErrorStateUpdate,
     ServersUpdate,
+    SettingsUpdate,
+    MapSettingsUpdate,
+    MinimapSettingsUpdate,
 }
 
 impl RadioChannel<Data> for DataChannel {}
@@ -78,7 +91,7 @@ pub enum Route {
                 #[route("/")]
                 Map,
                 #[route("/minimap_settings")]
-                MinimapSettings,
+                MinimapSettingsPage,
             #[end_layout]
         #[end_nest]
         #[route("/team")]
@@ -214,6 +227,25 @@ pub fn App() -> Element {
             radio
                 .write_channel(DataChannel::ConnectionStateUpdate)
                 .connection_state = "Done...".to_string();
+
+            // loop {
+            //     match rustplus.get_map_markers().await {
+            //         Ok(markers) => {
+            //             radio
+            //                 .write_channel(DataChannel::MapMarkersUpdate)
+            //                 .map_markers = Some(markers);
+            //         }
+            //         Err(e) => {
+            //             let err_msg = format!("Failed to get map data: {}", e);
+            //             println!("Error: {}", err_msg);
+            //             radio
+            //                 .write_channel(DataChannel::ErrorStateUpdate)
+            //                 .error_state = err_msg;
+            //         }
+            //     }
+
+            //     async_std::task::sleep(std::time::Duration::from_secs(5)).await;
+            // }
         })
     });
 

@@ -1,6 +1,6 @@
-use euclid::Point2D;
 use freya::prelude::*;
 use freya_radio::prelude::*;
+use rustplus_rs::AppMarkerType;
 
 use crate::{
     app::{Data, DataChannel},
@@ -14,7 +14,7 @@ pub struct Map {
     interactable: bool,
 
     grid: State<bool>,
-    teammates: State<bool>,
+    markers: State<bool>,
     deaths: State<bool>,
     monuments: State<bool>,
     shops: State<bool>,
@@ -26,7 +26,7 @@ impl Map {
             center: true,
             interactable: true,
             grid: use_state(|| false),
-            teammates: use_state(|| false),
+            markers: use_state(|| false),
             deaths: use_state(|| false),
             monuments: use_state(|| false),
             shops: use_state(|| false),
@@ -48,8 +48,8 @@ impl Map {
         self
     }
 
-    pub fn teammates(mut self, teammates: bool) -> Self {
-        *self.teammates.write() = teammates;
+    pub fn markers(mut self, markers: bool) -> Self {
+        *self.markers.write() = markers;
         self
     }
 
@@ -83,6 +83,13 @@ impl Render for Map {
             .info_state
             .clone()
             .expect("Server info should be loaded");
+        let marker_state_binding = use_radio::<Data, DataChannel>(DataChannel::MapMarkersUpdate);
+        let marker_state = marker_state_binding
+            .read()
+            .map_markers
+            .clone()
+            .expect("Map markers should be loaded");
+
         let map_size = info_state.map_size;
 
         let map_state_clone = map_state.clone();
@@ -113,6 +120,7 @@ impl Render for Map {
                 .unwrap(),
             )
             .children([DragableCanvas::new()
+                .zoom(0.5)
                 .interactable(self.interactable)
                 .size(CursorPoint::new(
                     map_state.width as f64,
@@ -231,6 +239,87 @@ impl Render for Map {
                 } else {
                     None
                 })
+                .child(
+                    rect()
+                        .width(Size::px(map_state.width as f32))
+                        .height(Size::px(map_state.height as f32))
+                        .layer(2)
+                        .children_iter(marker_state.markers.iter().filter_map(|marker| {
+                            match AppMarkerType::try_from(marker.marker_type) {
+                                Ok(AppMarkerType::VendingMachine) => {
+                                    if *self.shops.read() == false {
+                                        return None;
+                                    }
+                                    Some(
+                                        rect()
+                                            .width(Size::px(12.0))
+                                            .height(Size::px(12.0))
+                                            .corner_radius(CornerRadius::new_all(1000.0))
+                                            .background(Color::GREEN)
+                                            .position(
+                                                Position::new_absolute()
+                                                    .left(
+                                                        (marker.x * scale_x as f32)
+                                                            + map_state.ocean_margin as f32
+                                                            - 3.0,
+                                                    )
+                                                    .top(
+                                                        ((map_size as f32 - marker.y)
+                                                            * scale_y as f32)
+                                                            + map_state.ocean_margin as f32
+                                                            - 3.0,
+                                                    ),
+                                            )
+                                            .main_align(Alignment::Center)
+                                            .cross_align(Alignment::Center)
+                                            .into(),
+                                    )
+                                }
+                                Ok(marker_type) => {
+                                    if *self.markers.read() == false {
+                                        return None;
+                                    }
+                                    Some(
+                                        rect()
+                                            .width(Size::px(6.0))
+                                            .height(Size::px(6.0))
+                                            .corner_radius(CornerRadius::new_all(1000.0))
+                                            .background(Color::YELLOW)
+                                            .position(
+                                                Position::new_absolute()
+                                                    .left(
+                                                        (marker.x * scale_x as f32)
+                                                            + map_state.ocean_margin as f32
+                                                            - 3.0,
+                                                    )
+                                                    .top(
+                                                        ((map_size as f32 - marker.y)
+                                                            * scale_y as f32)
+                                                            + map_state.ocean_margin as f32
+                                                            - 3.0,
+                                                    ),
+                                            )
+                                            .main_align(Alignment::Center)
+                                            .cross_align(Alignment::Center)
+                                            .child(
+                                                label()
+                                                    .width(Size::px(500.0))
+                                                    .text_align(TextAlign::Center)
+                                                    // Magic numbers :)
+                                                    .font_size(8.864 / zoom() + 2.446)
+                                                    .font_family("PermanentMarker")
+                                                    .color(Color::from_hex("#e6191919").unwrap())
+                                                    .text(normalize_monument_name(
+                                                        marker_type.to_string(),
+                                                    )),
+                                            )
+                                            .into(),
+                                    )
+                                }
+                                _ => None,
+                            }
+                        })),
+                )
                 .into()])
             .into()
     }
