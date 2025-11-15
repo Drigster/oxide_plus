@@ -3052,6 +3052,7 @@ dependencies = [
  "bytes",
  "chrono",
  "dirs",
+ "euclid",
  "freya",
  "freya-icons",
  "freya-radio",

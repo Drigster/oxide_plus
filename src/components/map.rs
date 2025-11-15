@@ -1,3 +1,4 @@
+use euclid::Point2D;
 use freya::prelude::*;
 use freya_radio::prelude::*;
 
@@ -113,6 +114,10 @@ impl Render for Map {
             )
             .children([DragableCanvas::new()
                 .interactable(self.interactable)
+                .size(CursorPoint::new(
+                    map_state.width as f64,
+                    map_state.height as f64,
+                ))
                 .on_zoom(move |v| {
                     zoom.set(v as f32);
                 })

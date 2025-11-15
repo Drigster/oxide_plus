@@ -5,6 +5,7 @@ pub struct DragableCanvas {
     elements: Vec<Element>,
 
     pos: State<CursorPoint>,
+    size: State<CursorPoint>,
     zoom_state: State<f64>,
     interactable: State<bool>,
 
@@ -17,6 +18,7 @@ impl DragableCanvas {
             elements: Vec::new(),
             on_zoom: None,
             pos: use_state(|| CursorPoint::new(0.0, 0.0)),
+            size: use_state(|| CursorPoint::new(0.0, 0.0)),
             zoom_state: use_state(|| 1.0),
             interactable: use_state(|| true),
         }
@@ -41,6 +43,11 @@ impl DragableCanvas {
         self.on_zoom = Some(on_zoom.into());
         self
     }
+
+    pub fn size(mut self, size: CursorPoint) -> Self {
+        *self.size.write() = size;
+        self
+    }
 }
 
 impl ChildrenExt for DragableCanvas {
@@ -53,8 +60,8 @@ impl Render for DragableCanvas {
     fn render(&self) -> Element {
         let mut dragging = use_state(|| false);
         let mut hover = use_state(|| false);
-        let mut mouse_coords_global = use_state(|| CursorPoint::new(0.0, 0.0));
-        let mut mouse_coords_local = use_state(|| CursorPoint::new(0.0, 0.0));
+        let mut mouse_coords_global: State<CursorPoint> = use_state(|| CursorPoint::new(0.0, 0.0));
+        let mut mouse_coords_local: State<CursorPoint> = use_state(|| CursorPoint::new(0.0, 0.0));
 
         let on_zoom = self.on_zoom.clone();
         let mut zoom_state = self.zoom_state.clone();
@@ -62,7 +69,7 @@ impl Render for DragableCanvas {
 
         use_side_effect(move || {
             if let Some(on_zoom) = &on_zoom {
-                on_zoom.call(*zoom_state.read());
+                on_zoom.call(zoom_state());
             }
         });
 
@@ -85,7 +92,7 @@ impl Render for DragableCanvas {
                     *mouse_coords_global.write() = e.global_location;
                     Cursor::set(CursorIcon::Grabbing);
                 })
-                .on_mouse_up(move |e: Event<MouseEventData>| {
+                .on_global_mouse_up(move |e: Event<MouseEventData>| {
                     if e.button != Some(MouseButton::Left) {
                         return;
                     }
@@ -105,36 +112,45 @@ impl Render for DragableCanvas {
                     Cursor::set(CursorIcon::default());
                 })
                 .on_mouse_move(move |e: Event<MouseEventData>| {
-                    if *dragging.read() {
-                        *pos.write() += e.global_location - *mouse_coords_global.read();
-                        *mouse_coords_global.write() = e.global_location;
+                    if dragging() {
+                        let global_location = e.global_location;
+                        *pos.write() += global_location - mouse_coords_global();
+                        *mouse_coords_global.write() = global_location;
                     }
                     *mouse_coords_local.write() = e.element_location;
                 })
-                .on_wheel(move |e: Event<WheelEventData>| {
-                    let change = *zoom_state.read() * e.delta_y.signum() * 0.1;
-                    let current_zoom = *zoom_state.read();
-                    // let current_pos = pos;
-                    // let mouse_img_pos = mouse_coords_local() - current_pos;
-                    // let current_zoomed_width = image_width * current_zoom;
-                    // let current_zoomed_height = image_height * current_zoom;
-                    // let mouse_pos_percent_x = mouse_img_pos.x / current_zoomed_width;
-                    // let mouse_pos_percent_y = mouse_img_pos.y / current_zoomed_height;
-                    // let new_zoomed_width = image_width * (current_zoom + change);
-                    // let new_zoomed_height = image_height * (current_zoom + change);
-                    // let new_mouse_pos_x = mouse_pos_percent_x * new_zoomed_width;
-                    // let new_mouse_pos_y = mouse_pos_percent_y * new_zoomed_height;
-                    // *pos.write() = CursorPoint::new(
-                    //     current_pos.x + (mouse_img_pos.x - new_mouse_pos_x),
-                    //     current_pos.y + (mouse_img_pos.y - new_mouse_pos_y),
-                    // );
+                .on_wheel({
+                    let size = self.size.clone();
+                    move |e: Event<WheelEventData>| {
+                        let change = zoom_state() * e.delta_y.signum() * 0.1;
+                        let current_zoom = zoom_state();
+                        let new_zoom = match current_zoom + change {
+                            v if v < 0.3 => 0.3,
+                            v if v > 2.5 => 2.5,
+                            v => v,
+                        };
 
-                    let new_zoom = current_zoom + change;
-                    if new_zoom < 0.3 {
-                        *zoom_state.write() = 0.3;
-                    } else if new_zoom > 2.5 {
-                        *zoom_state.write() = 2.5;
-                    } else {
+                        if current_zoom == new_zoom {
+                            return;
+                        }
+
+                        let old_zoomd_size = size() * current_zoom;
+                        let new_zoomed_size = size() * new_zoom;
+
+                        let zoom_diff = old_zoomd_size - new_zoomed_size;
+
+                        let cursor_image_pos = mouse_coords_local()
+                            - pos()
+                            - ((size() - (size() * current_zoom)) / 2.0);
+                        let cursor_image_pos_percent_x =
+                            (cursor_image_pos.x / old_zoomd_size.x) - 0.5;
+                        let cursor_image_pos_percent_y =
+                            (cursor_image_pos.y / old_zoomd_size.y) - 0.5;
+
+                        *pos.write() = CursorPoint::new(
+                            pos().x + (zoom_diff.x * cursor_image_pos_percent_x),
+                            pos().y + (zoom_diff.y * cursor_image_pos_percent_y),
+                        );
                         *zoom_state.write() = new_zoom;
                     }
                 })
@@ -146,10 +162,10 @@ impl Render for DragableCanvas {
                         rect()
                             .position(
                                 Position::new_absolute()
-                                    .left(pos.read().x as f32)
-                                    .top(pos.read().y as f32),
+                                    .left(pos().x as f32)
+                                    .top(pos().y as f32),
                             )
-                            .scale((*zoom_state.read() as f32, *zoom_state.read() as f32))
+                            .scale((zoom_state() as f32, zoom_state() as f32))
                             .child(child.clone())
                             .into()
                     })
