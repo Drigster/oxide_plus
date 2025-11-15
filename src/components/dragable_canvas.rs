@@ -5,7 +5,7 @@ pub struct DragableCanvas {
     elements: Vec<Element>,
 
     pos: State<CursorPoint>,
-    size: State<CursorPoint>,
+    size_state: State<CursorPoint>,
     zoom_state: State<f64>,
     interactable: State<bool>,
 
@@ -18,7 +18,7 @@ impl DragableCanvas {
             elements: Vec::new(),
             on_zoom: None,
             pos: use_state(|| CursorPoint::new(0.0, 0.0)),
-            size: use_state(|| CursorPoint::new(0.0, 0.0)),
+            size_state: use_state(|| CursorPoint::new(0.0, 0.0)),
             zoom_state: use_state(|| 1.0),
             interactable: use_state(|| true),
         }
@@ -45,7 +45,7 @@ impl DragableCanvas {
     }
 
     pub fn size(mut self, size: CursorPoint) -> Self {
-        *self.size.write() = size;
+        *self.size_state.write() = size;
         self
     }
 }
@@ -79,7 +79,27 @@ impl Render for DragableCanvas {
             }
         });
 
+        let mut once = use_state(|| false);
+
         rect()
+            //Center map
+            .on_sized({
+                let size_state = self.size_state.clone();
+                move |e: Event<SizedEventData>| {
+                    if once() {
+                        return;
+                    }
+                    if e.area.width() == 0.0 || e.area.height() == 0.0 {
+                        return;
+                    }
+
+                    *once.write() = true;
+                    *pos.write() = CursorPoint::new(
+                        (size_state.read().x / -2.0) + (e.area.width() as f64 / 2.0),
+                        (size_state.read().y / -2.0) + (e.area.height() as f64 / 2.0),
+                    );
+                }
+            })
             .overflow_mode(OverflowMode::Clip)
             .width(Size::Fill)
             .height(Size::Fill)
@@ -120,7 +140,7 @@ impl Render for DragableCanvas {
                     *mouse_coords_local.write() = e.element_location;
                 })
                 .on_wheel({
-                    let size = self.size.clone();
+                    let size = self.size_state.clone();
                     move |e: Event<WheelEventData>| {
                         let change = zoom_state() * e.delta_y.signum() * 0.1;
                         let current_zoom = zoom_state();

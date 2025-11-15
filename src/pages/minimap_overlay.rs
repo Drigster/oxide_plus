@@ -29,7 +29,7 @@ impl Minimap {
 impl Render for Minimap {
     fn render(&self) -> Element {
         let grid = use_state(|| true);
-        let teammates = use_state(|| true);
+        let markers = use_state(|| true);
         let deaths = use_state(|| true);
         let monuments = use_state(|| true);
         let shops = use_state(|| true);
@@ -47,7 +47,7 @@ impl Render for Minimap {
                     .interactable(false)
                     .center(true)
                     .grid(grid())
-                    .teammates(teammates())
+                    .markers(markers())
                     .deaths(deaths())
                     .monuments(monuments())
                     .shops(shops()),

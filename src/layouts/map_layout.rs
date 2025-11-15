@@ -1,17 +1,19 @@
 use freya::prelude::*;
+use freya_radio::hooks::use_radio;
 use freya_router::prelude::{RouterContext, outlet};
 
-use crate::{app::Route, components::Button};
+use crate::{
+    app::{Data, DataChannel, Route},
+    components::Button,
+};
 
 #[derive(PartialEq)]
 pub struct MapLayout {}
 impl Render for MapLayout {
     fn render(&self) -> Element {
-        let mut grid = use_state(|| true);
-        let mut teammates = use_state(|| true);
-        let mut deaths = use_state(|| true);
-        let mut monuments = use_state(|| true);
-        let mut shops = use_state(|| true);
+        let mut map_settings_binding = use_radio::<Data, DataChannel>(DataChannel::MapStateUpdate);
+        let settings = &map_settings_binding.read().settings.clone();
+        let map_settings = settings.map_settings.clone();
 
         rect()
             .width(Size::Fill)
@@ -40,41 +42,46 @@ impl Render for MapLayout {
                             .height(Size::Fill)
                             .icon(freya_icons::lucide::grid_2x2())
                             .on_press(move |_| {
-                                grid.set(!grid());
+                                map_settings_binding.write().settings.map_settings.grid =
+                                    !map_settings.grid;
                             })
-                            .active(grid())
+                            .active(map_settings.grid)
                             .into(),
                         Button::new()
                             .height(Size::Fill)
-                            .icon(freya_icons::lucide::users_round())
+                            .icon(freya_icons::lucide::map_pin())
                             .on_press(move |_| {
-                                teammates.set(!teammates());
+                                map_settings_binding.write().settings.map_settings.markers =
+                                    !map_settings.markers;
                             })
-                            .active(teammates())
+                            .active(map_settings.markers)
                             .into(),
                         Button::new()
                             .height(Size::Fill)
                             .icon(freya_icons::lucide::skull())
                             .on_press(move |_| {
-                                deaths.set(!deaths());
+                                map_settings_binding.write().settings.map_settings.deaths =
+                                    !map_settings.deaths;
                             })
-                            .active(deaths())
+                            .active(map_settings.deaths)
                             .into(),
                         Button::new()
                             .height(Size::Fill)
                             .icon(freya_icons::lucide::factory())
                             .on_press(move |_| {
-                                monuments.set(!monuments());
+                                map_settings_binding.write().settings.map_settings.monuments =
+                                    !map_settings.monuments;
                             })
-                            .active(monuments())
+                            .active(map_settings.monuments)
                             .into(),
                         Button::new()
                             .height(Size::Fill)
                             .icon(freya_icons::lucide::store())
                             .on_press(move |_| {
-                                shops.set(!shops());
+                                map_settings_binding.write().settings.map_settings.shops =
+                                    !map_settings.shops;
                             })
-                            .active(shops())
+                            .active(map_settings.shops)
                             .into(),
                         rect().into(),
                         Button::new()
@@ -84,10 +91,11 @@ impl Render for MapLayout {
                             .icon(freya_icons::lucide::locate_fixed())
                             .text("MINIMAP")
                             .on_press(move |_| {
-                                RouterContext::get().replace(Route::MinimapSettings);
+                                RouterContext::get().replace(Route::MinimapSettingsPage);
                             })
                             .active(
-                                RouterContext::get().current::<Route>() == Route::MinimapSettings,
+                                RouterContext::get().current::<Route>()
+                                    == Route::MinimapSettingsPage,
                             )
                             .into(),
                     ])
@@ -96,8 +104,4 @@ impl Render for MapLayout {
             ])
             .into()
     }
-}
-
-fn get_text_size_concise(scale: f32) -> f32 {
-    return 8.864 / scale + 2.446;
 }
