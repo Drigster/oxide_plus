@@ -5,12 +5,16 @@ pub struct DragableCanvas {
     elements: Vec<Element>,
 
     pos: State<CursorPoint>,
-    size_state: State<CursorPoint>,
+    children_size: State<CursorPoint>,
     zoom_state: State<f64>,
     interactable: State<bool>,
 
     on_zoom: Option<EventHandler<f64>>,
+
+    size: State<Area>,
 }
+
+impl MaybeExt for DragableCanvas {}
 
 impl DragableCanvas {
     pub fn new() -> Self {
@@ -18,9 +22,10 @@ impl DragableCanvas {
             elements: Vec::new(),
             on_zoom: None,
             pos: use_state(|| CursorPoint::new(0.0, 0.0)),
-            size_state: use_state(|| CursorPoint::new(0.0, 0.0)),
+            children_size: use_state(|| CursorPoint::new(0.0, 0.0)),
             zoom_state: use_state(|| 1.0),
             interactable: use_state(|| true),
+            size: use_state(Area::default),
         }
     }
 
@@ -39,13 +44,21 @@ impl DragableCanvas {
         self
     }
 
+    pub fn pos_centered(mut self, pos: CursorPoint) -> Self {
+        *self.pos.write() = CursorPoint::new(
+            -pos.x + (self.size.read().width() as f64 / 2.0),
+            -pos.y + (self.size.read().height() as f64 / 2.0),
+        );
+        self
+    }
+
     pub fn on_zoom(mut self, on_zoom: impl Into<EventHandler<f64>>) -> Self {
         self.on_zoom = Some(on_zoom.into());
         self
     }
 
-    pub fn size(mut self, size: CursorPoint) -> Self {
-        *self.size_state.write() = size;
+    pub fn children_size(mut self, children_size: CursorPoint) -> Self {
+        *self.children_size.write() = children_size;
         self
     }
 }
@@ -84,8 +97,11 @@ impl Render for DragableCanvas {
         rect()
             //Center map
             .on_sized({
-                let size_state = self.size_state.clone();
+                let children_size = self.children_size.clone();
+                let mut size = self.size.clone();
                 move |e: Event<SizedEventData>| {
+                    size.set(e.area);
+
                     if once() {
                         return;
                     }
@@ -95,8 +111,8 @@ impl Render for DragableCanvas {
 
                     *once.write() = true;
                     *pos.write() = CursorPoint::new(
-                        (size_state.read().x / -2.0) + (e.area.width() as f64 / 2.0),
-                        (size_state.read().y / -2.0) + (e.area.height() as f64 / 2.0),
+                        (children_size.read().x / -2.0) + (e.area.width() as f64 / 2.0),
+                        (children_size.read().y / -2.0) + (e.area.height() as f64 / 2.0),
                     );
                 }
             })
@@ -140,7 +156,7 @@ impl Render for DragableCanvas {
                     *mouse_coords_local.write() = e.element_location;
                 })
                 .on_wheel({
-                    let size = self.size_state.clone();
+                    let size = self.children_size.clone();
                     move |e: Event<WheelEventData>| {
                         let change = zoom_state() * e.delta_y.signum() * 0.1;
                         let current_zoom = zoom_state();

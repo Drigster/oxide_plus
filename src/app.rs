@@ -3,7 +3,7 @@ use std::sync::Arc;
 use freya::prelude::*;
 use freya_radio::prelude::*;
 use freya_router::prelude::{Routable, RouterConfig, RouterContext, router};
-use rustplus_rs::{AppInfo, AppMap, AppMapMarkers, RustPlus};
+use rustplus_rs::{AppInfo, AppMap, AppMapMarkers, AppTeamInfo, RustPlus};
 
 use crate::{
     layouts::{LoginLayout, MainLayout, MapLayout},
@@ -24,6 +24,7 @@ pub struct Data {
     pub map_state: Option<AppMap>,
     pub info_state: Option<AppInfo>,
     pub map_markers: Option<AppMapMarkers>,
+    pub team_info: Option<AppTeamInfo>,
     pub connection_state: String,
     pub error_state: String,
     pub servers: Vec<ServerData>,
@@ -37,6 +38,7 @@ pub enum DataChannel {
     MapStateUpdate,
     InfoStateUpdate,
     MapMarkersUpdate,
+    TeamInfoUpdate,
     ConnectionStateUpdate,
     ErrorStateUpdate,
     ServersUpdate,
@@ -168,7 +170,7 @@ pub fn App() -> Element {
             println!("✅ Connected to Rust server!");
             radio
                 .write_channel(DataChannel::ConnectionStateUpdate)
-                .connection_state = "Connected, loading data.".to_string();
+                .connection_state = "Connected, loading data".to_string();
 
             println!("Requesting server data...");
             match rustplus.get_info().await {
@@ -185,7 +187,7 @@ pub fn App() -> Element {
             }
             radio
                 .write_channel(DataChannel::ConnectionStateUpdate)
-                .connection_state = "Connected, loading data..".to_string();
+                .connection_state = "Connected, loading data.".to_string();
 
             // Get map data
             println!("Requesting map data...");
@@ -206,7 +208,7 @@ pub fn App() -> Element {
             println!("Requesting markers data...");
             radio
                 .write_channel(DataChannel::ConnectionStateUpdate)
-                .connection_state = "Connected, loading data...".to_string();
+                .connection_state = "Connected, loading data..".to_string();
 
             match rustplus.get_map_markers().await {
                 Ok(markers) => {
@@ -223,29 +225,47 @@ pub fn App() -> Element {
                 }
             }
 
+            println!("Requesting team data...");
+            radio
+                .write_channel(DataChannel::ConnectionStateUpdate)
+                .connection_state = "Connected, loading data...".to_string();
+
+            match rustplus.get_team_info().await {
+                Ok(team_info) => {
+                    radio.write_channel(DataChannel::TeamInfoUpdate).team_info = Some(team_info);
+                }
+                Err(e) => {
+                    let err_msg = format!("Failed to get map data: {}", e);
+                    println!("Error: {}", err_msg);
+                    radio
+                        .write_channel(DataChannel::ErrorStateUpdate)
+                        .error_state = err_msg;
+                }
+            }
+
             println!("Done...");
             radio
                 .write_channel(DataChannel::ConnectionStateUpdate)
                 .connection_state = "Done...".to_string();
 
-            // loop {
-            //     match rustplus.get_map_markers().await {
-            //         Ok(markers) => {
-            //             radio
-            //                 .write_channel(DataChannel::MapMarkersUpdate)
-            //                 .map_markers = Some(markers);
-            //         }
-            //         Err(e) => {
-            //             let err_msg = format!("Failed to get map data: {}", e);
-            //             println!("Error: {}", err_msg);
-            //             radio
-            //                 .write_channel(DataChannel::ErrorStateUpdate)
-            //                 .error_state = err_msg;
-            //         }
-            //     }
+            loop {
+                match rustplus.get_map_markers().await {
+                    Ok(markers) => {
+                        radio
+                            .write_channel(DataChannel::MapMarkersUpdate)
+                            .map_markers = Some(markers);
+                    }
+                    Err(e) => {
+                        let err_msg = format!("Failed to get map data: {}", e);
+                        println!("Error: {}", err_msg);
+                        radio
+                            .write_channel(DataChannel::ErrorStateUpdate)
+                            .error_state = err_msg;
+                    }
+                }
 
-            //     async_std::task::sleep(std::time::Duration::from_secs(5)).await;
-            // }
+                async_std::task::sleep(std::time::Duration::from_secs(5)).await;
+            }
         })
     });
 

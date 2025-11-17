@@ -10,7 +10,7 @@ use crate::{
 
 #[derive(PartialEq)]
 pub struct Map {
-    center: bool,
+    center: State<bool>,
     interactable: bool,
 
     grid: State<bool>,
@@ -23,8 +23,8 @@ pub struct Map {
 impl Map {
     pub fn new() -> Self {
         Self {
-            center: true,
             interactable: true,
+            center: use_state(|| false),
             grid: use_state(|| false),
             markers: use_state(|| false),
             deaths: use_state(|| false),
@@ -34,7 +34,7 @@ impl Map {
     }
 
     pub fn center(mut self, center: bool) -> Self {
-        self.center = center;
+        *self.center.write() = center;
         self
     }
 
@@ -89,8 +89,15 @@ impl Render for Map {
             .map_markers
             .clone()
             .expect("Map markers should be loaded");
+        let team_info_binding = use_radio::<Data, DataChannel>(DataChannel::MapMarkersUpdate);
+        let team_info = team_info_binding
+            .read()
+            .team_info
+            .clone()
+            .expect("Map markers should be loaded");
 
         let map_size = info_state.map_size;
+        let center = self.center.clone();
 
         let map_state_clone = map_state.clone();
         let image_bytes: &'static [u8] = Box::leak(map_state_clone.jpg_image.into_boxed_slice());
@@ -101,6 +108,9 @@ impl Render for Map {
             (map_state.height as f64 - map_state.ocean_margin as f64 * 2.0) / (map_size as f64);
 
         let mut zoom = use_state(|| 1.0_f32);
+        let mut pos = use_state(|| {
+            CursorPoint::new(map_state.width as f64 / 2.0, map_state.height as f64 / 2.0)
+        });
 
         rect()
             .corner_radius(8.0)
@@ -109,23 +119,14 @@ impl Render for Map {
             .height(Size::Fill)
             .main_align(Alignment::Center)
             .cross_align(Alignment::Center)
-            .background(
-                Color::from_hex(
-                    map_state
-                        .background
-                        .as_ref()
-                        .map(|s| s.as_str())
-                        .unwrap_or("#000000"),
-                )
-                .unwrap(),
-            )
+            .background(Color::from_hex(&map_state.background).unwrap())
             .children([DragableCanvas::new()
-                .zoom(0.5)
                 .interactable(self.interactable)
-                .size(CursorPoint::new(
+                .children_size(CursorPoint::new(
                     map_state.width as f64,
                     map_state.height as f64,
                 ))
+                .maybe(*self.center.read(), |rect| rect.pos_centered(pos()))
                 .on_zoom(move |v| {
                     zoom.set(v as f32);
                 })
@@ -239,14 +240,59 @@ impl Render for Map {
                 } else {
                     None
                 })
+                .maybe_child(if *self.markers.read() {
+                    Some(
+                        rect()
+                            .width(Size::px(map_state.width as f32))
+                            .height(Size::px(map_state.height as f32))
+                            .layer(2)
+                            .children_iter(team_info.map_notes.iter().filter_map(|map_note| {
+                                Some(
+                                    rect()
+                                        .width(Size::px(6.0))
+                                        .height(Size::px(6.0))
+                                        .corner_radius(CornerRadius::new_all(1000.0))
+                                        .position(
+                                            Position::new_absolute()
+                                                .left(
+                                                    (map_note.x * scale_x as f32)
+                                                        + map_state.ocean_margin as f32
+                                                        - 3.0,
+                                                )
+                                                .top(
+                                                    ((map_size as f32 - map_note.y)
+                                                        * scale_y as f32)
+                                                        + map_state.ocean_margin as f32
+                                                        - 3.0,
+                                                ),
+                                        )
+                                        .main_align(Alignment::Center)
+                                        .cross_align(Alignment::Center)
+                                        .child(
+                                            label()
+                                                .width(Size::px(500.0))
+                                                .text_align(TextAlign::Center)
+                                                // Magic numbers :)
+                                                .font_size(8.864 / zoom() + 2.446)
+                                                .font_family("PermanentMarker")
+                                                .color(Color::from_hex("#e6191919").unwrap())
+                                                .text(map_note.r#type.to_string()),
+                                        )
+                                        .into(),
+                                )
+                            })),
+                    )
+                } else {
+                    None
+                })
                 .child(
                     rect()
                         .width(Size::px(map_state.width as f32))
                         .height(Size::px(map_state.height as f32))
                         .layer(2)
                         .children_iter(marker_state.markers.iter().filter_map(|marker| {
-                            match AppMarkerType::try_from(marker.marker_type) {
-                                Ok(AppMarkerType::VendingMachine) => {
+                            match marker.r#type() {
+                                AppMarkerType::VendingMachine => {
                                     if *self.shops.read() == false {
                                         return None;
                                     }
@@ -261,13 +307,13 @@ impl Render for Map {
                                                     .left(
                                                         (marker.x * scale_x as f32)
                                                             + map_state.ocean_margin as f32
-                                                            - 3.0,
+                                                            - 6.0,
                                                     )
                                                     .top(
                                                         ((map_size as f32 - marker.y)
                                                             * scale_y as f32)
                                                             + map_state.ocean_margin as f32
-                                                            - 3.0,
+                                                            - 6.0,
                                                     ),
                                             )
                                             .main_align(Alignment::Center)
@@ -275,7 +321,43 @@ impl Render for Map {
                                             .into(),
                                     )
                                 }
-                                Ok(marker_type) => {
+                                AppMarkerType::Player => {
+                                    if center() {
+                                        pos.set_if_modified(CursorPoint::new(
+                                            (marker.x as f64 * scale_x)
+                                                + map_state.ocean_margin as f64
+                                                - 3.0,
+                                            ((map_size as f64 - marker.y as f64) * scale_y)
+                                                + map_state.ocean_margin as f64
+                                                - 3.0,
+                                        ));
+                                    }
+                                    Some(
+                                        rect()
+                                            .width(Size::px(16.0))
+                                            .height(Size::px(16.0))
+                                            .corner_radius(CornerRadius::new_all(1000.0))
+                                            .background(Color::YELLOW)
+                                            .position(
+                                                Position::new_absolute()
+                                                    .left(
+                                                        (marker.x * scale_x as f32)
+                                                            + map_state.ocean_margin as f32
+                                                            - 8.0,
+                                                    )
+                                                    .top(
+                                                        ((map_size as f32 - marker.y)
+                                                            * scale_y as f32)
+                                                            + map_state.ocean_margin as f32
+                                                            - 8.0,
+                                                    ),
+                                            )
+                                            .main_align(Alignment::Center)
+                                            .cross_align(Alignment::Center)
+                                            .into(),
+                                    )
+                                }
+                                marker_type => {
                                     if *self.markers.read() == false {
                                         return None;
                                     }
@@ -309,14 +391,11 @@ impl Render for Map {
                                                     .font_size(8.864 / zoom() + 2.446)
                                                     .font_family("PermanentMarker")
                                                     .color(Color::from_hex("#e6191919").unwrap())
-                                                    .text(normalize_monument_name(
-                                                        marker_type.to_string(),
-                                                    )),
+                                                    .text(format!("{:?}", marker_type)),
                                             )
                                             .into(),
                                     )
                                 }
-                                _ => None,
                             }
                         })),
                 )
