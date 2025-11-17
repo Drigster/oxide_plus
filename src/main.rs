@@ -32,11 +32,12 @@ fn main() {
                     .with_size(1200.0, 800.0)
                     .with_resizable(false)
                     .with_title("Oxide+")
-                    .with_window_attributes(|window_attributes| {
-                        if cfg!(target_os = "linux") {
-                            return window_attributes.with_name("oxide_plus", "oxide_plus");
+                    .with_window_attributes(|mut attributes| {
+                        #[cfg(target_os = "linux")]{
+                            attributes = attributes.with_name("oxide_plus", "oxide_plus");
                         }
-                        window_attributes
+                        
+                        attributes
                     }),
             ),
     );

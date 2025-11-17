@@ -32,8 +32,8 @@ pub struct Map {}
 
 impl Render for Map {
     fn render(&self) -> Element {
-        let map_settings_binding = use_radio::<Data, DataChannel>(DataChannel::MapStateUpdate);
-        let map_settings = &map_settings_binding.read().settings.map_settings;
+        let map_settings_binding = use_radio::<Data, DataChannel>(DataChannel::MapSettingsUpdate);
+        let map_settings = map_settings_binding.read().settings.map_settings.clone();
 
         rect()
             .padding(8.0)
@@ -47,8 +47,4 @@ impl Render for Map {
             )
             .into()
     }
-}
-
-fn get_text_size_concise(scale: f32) -> f32 {
-    return 8.864 / scale + 2.446;
 }

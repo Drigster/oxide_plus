@@ -24,20 +24,10 @@ impl Render for Dropdown {
             use_radio::<Data, DataChannel>(DataChannel::ConnectionStateUpdate);
         let connection_state = connection_state_binding.read().connection_state.clone();
         let info_state_binding = use_radio::<Data, DataChannel>(DataChannel::InfoStateUpdate);
-        let info_state = info_state_binding.read().info_state.clone();
+        let info_state = info_state_binding.read().info_state.clone().expect("Info state should be loaded");
 
         let mut hovering = use_state(|| false);
         let mut hovering2 = use_state(|| false);
-
-        let image_uri: String = if let Some(info) = info_state.clone() {
-            if let Some(logo_image) = info.logo_image.clone() {
-                logo_image
-            } else {
-                String::new()
-            }
-        } else {
-            String::new()
-        };
 
         use_drop(move || {
             if hovering() || hovering2() {
@@ -74,8 +64,8 @@ impl Render for Dropdown {
                             .cross_align(Alignment::Center)
                             .spacing(8.0)
                             .children([
-                                if !image_uri.is_empty() {
-                                    ImageViewer::new(Uri::from_str(image_uri.as_str()).expect(""))
+                                if !info_state.logo_image.is_empty() {
+                                    ImageViewer::new(Uri::from_str(&info_state.logo_image).expect(""))
                                         .into()
                                 } else {
                                     rect().into()
@@ -85,11 +75,7 @@ impl Render for Dropdown {
                                     .font_weight(FontWeight::BOLD)
                                     .color(Color::from_hex("#E4DAD1").unwrap())
                                     .font_size(12.0)
-                                    .text(if let Some(state) = info_state {
-                                        format!("{}", state.name)
-                                    } else {
-                                        "Loading...".to_string()
-                                    })
+                                    .text(info_state.name)
                                     .into(),
                             ])
                             .into(),

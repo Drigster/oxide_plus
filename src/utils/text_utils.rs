@@ -8,9 +8,9 @@ pub fn number_to_letters(mut num: u32) -> String {
     let mut result = String::new();
     
     while num > 0 {
-        let remainder = (num - 1) % 26;
+        let remainder = num % 26;
         result = char::from(b'A' + remainder as u8).to_string() + &result;
-        num = (num - 1) / 26;
+        num = num / 26;
     }
     
     result

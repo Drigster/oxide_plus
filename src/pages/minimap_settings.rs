@@ -1,6 +1,5 @@
-use chrono::offset;
-use freya::prelude::*;
-use freya_radio::hooks::use_radio_station;
+use freya::{prelude::*, winit::window::WindowLevel};
+use freya_radio::hooks::{use_radio, use_radio_station};
 
 use crate::{
     app::{Data, DataChannel},
@@ -8,7 +7,7 @@ use crate::{
     pages::{Minimap, Shape},
 };
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 enum Position {
     TopLeft,
     TopRight,
@@ -16,7 +15,7 @@ enum Position {
     BottomRight,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct MinimapSettings {
     pub enabled: bool,
     pub position: Position,
@@ -52,27 +51,47 @@ impl Render for MinimapSettingsPage {
     fn render(&self) -> Element {
         let radio_station = use_radio_station::<Data, DataChannel>();
 
-        let mut enabled = use_state(|| false);
-        // let mut position = use_state(|| 250.0f32);
-        let mut shape = use_state(|| Shape::Circle);
-        let mut size = use_state(|| 250.0f32);
-        let mut offset = use_state(|| 0.0f32);
-        let mut opacity = use_state(|| 0.0f32);
+        let mut minimap_settings_state =
+            use_radio::<Data, DataChannel>(DataChannel::MinimapSettingsUpdate);
 
         use_side_effect({
             move || {
-                if enabled() {
+                if minimap_settings_state
+                    .read()
+                    .settings
+                    .minimap_settings
+                    .enabled
+                {
                     EventNotifier::get().launch_window(
                         WindowConfig::new(move || {
                             use_provide_context(move || radio_station);
 
-                            Minimap::new().shape(shape.read().clone()).into()
+                            Minimap::new().into()
                         })
-                        .with_size(200.0, 200.0)
+                        .with_size(250.0, 250.0)
                         .with_background(Color::TRANSPARENT)
                         .with_transparency(true)
                         .with_decorations(false)
-                        .with_resizable(false),
+                        .with_resizable(false)
+                        .with_window_attributes({
+                            move |mut attributes| {
+                                #[cfg(not(target_os = "linux"))]
+                                {
+                                    use freya::winit::dpi::PhysicalPosition;
+
+                                    attributes = attributes
+                                        .with_window_level(WindowLevel::AlwaysOnTop)
+                                        .with_position(PhysicalPosition::new(0.0, 0.0));
+                                }
+
+                                #[cfg(target_os = "linux")]
+                                {
+                                    attributes = attributes.with_name("oxide_plus", "oxide_plus");
+                                }
+
+                                attributes
+                            }
+                        }),
                     );
                 }
             }
@@ -106,7 +125,11 @@ impl Render for MinimapSettingsPage {
                     .into(),
                 Setting::new(SettingType::Toggle(ToggleSettings {
                     on_change: Some(EventHandler::new(move |active: bool| {
-                        enabled.set(active);
+                        minimap_settings_state
+                            .write()
+                            .settings
+                            .minimap_settings
+                            .enabled = active;
                     })),
                 }))
                 .text("ENABLED")
@@ -115,34 +138,54 @@ impl Render for MinimapSettingsPage {
                     .text("POSITION")
                     .into(),
                 Setting::new(SettingType::Slider(SliderSettings {
-                    value: size(),
+                    value: minimap_settings_state.read().settings.minimap_settings.size,
                     min: 100.0,
                     max: 500.0,
                     step: 10.0,
                     on_change: Some(EventHandler::new(move |new_size: f32| {
-                        size.set(new_size);
+                        minimap_settings_state
+                            .write()
+                            .settings
+                            .minimap_settings
+                            .size = new_size;
                     })),
                 }))
                 .text("SIZE")
                 .into(),
                 Setting::new(SettingType::Slider(SliderSettings {
-                    value: 0.0,
+                    value: minimap_settings_state
+                        .read()
+                        .settings
+                        .minimap_settings
+                        .offset,
                     min: 0.0,
                     max: 512.0,
                     step: 1.0,
                     on_change: Some(EventHandler::new(move |new_offset: f32| {
-                        offset.set(new_offset);
+                        minimap_settings_state
+                            .write()
+                            .settings
+                            .minimap_settings
+                            .offset = new_offset;
                     })),
                 }))
                 .text("OFFSET")
                 .into(),
                 Setting::new(SettingType::Slider(SliderSettings {
-                    value: 100.0,
+                    value: minimap_settings_state
+                        .read()
+                        .settings
+                        .minimap_settings
+                        .opacity,
                     min: 1.0,
                     max: 100.0,
                     step: 1.0,
                     on_change: Some(EventHandler::new(move |new_opacity: f32| {
-                        opacity.set(new_opacity);
+                        minimap_settings_state
+                            .write()
+                            .settings
+                            .minimap_settings
+                            .opacity = new_opacity;
                     })),
                 }))
                 .text("OPACITY")
@@ -175,8 +218,4 @@ impl Render for MinimapSettingsPage {
             ])
             .into()
     }
-}
-
-fn get_text_size_concise(scale: f32) -> f32 {
-    return 8.864 / scale + 2.446;
 }

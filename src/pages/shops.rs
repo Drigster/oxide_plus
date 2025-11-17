@@ -129,10 +129,10 @@ impl Render for Shops {
                     .height(Size::Fill)
                     .spacing(8.0)
                     .children_iter(map_markers.markers.iter().filter_map(|marker| {
-                        if AppMarkerType::try_from(marker.marker_type).unwrap_or_default()
+                        if marker.r#type()
                             != AppMarkerType::VendingMachine
                         {
-                            println!("Marker type: {:?}", marker.marker_type);
+                            println!("Marker type: {:?}", marker.r#type());
                             return None;
                         }
                         Some(
@@ -152,12 +152,7 @@ impl Render for Shops {
                                         .font_weight(FontWeight::BOLD)
                                         .children([
                                             label()
-                                                .text(
-                                                    marker
-                                                        .name
-                                                        .clone()
-                                                        .unwrap_or(marker.id.to_string()),
-                                                )
+                                                .text(marker.name.clone())
                                                 .into(),
                                             label().text("G20").into(),
                                         ])
