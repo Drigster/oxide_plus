@@ -1,4 +1,4 @@
-use freya::{prelude::*, winit::window::WindowLevel};
+use freya::prelude::*;
 use freya_radio::hooks::{use_radio, use_radio_station};
 
 use crate::{
@@ -86,6 +86,7 @@ impl Render for MinimapSettingsPage {
 
                                 #[cfg(target_os = "linux")]
                                 {
+                                    use freya::winit::platform::x11::WindowAttributesExtX11;
                                     attributes = attributes.with_name("oxide_plus", "oxide_plus");
                                 }
 

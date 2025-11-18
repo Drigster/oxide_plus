@@ -11,7 +11,8 @@ use crate::{
 pub struct MapLayout {}
 impl Render for MapLayout {
     fn render(&self) -> Element {
-        let mut map_settings_binding = use_radio::<Data, DataChannel>(DataChannel::MapStateUpdate);
+        let mut map_settings_binding =
+            use_radio::<Data, DataChannel>(DataChannel::MapSettingsUpdate);
         let settings = &map_settings_binding.read().settings.clone();
         let map_settings = settings.map_settings.clone();
 
@@ -83,12 +84,21 @@ impl Render for MapLayout {
                             })
                             .active(map_settings.shops)
                             .into(),
+                        Button::new()
+                            .height(Size::Fill)
+                            .icon(freya_icons::lucide::locate_fixed())
+                            .on_press(move |_| {
+                                map_settings_binding.write().settings.map_settings.center =
+                                    !map_settings.center;
+                            })
+                            .active(map_settings.center)
+                            .into(),
                         rect().into(),
                         Button::new()
                             .width(Size::px(110.0))
                             .height(Size::Fill)
                             .align(Alignment::Center)
-                            .icon(freya_icons::lucide::locate_fixed())
+                            .icon(freya_icons::lucide::map_plus())
                             .text("MINIMAP")
                             .on_press(move |_| {
                                 RouterContext::get().replace(Route::MinimapSettingsPage);

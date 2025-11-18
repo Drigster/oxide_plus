@@ -13,6 +13,7 @@ pub struct MapSettings {
     pub deaths: bool,
     pub monuments: bool,
     pub shops: bool,
+    pub center: bool,
 }
 
 impl Default for MapSettings {
@@ -23,6 +24,7 @@ impl Default for MapSettings {
             deaths: true,
             monuments: true,
             shops: true,
+            center: false,
         }
     }
 }
@@ -32,18 +34,19 @@ pub struct Map {}
 
 impl Render for Map {
     fn render(&self) -> Element {
-        let map_settings_binding = use_radio::<Data, DataChannel>(DataChannel::MapSettingsUpdate);
-        let map_settings = map_settings_binding.read().settings.map_settings.clone();
+        let map_settings_state = use_radio::<Data, DataChannel>(DataChannel::MapSettingsUpdate);
 
         rect()
             .padding(8.0)
             .child(
                 MapComponent::new()
-                    .grid(map_settings.grid)
-                    .markers(map_settings.markers)
-                    .deaths(map_settings.deaths)
-                    .monuments(map_settings.monuments)
-                    .shops(map_settings.shops),
+                    .grid(map_settings_state.read().settings.map_settings.grid)
+                    .markers(map_settings_state.read().settings.map_settings.markers)
+                    .deaths(map_settings_state.read().settings.map_settings.deaths)
+                    .monuments(map_settings_state.read().settings.map_settings.monuments)
+                    .shops(map_settings_state.read().settings.map_settings.shops)
+                    .center(map_settings_state.read().settings.map_settings.center)
+                    .interactable(!map_settings_state.read().settings.map_settings.center),
             )
             .into()
     }

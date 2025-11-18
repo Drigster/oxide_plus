@@ -42,7 +42,6 @@ pub enum DataChannel {
     ConnectionStateUpdate,
     ErrorStateUpdate,
     ServersUpdate,
-    SettingsUpdate,
     MapSettingsUpdate,
     MinimapSettingsUpdate,
 }
