@@ -1,5 +1,5 @@
 use freya::prelude::*;
-use freya_router::prelude::{Routable, RouterContext};
+use freya_router::prelude::RouterContext;
 
 use crate::{app::Route, components::Button};
 
