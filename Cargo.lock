@@ -3100,6 +3100,7 @@ dependencies = [
  "freya-router",
  "http",
  "image",
+ "rand",
  "regex",
  "rustplus_rs",
  "serde",

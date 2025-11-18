@@ -3,18 +3,20 @@ use freya_radio::hooks::{use_radio, use_radio_station};
 
 use crate::{
     app::{Data, DataChannel},
-    components::{Setting, SettingType, SliderSettings, ToggleSettings},
+    components::{DropdownSettings, Setting, SettingType, SliderSettings, ToggleSettings},
     pages::{Minimap, Shape},
 };
 
+#[allow(dead_code)]
 #[derive(Clone, Debug)]
-enum Position {
+pub enum Position {
     TopLeft,
     TopRight,
     BottomLeft,
     BottomRight,
 }
 
+#[allow(dead_code)]
 #[derive(Clone, Debug)]
 pub struct MinimapSettings {
     pub enabled: bool,
@@ -40,12 +42,6 @@ impl Default for MinimapSettings {
 
 #[derive(PartialEq)]
 pub struct MinimapSettingsPage {}
-
-impl MinimapSettingsPage {
-    pub fn new() -> Self {
-        Self {}
-    }
-}
 
 impl Render for MinimapSettingsPage {
     fn render(&self) -> Element {
@@ -135,7 +131,7 @@ impl Render for MinimapSettingsPage {
                 }))
                 .text("ENABLED")
                 .into(),
-                Setting::new(SettingType::Toggle(ToggleSettings { on_change: None }))
+                Setting::new(SettingType::Dropdown(DropdownSettings {}))
                     .text("POSITION")
                     .into(),
                 Setting::new(SettingType::Slider(SliderSettings {

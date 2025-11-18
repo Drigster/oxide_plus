@@ -6,6 +6,7 @@ use crate::{
     components::Map as MapComponent,
 };
 
+#[allow(dead_code)]
 #[derive(PartialEq, Clone, Debug)]
 pub enum Shape {
     Circle,
@@ -23,7 +24,8 @@ impl Minimap {
 
 impl Render for Minimap {
     fn render(&self) -> Element {
-        let minimap_settings_state = use_radio::<Data, DataChannel>(DataChannel::MinimapSettingsUpdate);
+        let minimap_settings_state =
+            use_radio::<Data, DataChannel>(DataChannel::MinimapSettingsUpdate);
 
         let grid = use_state(|| true);
         let markers = use_state(|| true);
@@ -34,9 +36,15 @@ impl Render for Minimap {
         rect()
             .width(Size::percent(100.0))
             .height(Size::percent(100.0))
-            .maybe(minimap_settings_state.read().settings.minimap_settings.shape == Shape::Circle, |rect| {
-                rect.corner_radius(1000.0)
-            })
+            .maybe(
+                minimap_settings_state
+                    .read()
+                    .settings
+                    .minimap_settings
+                    .shape
+                    == Shape::Circle,
+                |rect| rect.corner_radius(1000.0),
+            )
             .overflow_mode(OverflowMode::Clip)
             .child(
                 MapComponent::new()
