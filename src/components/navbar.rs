@@ -1,6 +1,6 @@
 use freya::prelude::*;
 
-use crate::components::{Dropdown, UserCard};
+use crate::components::{Dropdown, DropdownOption, UserCard};
 
 #[derive(Clone, PartialEq)]
 pub struct Navbar {}
@@ -36,7 +36,32 @@ impl Render for Navbar {
                     .alignment(BorderAlignment::Outer)
                     .fill(Color::from_hex("#393834").unwrap()),
             )
-            .children([Dropdown::new().into(), UserCard::new().into()])
+            .children([
+                Dropdown::new(vec![
+                    DropdownOption {
+                        icon: Some(Bytes::from_static(PROFILE_ICON)),
+                        text: "Rusty Moose | EU Hapis".to_string(),
+                        on_press: None,
+                    },
+                    DropdownOption {
+                        icon: Some(Bytes::from_static(PROFILE_ICON)),
+                        text: "Rusty Moose | EU Hapis".to_string(),
+                        on_press: None,
+                    },
+                    DropdownOption {
+                        icon: Some(Bytes::from_static(PROFILE_ICON)),
+                        text: "Rusty Moose | EU Hapis".to_string(),
+                        on_press: None,
+                    },
+                ])
+                .width(Size::px(250.0))
+                .height(Size::Fill)
+                .child_height(Size::px(48.0))
+                .into(),
+                UserCard::new().into(),
+            ])
             .into()
     }
 }
+
+static PROFILE_ICON: &[u8] = include_bytes!("../assets/Drigster.png");

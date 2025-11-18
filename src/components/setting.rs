@@ -2,7 +2,7 @@ use std::borrow::Cow;
 
 use freya::prelude::*;
 
-use crate::components::{Button, Slider};
+use crate::components::{Button, Dropdown, Slider};
 
 #[derive(PartialEq)]
 pub struct ToggleSettings {
@@ -19,10 +19,13 @@ pub struct SliderSettings {
 }
 
 #[derive(PartialEq)]
+pub struct DropdownSettings {}
+
+#[derive(PartialEq)]
 pub enum SettingType {
     Toggle(ToggleSettings),
     Slider(SliderSettings),
-    Dropdown,
+    Dropdown(DropdownSettings),
 }
 
 #[derive(PartialEq)]
@@ -101,9 +104,35 @@ impl Render for Setting {
                             }
                         })
                         .into(),
-                    SettingType::Dropdown => {
-                        rect().width(Size::px(250.0)).height(Size::Fill).into()
-                    }
+                    SettingType::Dropdown(_) => Dropdown::new(vec![
+                        crate::components::DropdownOption {
+                            icon: None,
+                            text: "TOP LEFT".to_string(),
+                            on_press: None,
+                        },
+                        crate::components::DropdownOption {
+                            icon: None,
+                            text: "TOP RIGHT".to_string(),
+                            on_press: None,
+                        },
+                        crate::components::DropdownOption {
+                            icon: None,
+                            text: "BOTTOM LEFT".to_string(),
+                            on_press: None,
+                        },
+                        crate::components::DropdownOption {
+                            icon: None,
+                            text: "BOTTOM RIGHT".to_string(),
+                            on_press: None,
+                        },
+                    ])
+                    .width(Size::px(250.0))
+                    .height(Size::Fill)
+                    .padding((0.0, 16.0))
+                    .background(Color::from_hex("BF0E0E0D").unwrap())
+                    .background_chevron(Color::from_hex("#333333").unwrap())
+                    .child_height(Size::px(32.0))
+                    .into(),
                 },
             ])
             .into()

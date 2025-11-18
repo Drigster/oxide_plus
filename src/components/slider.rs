@@ -13,6 +13,7 @@ pub struct Slider {
     on_changed: Option<EventHandler<f32>>,
 }
 
+#[allow(dead_code)]
 impl Slider {
     pub fn new() -> Self {
         Self {

@@ -16,6 +16,7 @@ pub struct DragableCanvas {
 
 impl MaybeExt for DragableCanvas {}
 
+#[allow(dead_code)]
 impl DragableCanvas {
     pub fn new() -> Self {
         Self {
