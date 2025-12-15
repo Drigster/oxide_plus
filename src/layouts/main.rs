@@ -9,7 +9,7 @@ use crate::{
 #[derive(PartialEq)]
 pub struct MainLayout;
 impl Render for MainLayout {
-    fn render(&self) -> Element {
+    fn render(&self) -> impl IntoElement {
         rect()
             .width(Size::percent(100.0))
             .height(Size::percent(100.0))
@@ -36,6 +36,5 @@ impl Render for MainLayout {
                     ])
                     .into(),
             ])
-            .into()
     }
 }

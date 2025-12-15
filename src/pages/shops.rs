@@ -43,7 +43,7 @@ impl OrderPart {
 }
 
 impl Render for OrderPart {
-    fn render(&self) -> Element {
+    fn render(&self) -> impl IntoElement {
         rect()
             .width(self.width.clone())
             .height(Size::Fill)
@@ -80,7 +80,6 @@ impl Render for OrderPart {
                             .into(),
                     ]),
             )
-            .into()
     }
 }
 
@@ -99,7 +98,7 @@ struct Item {
 #[derive(PartialEq)]
 pub struct Shops {}
 impl Render for Shops {
-    fn render(&self) -> Element {
+    fn render(&self) -> impl IntoElement {
         let map_markers_binding = use_radio::<Data, DataChannel>(DataChannel::MapMarkersUpdate);
         let map_markers = map_markers_binding
             .read()
@@ -129,9 +128,7 @@ impl Render for Shops {
                     .height(Size::Fill)
                     .spacing(8.0)
                     .children_iter(map_markers.markers.iter().filter_map(|marker| {
-                        if marker.r#type()
-                            != AppMarkerType::VendingMachine
-                        {
+                        if marker.r#type() != AppMarkerType::VendingMachine {
                             println!("Marker type: {:?}", marker.r#type());
                             return None;
                         }
@@ -151,9 +148,7 @@ impl Render for Shops {
                                         .font_size(15.0)
                                         .font_weight(FontWeight::BOLD)
                                         .children([
-                                            label()
-                                                .text(marker.name.clone())
-                                                .into(),
+                                            label().text(marker.name.clone()).into(),
                                             label().text("G20").into(),
                                         ])
                                         .into(),
@@ -237,6 +232,5 @@ impl Render for Shops {
                     }))
                     .into(),
             ])
-            .into()
     }
 }

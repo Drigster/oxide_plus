@@ -50,7 +50,7 @@ impl Setting {
 }
 
 impl Render for Setting {
-    fn render(&self) -> Element {
+    fn render(&self) -> impl IntoElement {
         rect()
             .width(Size::Fill)
             .height(Size::px(48.0))
@@ -58,7 +58,7 @@ impl Render for Setting {
             .direction(Direction::Horizontal)
             .main_align(Alignment::SpaceBetween)
             .cross_align(Alignment::Center)
-            .background(Color::from_hex("#800E0E0D").unwrap())
+            .background(Color::from_hex("#0E0E0D80").unwrap())
             .children([
                 label()
                     .font_size(20.0)
@@ -74,8 +74,8 @@ impl Render for Setting {
                             .width(Size::px(250.0))
                             .height(Size::Fill)
                             .align(Alignment::Center)
-                            .background(Color::from_hex("#BF0E0E0D").unwrap())
-                            .background_hover(Color::from_hex("#BF0E0E0D").unwrap())
+                            .background(Color::from_hex("#0E0E0DBF").unwrap())
+                            .background_hover(Color::from_hex("#0E0E0DBF").unwrap())
                             .background_active(Color::from_hex("#434140").unwrap())
                             .text(if toggle() { "ON" } else { "OFF" })
                             .on_press({
@@ -129,12 +129,11 @@ impl Render for Setting {
                     .width(Size::px(250.0))
                     .height(Size::Fill)
                     .padding((0.0, 16.0))
-                    .background(Color::from_hex("BF0E0E0D").unwrap())
+                    .background(Color::from_hex("#0E0E0DBF").unwrap())
                     .background_chevron(Color::from_hex("#333333").unwrap())
                     .child_height(Size::px(32.0))
                     .into(),
                 },
             ])
-            .into()
     }
 }

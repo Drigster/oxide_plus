@@ -10,7 +10,7 @@ impl UserCard {
 }
 
 impl Render for UserCard {
-    fn render(&self) -> Element {
+    fn render(&self) -> impl IntoElement {
         rect()
             .direction(Direction::Horizontal)
             .padding(8.0)
@@ -37,11 +37,10 @@ impl Render for UserCard {
                     .corner_radius(CornerRadius::new_all(1000.0))
                     .height(Size::px(32.0))
                     .width(Size::px(32.0))
-                    .overflow_mode(OverflowMode::Clip)
+                    .overflow(Overflow::Clip)
                     .children([ImageViewer::new(PROFILE_ICON).into()])
                     .into(),
             ])
-            .into()
     }
 }
 

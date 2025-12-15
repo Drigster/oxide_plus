@@ -12,7 +12,7 @@ impl Navbar {
 }
 
 impl Render for Navbar {
-    fn render(&self) -> Element {
+    fn render(&self) -> impl IntoElement {
         rect()
             .width(Size::percent(100.0))
             .height(Size::px(48.0))
@@ -60,7 +60,6 @@ impl Render for Navbar {
                 .into(),
                 UserCard::new().into(),
             ])
-            .into()
     }
 }
 

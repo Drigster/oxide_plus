@@ -71,7 +71,7 @@ impl ChildrenExt for DragableCanvas {
 }
 
 impl Render for DragableCanvas {
-    fn render(&self) -> Element {
+    fn render(&self) -> impl IntoElement {
         let mut dragging = use_state(|| false);
         let mut hover = use_state(|| false);
         let mut mouse_coords_global: State<CursorPoint> = use_state(|| CursorPoint::new(0.0, 0.0));
@@ -117,7 +117,7 @@ impl Render for DragableCanvas {
                     );
                 }
             })
-            .overflow_mode(OverflowMode::Clip)
+            .overflow(Overflow::Clip)
             .width(Size::Fill)
             .height(Size::Fill)
             .maybe(*self.interactable.read(), |rect| {
@@ -208,6 +208,5 @@ impl Render for DragableCanvas {
                     })
                     .collect::<Vec<Element>>(),
             )
-            .into()
     }
 }

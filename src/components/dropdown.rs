@@ -95,7 +95,7 @@ impl Dropdown {
 }
 
 impl Render for Dropdown {
-    fn render(&self) -> Element {
+    fn render(&self) -> impl IntoElement {
         let mut expanded = use_state(|| false);
         let mut size = use_state(Area::default);
 
@@ -248,6 +248,5 @@ impl Render for Dropdown {
                         None
                     }),
             )
-            .into()
     }
 }

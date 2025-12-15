@@ -18,7 +18,7 @@ impl TeamMember {
 }
 
 impl Render for TeamMember {
-    fn render(&self) -> Element {
+    fn render(&self) -> impl IntoElement {
         rect()
             .width(Size::Fill)
             .height(Size::Fill)
@@ -42,14 +42,13 @@ impl Render for TeamMember {
                     .into(),
                 rect().width(Size::Fill).height(Size::Fill).into(),
             ])
-            .into()
     }
 }
 
 #[derive(PartialEq)]
 pub struct Team {}
 impl Render for Team {
-    fn render(&self) -> Element {
+    fn render(&self) -> impl IntoElement {
         rect()
             .width(Size::Fill)
             .height(Size::Fill)
@@ -70,6 +69,5 @@ impl Render for Team {
                     .into(),
                 rect().width(Size::Fill).height(Size::Fill).into(),
             ])
-            .into()
     }
 }

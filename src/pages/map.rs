@@ -33,21 +33,18 @@ impl Default for MapSettings {
 pub struct Map {}
 
 impl Render for Map {
-    fn render(&self) -> Element {
+    fn render(&self) -> impl IntoElement {
         let map_settings_state = use_radio::<Data, DataChannel>(DataChannel::MapSettingsUpdate);
 
-        rect()
-            .padding(8.0)
-            .child(
-                MapComponent::new()
-                    .grid(map_settings_state.read().settings.map_settings.grid)
-                    .markers(map_settings_state.read().settings.map_settings.markers)
-                    .deaths(map_settings_state.read().settings.map_settings.deaths)
-                    .monuments(map_settings_state.read().settings.map_settings.monuments)
-                    .shops(map_settings_state.read().settings.map_settings.shops)
-                    .center(map_settings_state.read().settings.map_settings.center)
-                    .interactable(!map_settings_state.read().settings.map_settings.center),
-            )
-            .into()
+        rect().padding(8.0).child(
+            MapComponent::new()
+                .grid(map_settings_state.read().settings.map_settings.grid)
+                .markers(map_settings_state.read().settings.map_settings.markers)
+                .deaths(map_settings_state.read().settings.map_settings.deaths)
+                .monuments(map_settings_state.read().settings.map_settings.monuments)
+                .shops(map_settings_state.read().settings.map_settings.shops)
+                .center(map_settings_state.read().settings.map_settings.center)
+                .interactable(!map_settings_state.read().settings.map_settings.center),
+        )
     }
 }
