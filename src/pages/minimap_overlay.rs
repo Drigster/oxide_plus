@@ -23,7 +23,7 @@ impl Minimap {
 }
 
 impl Render for Minimap {
-    fn render(&self) -> Element {
+    fn render(&self) -> impl IntoElement {
         let minimap_settings_state =
             use_radio::<Data, DataChannel>(DataChannel::MinimapSettingsUpdate);
 
@@ -45,7 +45,7 @@ impl Render for Minimap {
                     == Shape::Circle,
                 |rect| rect.corner_radius(1000.0),
             )
-            .overflow_mode(OverflowMode::Clip)
+            .overflow(Overflow::Clip)
             .child(
                 MapComponent::new()
                     .interactable(false)
@@ -56,6 +56,5 @@ impl Render for Minimap {
                     .monuments(monuments())
                     .shops(shops()),
             )
-            .into()
     }
 }

@@ -44,11 +44,13 @@ impl Default for MinimapSettings {
 pub struct MinimapSettingsPage {}
 
 impl Render for MinimapSettingsPage {
-    fn render(&self) -> Element {
+    fn render(&self) -> impl IntoElement {
         let radio_station = use_radio_station::<Data, DataChannel>();
 
         let mut minimap_settings_state =
             use_radio::<Data, DataChannel>(DataChannel::MinimapSettingsUpdate);
+
+        let mut windows = use_state(Vec::new);
 
         use_side_effect({
             move || {
@@ -57,40 +59,7 @@ impl Render for MinimapSettingsPage {
                     .settings
                     .minimap_settings
                     .enabled
-                {
-                    EventNotifier::get().launch_window(
-                        WindowConfig::new(move || {
-                            use_provide_context(move || radio_station);
-
-                            Minimap::new().into()
-                        })
-                        .with_size(250.0, 250.0)
-                        .with_background(Color::TRANSPARENT)
-                        .with_transparency(true)
-                        .with_decorations(false)
-                        .with_resizable(false)
-                        .with_window_attributes({
-                            move |mut attributes| {
-                                #[cfg(not(target_os = "linux"))]
-                                {
-                                    use freya::winit::dpi::PhysicalPosition;
-
-                                    attributes = attributes
-                                        .with_window_level(WindowLevel::AlwaysOnTop)
-                                        .with_position(PhysicalPosition::new(0.0, 0.0));
-                                }
-
-                                #[cfg(target_os = "linux")]
-                                {
-                                    use freya::winit::platform::x11::WindowAttributesExtX11;
-                                    attributes = attributes.with_name("oxide_plus", "oxide_plus");
-                                }
-
-                                attributes
-                            }
-                        }),
-                    );
-                }
+                {}
             }
         });
 
@@ -127,6 +96,51 @@ impl Render for MinimapSettingsPage {
                             .settings
                             .minimap_settings
                             .enabled = active;
+                        spawn(async move {
+                            if windows.read().is_empty() && active {
+                                let window_id = Platform::get()
+                                    .launch_window(
+                                        WindowConfig::new(move || {
+                                            use_provide_context(move || radio_station);
+
+                                            Minimap::new()
+                                        })
+                                        .with_size(250.0, 250.0)
+                                        .with_background(Color::TRANSPARENT)
+                                        .with_transparency(true)
+                                        .with_decorations(false)
+                                        .with_resizable(false)
+                                        .with_window_attributes({
+                                            move |mut attributes| {
+                                                #[cfg(not(target_os = "linux"))]
+                                                {
+                                                    use freya::winit::dpi::PhysicalPosition;
+
+                                                    attributes = attributes
+                                                        .with_window_level(WindowLevel::AlwaysOnTop)
+                                                        .with_position(PhysicalPosition::new(0.0, 0.0));
+                                                }
+
+                                                #[cfg(target_os = "linux")]
+                                                {
+                                                    use freya::winit::platform::x11::WindowAttributesExtX11;
+                                                    attributes =
+                                                        attributes.with_name("oxide_plus", "oxide_plus");
+                                                }
+
+                                                attributes
+                                            }
+                                        }),
+                                    )
+                                    .await;
+                                windows.write().push(window_id);
+                            } else if !active {
+                                for window_id in windows.read().iter() {
+                                    Platform::get().close_window(*window_id);
+                                }
+                                windows.write().clear();
+                            }
+                        });
                     })),
                 }))
                 .text("ENABLED")
@@ -213,6 +227,5 @@ impl Render for MinimapSettingsPage {
                 // Setting::new(SettingType::Toggle).text("MARKERS").into(),
                 // Setting::new(SettingType::Toggle).text("DEATHS").into(),
             ])
-            .into()
     }
 }

@@ -13,7 +13,7 @@ use crate::{
 #[derive(PartialEq)]
 pub struct ServerSelect {}
 impl Render for ServerSelect {
-    fn render(&self) -> Element {
+    fn render(&self) -> impl IntoElement {
         let radio = use_radio::<Data, DataChannel>(DataChannel::ServersUpdate);
         let servers = radio.read().servers.clone();
 
@@ -41,7 +41,6 @@ impl Render for ServerSelect {
                     },
                 ),
             )
-            .into()
     }
 }
 

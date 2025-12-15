@@ -51,7 +51,7 @@ impl RadioChannel<Data> for DataChannel {}
 #[derive(PartialEq)]
 struct Loading {}
 impl Render for Loading {
-    fn render(&self) -> Element {
+    fn render(&self) -> impl IntoElement {
         rect()
             .width(Size::Fill)
             .height(Size::Fill)
@@ -71,7 +71,6 @@ impl Render for Loading {
                     .child("Go Map")
                     .into(),
             ])
-            .into()
     }
 }
 
@@ -104,7 +103,7 @@ pub enum Route {
 }
 
 #[allow(non_snake_case)]
-pub fn App() -> Element {
+pub fn App() -> impl IntoElement {
     use_init_radio_station::<Data, DataChannel>(Data::default);
     let mut radio = use_radio::<Data, DataChannel>(DataChannel::NoUpdate);
 

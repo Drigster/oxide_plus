@@ -6,7 +6,7 @@ use crate::app::Route;
 #[derive(PartialEq)]
 pub struct LoginLayout;
 impl Render for LoginLayout {
-    fn render(&self) -> Element {
+    fn render(&self) -> impl IntoElement {
         rect()
             .width(Size::Fill)
             .height(Size::Fill)
@@ -64,6 +64,5 @@ impl Render for LoginLayout {
                     ])
                     .into(),
             ])
-            .into()
     }
 }

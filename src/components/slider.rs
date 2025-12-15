@@ -64,7 +64,7 @@ impl Slider {
 }
 
 impl Render for Slider {
-    fn render(&self) -> Element {
+    fn render(&self) -> impl IntoElement {
         let mut clicking = use_state(|| false);
         let mut size = use_state(Area::default);
 
@@ -191,6 +191,5 @@ impl Render for Slider {
                     })
                     .into(),
             ])
-            .into()
     }
 }

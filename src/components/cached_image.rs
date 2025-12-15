@@ -32,7 +32,7 @@ impl CachedImage {
 }
 
 impl Render for CachedImage {
-    fn render(&self) -> Element {
+    fn render(&self) -> impl IntoElement {
         let mut path = use_state(|| None::<PathBuf>);
 
         let image_uri = self.image_uri.clone();
@@ -54,7 +54,7 @@ impl Render for CachedImage {
             ImageViewer::new(image_path)
                 .width(self.width.clone())
                 .height(self.height.clone())
-                .into()
+                .into_element()
         } else {
             rect()
                 .width(self.width.clone())

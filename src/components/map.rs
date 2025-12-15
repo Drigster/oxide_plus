@@ -70,7 +70,7 @@ impl Map {
 }
 
 impl Render for Map {
-    fn render(&self) -> Element {
+    fn render(&self) -> impl IntoElement {
         let map_state_binding = use_radio::<Data, DataChannel>(DataChannel::MapStateUpdate);
         let map_state = map_state_binding
             .read()
@@ -114,7 +114,7 @@ impl Render for Map {
 
         rect()
             .corner_radius(8.0)
-            .overflow_mode(OverflowMode::Clip)
+            .overflow(Overflow::Clip)
             .width(Size::Fill)
             .height(Size::Fill)
             .main_align(Alignment::Center)
@@ -223,7 +223,7 @@ impl Render for Map {
                                                             .font_size(8.864 / zoom() + 2.446)
                                                             .font_family("PermanentMarker")
                                                             .color(
-                                                                Color::from_hex("#e6191919")
+                                                                Color::from_hex("#191919e6")
                                                                     .unwrap(),
                                                             )
                                                             .text(normalize_monument_name(
@@ -275,7 +275,7 @@ impl Render for Map {
                                                 // Magic numbers :)
                                                 .font_size(8.864 / zoom() + 2.446)
                                                 .font_family("PermanentMarker")
-                                                .color(Color::from_hex("#e6191919").unwrap())
+                                                .color(Color::from_hex("#191919e6").unwrap())
                                                 .text(map_note.r#type.to_string()),
                                         )
                                         .into(),
@@ -390,7 +390,7 @@ impl Render for Map {
                                                     // Magic numbers :)
                                                     .font_size(8.864 / zoom() + 2.446)
                                                     .font_family("PermanentMarker")
-                                                    .color(Color::from_hex("#e6191919").unwrap())
+                                                    .color(Color::from_hex("#191919e6").unwrap())
                                                     .text(format!("{:?}", marker_type)),
                                             )
                                             .into(),
@@ -400,6 +400,5 @@ impl Render for Map {
                         })),
                 )
                 .into()])
-            .into()
     }
 }

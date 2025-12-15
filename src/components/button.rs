@@ -36,8 +36,8 @@ impl Button {
             icon: None,
             text: None,
             border: Border::new(),
-            background: Color::from_hex("#0DFFFFFF").unwrap(),
-            background_hover: Color::from_hex("#2DFFFFFF").unwrap(),
+            background: Color::from_hex("#FFFFFF0D").unwrap(),
+            background_hover: Color::from_hex("#FFFFFF2D").unwrap(),
             background_active: Color::from_hex("#5D7238").unwrap(),
             icon_color: Color::from_hex("#605B55").unwrap(),
             icon_color_active: Color::from_hex("#E4DAD1").unwrap(),
@@ -142,7 +142,7 @@ impl ChildrenExt for Button {
 impl MaybeExt for Button {}
 
 impl Render for Button {
-    fn render(&self) -> Element {
+    fn render(&self) -> impl IntoElement {
         let mut hovered = use_state(|| false);
 
         let background_color = if self.active {
@@ -212,6 +212,5 @@ impl Render for Button {
             .maybe(!self.elements.is_empty(), |rect| {
                 rect.children(self.elements.clone())
             })
-            .into()
     }
 }

@@ -9,7 +9,7 @@ use crate::app::{Data, DataChannel};
 #[derive(PartialEq)]
 pub struct Info {}
 impl Render for Info {
-    fn render(&self) -> Element {
+    fn render(&self) -> impl IntoElement {
         let info_state_binding = use_radio::<Data, DataChannel>(DataChannel::InfoStateUpdate);
         let info_state = info_state_binding
             .read()
@@ -33,13 +33,14 @@ impl Render for Info {
                     .background(Color::from_hex("#1D1D1B").unwrap())
                     .maybe_child(
                         if let Ok(image_url) = Uri::try_from(info_state.header_image) {
-                            Some(ImageViewer::new(image_url)
-                                .width(Size::px(400.0))
-                                .height(Size::px(200.0))
+                            Some(
+                                ImageViewer::new(image_url)
+                                    .width(Size::px(400.0))
+                                    .height(Size::px(200.0)),
                             )
                         } else {
                             None
-                        }
+                        },
                     )
                     .children([
                         rect()
@@ -236,6 +237,5 @@ impl Render for Info {
                             .into(),
                     ]),
             )
-            .into()
     }
 }

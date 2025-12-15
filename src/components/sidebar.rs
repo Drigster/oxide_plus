@@ -13,7 +13,7 @@ impl Sidebar {
 }
 
 impl Render for Sidebar {
-    fn render(&self) -> Element {
+    fn render(&self) -> impl IntoElement {
         rect()
             .height(Size::percent(100.0))
             .width(Size::px(250.0))
@@ -22,7 +22,7 @@ impl Render for Sidebar {
             .background_linear_gradient(
                 LinearGradient::new()
                     .angle(0.0)
-                    .stop((Color::from_hex("#0051241C").unwrap(), 5.0))
+                    .stop((Color::from_hex("#51241C00").unwrap(), 5.0))
                     .stop((Color::from_hex("#51241C").unwrap(), 100.0)),
             )
             .children([
@@ -67,6 +67,5 @@ impl Render for Sidebar {
                     .active(RouterContext::get().current::<Route>() == Route::Team)
                     .into(),
             ])
-            .into()
     }
 }

@@ -23,7 +23,7 @@ impl ServerCard {
 }
 
 impl Render for ServerCard {
-    fn render(&self) -> Element {
+    fn render(&self) -> impl IntoElement {
         let mut hovering = use_state(|| false);
 
         // use_drop(move || {
@@ -85,6 +85,5 @@ impl Render for ServerCard {
                     )
                     .into(),
             ])
-            .into()
     }
 }
