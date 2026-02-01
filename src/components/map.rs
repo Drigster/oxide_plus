@@ -290,6 +290,33 @@ impl Component for Map {
                         .width(Size::px(map_size))
                         .height(Size::px(map_size))
                         .layer(2)
+                        .children(team_info.members.iter().filter_map(|member| {
+                            let me = member.steam_id
+                                == user_data
+                                    .steam_id
+                                    .parse::<u64>()
+                                    .expect("Steam ID should be a u64");
+
+                            if me {
+                                let point: Point2D<f32, ()> = Point2D::new(
+                                    -(member.x + margin),
+                                    -(map_size - member.y - margin),
+                                );
+                                me_pos.set_if_modified(point);
+                            }
+
+                            if member.is_alive == false && member.death_time == 0 {
+                                return None;
+                            }
+
+                            Some(markers::Player::new(member.clone(), map_size, margin, me).into())
+                        })),
+                )
+                .child(
+                    rect()
+                        .width(Size::px(map_size))
+                        .height(Size::px(map_size))
+                        .layer(2)
                         .children(marker_state.markers.iter().filter_map(|marker| {
                             match marker.r#type() {
                                 AppMarkerType::VendingMachine => {
@@ -305,32 +332,7 @@ impl Component for Map {
                                         .into(),
                                     )
                                 }
-                                AppMarkerType::Player => {
-                                    let me = marker.steam_id
-                                        == user_data
-                                            .steam_id
-                                            .parse::<u64>()
-                                            .expect("Steam ID should be a u64");
-
-                                    if me {
-                                        let point: Point2D<f32, ()> = Point2D::new(
-                                            -(marker.x + margin),
-                                            -(map_size - marker.y - margin),
-                                        );
-                                        me_pos.set_if_modified(point);
-                                    }
-
-                                    Some(
-                                        markers::Player::new(
-                                            marker.clone(),
-                                            team_info.members.clone(),
-                                            map_size,
-                                            margin,
-                                            me,
-                                        )
-                                        .into(),
-                                    )
-                                }
+                                AppMarkerType::Player => None,
                                 AppMarkerType::CargoShip => Some(
                                     markers::CargoShip::new(marker.clone(), map_size, margin)
                                         .into(),

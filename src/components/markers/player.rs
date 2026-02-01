@@ -5,24 +5,16 @@ use crate::components::markers::{Align, base_marker};
 
 #[derive(PartialEq)]
 pub struct Player {
-    pub marker: AppMarker,
-    pub team_members: Vec<Member>,
+    pub member: Member,
     pub map_size: f32,
     pub margin: f32,
     pub me: bool,
 }
 
 impl Player {
-    pub fn new(
-        marker: AppMarker,
-        team_members: Vec<Member>,
-        map_size: f32,
-        margin: f32,
-        me: bool,
-    ) -> Self {
+    pub fn new(member: Member, map_size: f32, margin: f32, me: bool) -> Self {
         Self {
-            marker,
-            team_members,
+            member,
             map_size,
             margin,
             me: me,
@@ -34,8 +26,8 @@ impl Component for Player {
     fn render(&self) -> impl IntoElement {
         if self.me {
             base_marker(
-                self.marker.x,
-                self.marker.y,
+                self.member.x,
+                self.member.y,
                 12.0,
                 self.margin,
                 self.map_size,
@@ -52,8 +44,8 @@ impl Component for Player {
             .cross_align(Alignment::Center)
         } else {
             base_marker(
-                self.marker.x,
-                self.marker.y,
+                self.member.x,
+                self.member.y,
                 9.0,
                 self.margin,
                 self.map_size,
@@ -76,14 +68,7 @@ impl Component for Player {
                         .color(Color::from_hex("#aaee32").unwrap())
                         .font_size(6.0)
                         .max_lines(1)
-                        .text(format!(
-                            "{}",
-                            self.team_members
-                                .iter()
-                                .find(|member| member.steam_id == self.marker.steam_id)
-                                .unwrap()
-                                .name
-                        )),
+                        .text(format!("{}", self.member.name)),
                 ),
             )
         }
