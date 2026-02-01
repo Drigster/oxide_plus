@@ -1,21 +1,20 @@
 use chrono::prelude::*;
-use freya::prelude::*;
-use freya_radio::prelude::*;
-use http::Uri;
+use freya::{prelude::*, radio::use_radio};
 use timeago::Formatter;
 
-use crate::app::{Data, DataChannel};
+use crate::{Data, DataChannel, components::CachedImage};
 
 #[derive(PartialEq)]
 pub struct Info {}
-impl Render for Info {
+impl Component for Info {
     fn render(&self) -> impl IntoElement {
-        let info_state_binding = use_radio::<Data, DataChannel>(DataChannel::InfoStateUpdate);
-        let info_state = info_state_binding
-            .read()
-            .info_state
-            .clone()
-            .expect("Server info should be loaded");
+        let radio = use_radio::<Data, DataChannel>(DataChannel::InfoStateUpdate);
+
+        let info_state = radio.read().info_state.clone();
+        if info_state.is_none() {
+            return rect();
+        }
+        let info_state = info_state.unwrap();
 
         let formatter = Formatter::new();
         let timestamp = DateTime::from_timestamp(info_state.wipe_time.into(), 0).unwrap();
@@ -31,17 +30,15 @@ impl Render for Info {
                 rect()
                     .corner_radius(8.0)
                     .background(Color::from_hex("#1D1D1B").unwrap())
-                    .maybe_child(
-                        if let Ok(image_url) = Uri::try_from(info_state.header_image) {
-                            Some(
-                                ImageViewer::new(image_url)
-                                    .width(Size::px(400.0))
-                                    .height(Size::px(200.0)),
-                            )
-                        } else {
-                            None
-                        },
-                    )
+                    .maybe_child(if !info_state.header_image.is_empty() {
+                        Some(
+                            CachedImage::new(info_state.header_image)
+                                .width(Size::px(400.0))
+                                .height(Size::px(200.0)),
+                        )
+                    } else {
+                        None
+                    })
                     .children([
                         rect()
                             .width(Size::percent(100.0))

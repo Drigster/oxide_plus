@@ -2,10 +2,11 @@ use std::borrow::Cow;
 
 use freya::prelude::*;
 
-use crate::components::{Button, Dropdown, Slider};
+use crate::components::{Button, Slider};
 
 #[derive(PartialEq)]
 pub struct ToggleSettings {
+    pub value: bool,
     pub on_change: Option<EventHandler<bool>>,
 }
 
@@ -19,13 +20,11 @@ pub struct SliderSettings {
 }
 
 #[derive(PartialEq)]
-pub struct DropdownSettings {}
-
-#[derive(PartialEq)]
+#[allow(dead_code)]
 pub enum SettingType {
     Toggle(ToggleSettings),
     Slider(SliderSettings),
-    Dropdown(DropdownSettings),
+    Dropdown,
 }
 
 #[derive(PartialEq)]
@@ -49,7 +48,7 @@ impl Setting {
     }
 }
 
-impl Render for Setting {
+impl Component for Setting {
     fn render(&self) -> impl IntoElement {
         rect()
             .width(Size::Fill)
@@ -67,29 +66,25 @@ impl Render for Setting {
                     .text(self.text.clone())
                     .into(),
                 match &self.setting_type {
-                    SettingType::Toggle(settings) => {
-                        let mut toggle = use_state(|| false);
-
-                        Button::new()
-                            .width(Size::px(250.0))
-                            .height(Size::Fill)
-                            .align(Alignment::Center)
-                            .background(Color::from_hex("#0E0E0DBF").unwrap())
-                            .background_hover(Color::from_hex("#0E0E0DBF").unwrap())
-                            .background_active(Color::from_hex("#434140").unwrap())
-                            .text(if toggle() { "ON" } else { "OFF" })
-                            .on_press({
-                                let on_change = settings.on_change.clone();
-                                move |_| {
-                                    if let Some(on_change) = &on_change {
-                                        let new_state = !toggle();
-                                        toggle.set(new_state);
-                                        on_change.call(new_state);
-                                    }
+                    SettingType::Toggle(settings) => Button::new()
+                        .width(Size::px(250.0))
+                        .height(Size::Fill)
+                        .align(Alignment::Center)
+                        .background(Color::from_hex("#0E0E0DBF").unwrap())
+                        .background_hover(Color::from_hex("#0E0E0DBF").unwrap())
+                        .background_active(Color::from_hex("#434140").unwrap())
+                        .text(if settings.value { "ON" } else { "OFF" })
+                        .on_press({
+                            let on_change = settings.on_change.clone();
+                            let value = settings.value;
+                            move |_| {
+                                if let Some(on_change) = &on_change {
+                                    let new_state = !value;
+                                    on_change.call(new_state);
                                 }
-                            })
-                            .into()
-                    }
+                            }
+                        })
+                        .into(),
                     SettingType::Slider(settings) => Slider::new()
                         .value(settings.value)
                         .min(settings.min)
@@ -104,35 +99,9 @@ impl Render for Setting {
                             }
                         })
                         .into(),
-                    SettingType::Dropdown(_) => Dropdown::new(vec![
-                        crate::components::DropdownOption {
-                            icon: None,
-                            text: "TOP LEFT".to_string(),
-                            on_press: None,
-                        },
-                        crate::components::DropdownOption {
-                            icon: None,
-                            text: "TOP RIGHT".to_string(),
-                            on_press: None,
-                        },
-                        crate::components::DropdownOption {
-                            icon: None,
-                            text: "BOTTOM LEFT".to_string(),
-                            on_press: None,
-                        },
-                        crate::components::DropdownOption {
-                            icon: None,
-                            text: "BOTTOM RIGHT".to_string(),
-                            on_press: None,
-                        },
-                    ])
-                    .width(Size::px(250.0))
-                    .height(Size::Fill)
-                    .padding((0.0, 16.0))
-                    .background(Color::from_hex("#0E0E0DBF").unwrap())
-                    .background_chevron(Color::from_hex("#333333").unwrap())
-                    .child_height(Size::px(32.0))
-                    .into(),
+                    SettingType::Dropdown => {
+                        rect().width(Size::px(250.0)).height(Size::Fill).into()
+                    }
                 },
             ])
     }

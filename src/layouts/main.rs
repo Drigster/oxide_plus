@@ -1,5 +1,4 @@
-use freya::prelude::*;
-use freya_router::prelude::outlet;
+use freya::{prelude::*, router::prelude::Outlet};
 
 use crate::{
     app::Route,
@@ -8,7 +7,7 @@ use crate::{
 
 #[derive(PartialEq)]
 pub struct MainLayout;
-impl Render for MainLayout {
+impl Component for MainLayout {
     fn render(&self) -> impl IntoElement {
         rect()
             .width(Size::percent(100.0))
@@ -31,7 +30,7 @@ impl Render for MainLayout {
                         rect()
                             .height(Size::percent(100.0))
                             .width(Size::Fill)
-                            .child(outlet::<Route>())
+                            .child(Outlet::<Route>::new())
                             .into(),
                     ])
                     .into(),

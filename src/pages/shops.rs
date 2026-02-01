@@ -1,12 +1,11 @@
-use freya::prelude::*;
-use freya_radio::prelude::*;
+use freya::{prelude::*, radio::use_radio};
 use rustplus_rs::AppMarkerType;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 use crate::{
-    app::{Data, DataChannel},
     components::CachedImage,
+    {Data, DataChannel},
 };
 
 static ITEM_DATA: &'static [u8] = include_bytes!("./../assets/item_data.json");
@@ -42,7 +41,7 @@ impl OrderPart {
     }
 }
 
-impl Render for OrderPart {
+impl Component for OrderPart {
     fn render(&self) -> impl IntoElement {
         rect()
             .width(self.width.clone())
@@ -97,7 +96,7 @@ struct Item {
 
 #[derive(PartialEq)]
 pub struct Shops {}
-impl Render for Shops {
+impl Component for Shops {
     fn render(&self) -> impl IntoElement {
         let map_markers_binding = use_radio::<Data, DataChannel>(DataChannel::MapMarkersUpdate);
         let map_markers = map_markers_binding
@@ -127,7 +126,7 @@ impl Render for Shops {
                     .width(Size::Fill)
                     .height(Size::Fill)
                     .spacing(8.0)
-                    .children_iter(map_markers.markers.iter().filter_map(|marker| {
+                    .children(map_markers.markers.iter().filter_map(|marker| {
                         if marker.r#type() != AppMarkerType::VendingMachine {
                             println!("Marker type: {:?}", marker.r#type());
                             return None;
@@ -156,7 +155,7 @@ impl Render for Shops {
                                         .width(Size::percent(50.0))
                                         .padding(8.0)
                                         .spacing(8.0)
-                                        .children_iter(marker.sell_orders.iter().filter_map(
+                                        .children(marker.sell_orders.iter().filter_map(
                                             |sell_order| {
                                                 let selling_item = map.get(&sell_order.item_id);
 

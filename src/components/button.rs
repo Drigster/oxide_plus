@@ -4,25 +4,19 @@ use freya::prelude::*;
 
 #[derive(Clone, PartialEq)]
 pub struct Button {
-    width: Size,
-    height: Size,
-    padding: Gaps,
-    spacing: f32,
-    icon: Option<Bytes>,
-    text: Option<Cow<'static, str>>,
-    border: Border,
-    background: Color,
-    background_hover: Color,
-    background_active: Color,
-    icon_color: Color,
-    icon_color_active: Color,
-    color: Color,
-    align: Alignment,
-
-    active: bool,
-    on_press: Option<EventHandler<Event<PressEventData>>>,
-
-    elements: Vec<Element>,
+    pub width: Size,
+    pub height: Size,
+    pub icon: Option<Bytes>,
+    pub text: Option<Cow<'static, str>>,
+    pub on_press: Option<EventHandler<Event<PressEventData>>>,
+    pub active: bool,
+    pub background: Color,
+    pub background_hover: Color,
+    pub background_active: Color,
+    pub icon_color: Color,
+    pub icon_color_active: Color,
+    pub color: Color,
+    pub align: Alignment,
 }
 
 #[allow(dead_code)]
@@ -31,11 +25,10 @@ impl Button {
         Self {
             width: Size::default(),
             height: Size::default(),
-            padding: Gaps::new_all(8.0),
-            spacing: 8.0,
             icon: None,
             text: None,
-            border: Border::new(),
+            on_press: None,
+            active: false,
             background: Color::from_hex("#FFFFFF0D").unwrap(),
             background_hover: Color::from_hex("#FFFFFF2D").unwrap(),
             background_active: Color::from_hex("#5D7238").unwrap(),
@@ -43,11 +36,6 @@ impl Button {
             icon_color_active: Color::from_hex("#E4DAD1").unwrap(),
             color: Color::from_hex("#E4DAD1").unwrap(),
             align: Alignment::Start,
-
-            active: false,
-            on_press: None,
-
-            elements: Vec::new(),
         }
     }
 
@@ -58,16 +46,6 @@ impl Button {
 
     pub fn height(mut self, height: Size) -> Self {
         self.height = height;
-        self
-    }
-
-    pub fn padding(mut self, padding: impl Into<Gaps>) -> Self {
-        self.padding = padding.into();
-        self
-    }
-
-    pub fn spacing(mut self, spacing: f32) -> Self {
-        self.spacing = spacing;
         self
     }
 
@@ -82,8 +60,8 @@ impl Button {
         self
     }
 
-    pub fn border(mut self, border: impl Into<Border>) -> Self {
-        self.border = border.into();
+    pub fn active(mut self, active: bool) -> Self {
+        self.active = active;
         self
     }
 
@@ -122,26 +100,13 @@ impl Button {
         self
     }
 
-    pub fn active(mut self, active: bool) -> Self {
-        self.active = active;
-        self
-    }
-
     pub fn on_press(mut self, on_press: impl FnMut(Event<PressEventData>) + 'static) -> Self {
         self.on_press = Some(EventHandler::new(on_press));
         self
     }
 }
 
-impl ChildrenExt for Button {
-    fn get_children(&mut self) -> &mut Vec<Element> {
-        &mut self.elements
-    }
-}
-
-impl MaybeExt for Button {}
-
-impl Render for Button {
+impl Component for Button {
     fn render(&self) -> impl IntoElement {
         let mut hovered = use_state(|| false);
 
@@ -170,17 +135,16 @@ impl Render for Button {
             .height(self.height.clone())
             .background(background_color)
             .direction(Direction::Horizontal)
-            .padding(self.padding.clone())
-            .spacing(self.spacing)
+            .padding(8.0)
+            .spacing(8.0)
             .cross_align(Alignment::Center)
             .main_align(self.align.clone())
-            .border(self.border.clone())
             .on_pointer_enter(move |_| {
-                hovered.set_if_modified(true);
+                *hovered.write() = true;
                 Cursor::set(CursorIcon::Pointer);
             })
             .on_pointer_leave(move |_| {
-                hovered.set_if_modified(false);
+                *hovered.write() = false;
                 Cursor::set(CursorIcon::default());
             })
             .on_press({
@@ -208,9 +172,6 @@ impl Render for Button {
                 )
             } else {
                 None
-            })
-            .maybe(!self.elements.is_empty(), |rect| {
-                rect.children(self.elements.clone())
             })
     }
 }

@@ -63,25 +63,14 @@ impl Slider {
     }
 }
 
-impl Render for Slider {
+impl Component for Slider {
     fn render(&self) -> impl IntoElement {
         let mut clicking = use_state(|| false);
         let mut size = use_state(Area::default);
 
-        let mut value = use_state(|| self.value);
-
         let steps = (self.max - self.min) / self.step;
 
-        let mut slider_pos = use_state(|| (((self.value - self.min) / self.step) / steps) * 100.0);
-
-        use_side_effect({
-            let on_changed = self.on_changed.clone();
-            move || {
-                if let Some(on_changed) = &on_changed {
-                    on_changed.call(*value.read());
-                }
-            }
-        });
+        let slider_pos = use_reactive(&((((self.value - self.min) / self.step) / steps) * 100.0));
 
         rect()
             .width(Size::px(250.0))
@@ -98,7 +87,7 @@ impl Render for Slider {
                         label()
                             .font_size(16.0)
                             .color(Color::from_hex("#E4DAD1").unwrap())
-                            .text(value().to_string()),
+                            .text(self.value.to_string()),
                     )
                     .into(),
                 rect()
@@ -128,6 +117,7 @@ impl Render for Slider {
                         let min = self.min;
                         let max = self.max;
                         let step = self.step;
+                        let on_changed = self.on_changed.clone();
                         move |e: Event<PointerEventData>| {
                             e.stop_propagation();
 
@@ -136,14 +126,16 @@ impl Render for Slider {
                             let step_px = size().width() / steps;
                             let step_clicked = (pos / step_px).round();
 
-                            value.set((min + step_clicked * step).clamp(min, max));
-                            slider_pos.set((step_clicked / steps) * 100.0);
+                            if let Some(on_changed) = &on_changed {
+                                on_changed.call((min + step_clicked * step).clamp(min, max));
+                            }
                         }
                     })
                     .on_global_mouse_move({
                         let min = self.min;
                         let max = self.max;
                         let step = self.step;
+                        let on_changed = self.on_changed.clone();
                         move |e: Event<MouseEventData>| {
                             e.stop_propagation();
 
@@ -156,36 +148,35 @@ impl Render for Slider {
                             let step_px = size().width() / steps;
                             let step_clicked = (pos / step_px).round();
 
-                            value.set((min + step_clicked * step).clamp(min, max));
-                            slider_pos.set((step_clicked / steps) * 100.0);
+                            if let Some(on_changed) = &on_changed {
+                                on_changed.call((min + step_clicked * step).clamp(min, max));
+                            }
                         }
                     })
                     .on_wheel({
                         let min = self.min;
                         let max = self.max;
                         let step = self.step;
+                        let value = self.value;
+                        let on_changed = self.on_changed.clone();
                         move |e: Event<WheelEventData>| {
                             e.stop_propagation();
                             if e.delta_y > 0.0 {
-                                if value() >= max {
+                                if value >= max {
                                     return;
                                 }
 
-                                let step_clicked = ((value() - min) / step) + 1.0;
-
-                                value.set(value() + step);
-                                slider_pos.set((step_clicked / steps) * 100.0);
+                                if let Some(on_changed) = &on_changed {
+                                    on_changed.call(value + step);
+                                }
                             } else {
-                                if value() <= min {
+                                if value <= min {
                                     return;
                                 }
 
-                                let step_clicked = ((value() - min) / step) - 1.0;
-
-                                value.set(value() - step);
-                                slider_pos.set((step_clicked / steps) * 100.0);
-                                println!("Increased to {}", value());
-                                println!("Slider pos {}", slider_pos());
+                                if let Some(on_changed) = &on_changed {
+                                    on_changed.call(value - step);
+                                }
                             }
                         }
                     })

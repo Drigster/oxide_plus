@@ -1,20 +1,13 @@
-use freya::prelude::*;
-use freya_radio::hooks::use_radio;
-use freya_router::prelude::{RouterContext, outlet};
+use freya::{prelude::*, radio::use_radio, router::prelude::Outlet};
+use freya_router::prelude::RouterContext;
 
-use crate::{
-    app::{Data, DataChannel, Route},
-    components::Button,
-};
+use crate::{Data, DataChannel, app::Route, components::Button};
 
 #[derive(PartialEq)]
 pub struct MapLayout {}
-impl Render for MapLayout {
+impl Component for MapLayout {
     fn render(&self) -> impl IntoElement {
-        let mut map_settings_binding =
-            use_radio::<Data, DataChannel>(DataChannel::MapSettingsUpdate);
-        let settings = &map_settings_binding.read().settings.clone();
-        let map_settings = settings.map_settings.clone();
+        let mut radio = use_radio::<Data, DataChannel>(DataChannel::MapSettingsUpdate);
 
         rect().width(Size::Fill).height(Size::Fill).children([
             rect()
@@ -40,62 +33,63 @@ impl Render for MapLayout {
                         .height(Size::Fill)
                         .icon(freya_icons::lucide::grid_2x2())
                         .on_press(move |_| {
-                            map_settings_binding.write().settings.map_settings.grid =
-                                !map_settings.grid;
+                            let grid = radio.read().settings.map_settings.grid;
+                            radio.write().settings.map_settings.grid = !grid;
                         })
-                        .active(map_settings.grid)
+                        .active(radio.read().settings.map_settings.grid)
                         .into(),
                     Button::new()
                         .height(Size::Fill)
                         .icon(freya_icons::lucide::map_pin())
                         .on_press(move |_| {
-                            map_settings_binding.write().settings.map_settings.markers =
-                                !map_settings.markers;
+                            let markers = radio.read().settings.map_settings.markers;
+                            radio.write().settings.map_settings.markers = !markers;
                         })
-                        .active(map_settings.markers)
+                        .active(radio.read().settings.map_settings.markers)
                         .into(),
                     Button::new()
                         .height(Size::Fill)
                         .icon(freya_icons::lucide::skull())
                         .on_press(move |_| {
-                            map_settings_binding.write().settings.map_settings.deaths =
-                                !map_settings.deaths;
+                            let deaths = radio.read().settings.map_settings.deaths;
+                            radio.write().settings.map_settings.deaths = !deaths;
                         })
-                        .active(map_settings.deaths)
+                        .active(radio.read().settings.map_settings.deaths)
                         .into(),
                     Button::new()
                         .height(Size::Fill)
                         .icon(freya_icons::lucide::factory())
                         .on_press(move |_| {
-                            map_settings_binding.write().settings.map_settings.monuments =
-                                !map_settings.monuments;
+                            let monuments = radio.read().settings.map_settings.monuments;
+                            radio.write().settings.map_settings.monuments = !monuments;
                         })
-                        .active(map_settings.monuments)
+                        .active(radio.read().settings.map_settings.monuments)
                         .into(),
                     Button::new()
                         .height(Size::Fill)
                         .icon(freya_icons::lucide::store())
                         .on_press(move |_| {
-                            map_settings_binding.write().settings.map_settings.shops =
-                                !map_settings.shops;
+                            let shops = radio.read().settings.map_settings.shops;
+                            radio.write().settings.map_settings.shops = !shops;
                         })
-                        .active(map_settings.shops)
+                        .active(radio.read().settings.map_settings.shops)
                         .into(),
+                    rect().into(),
                     Button::new()
                         .height(Size::Fill)
                         .icon(freya_icons::lucide::locate_fixed())
                         .on_press(move |_| {
-                            map_settings_binding.write().settings.map_settings.center =
-                                !map_settings.center;
+                            let center = radio.read().settings.map_settings.center;
+                            radio.write().settings.map_settings.center = !center;
                         })
-                        .active(map_settings.center)
+                        .active(radio.read().settings.map_settings.center)
                         .into(),
                     rect().into(),
                     Button::new()
                         .width(Size::px(110.0))
                         .height(Size::Fill)
                         .align(Alignment::Center)
-                        .icon(freya_icons::lucide::map_plus())
+                        .icon(freya_icons::lucide::locate_fixed())
                         .text("MINIMAP")
                         .on_press(move |_| {
                             RouterContext::get().replace(Route::MinimapSettingsPage);
@@ -106,7 +100,7 @@ impl Render for MapLayout {
                         .into(),
                 ])
                 .into(),
-            outlet::<Route>(),
+            Outlet::<Route>::new().into(),
         ])
     }
 }

@@ -1,11 +1,10 @@
-use freya::prelude::*;
-use freya_router::prelude::outlet;
+use freya::{prelude::*, router::prelude::Outlet};
 
 use crate::app::Route;
 
 #[derive(PartialEq)]
 pub struct LoginLayout;
-impl Render for LoginLayout {
+impl Component for LoginLayout {
     fn render(&self) -> impl IntoElement {
         rect()
             .width(Size::Fill)
@@ -36,7 +35,7 @@ impl Render for LoginLayout {
                     .main_align(Alignment::Center)
                     .spacing(16.0)
                     .children([
-                        outlet::<Route>().into(),
+                        Outlet::<Route>::new().into(),
                     ])
                     .into(),
                 rect()

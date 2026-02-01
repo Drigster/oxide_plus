@@ -1,30 +1,29 @@
-use freya::prelude::*;
-use freya_radio::hooks::use_radio;
+use freya::{prelude::*, radio::use_radio};
 
 use crate::{
-    app::{Data, DataChannel},
     components::Map as MapComponent,
+    {Data, DataChannel},
 };
 
 #[derive(Clone)]
 pub struct MapSettings {
+    pub center: bool,
     pub grid: bool,
     pub markers: bool,
     pub deaths: bool,
     pub monuments: bool,
     pub shops: bool,
-    pub center: bool,
 }
 
 impl Default for MapSettings {
     fn default() -> Self {
         Self {
+            center: false,
             grid: true,
             markers: true,
             deaths: true,
             monuments: true,
             shops: true,
-            center: false,
         }
     }
 }
@@ -32,19 +31,52 @@ impl Default for MapSettings {
 #[derive(PartialEq)]
 pub struct Map {}
 
-impl Render for Map {
+impl Component for Map {
     fn render(&self) -> impl IntoElement {
-        let map_settings_state = use_radio::<Data, DataChannel>(DataChannel::MapSettingsUpdate);
+        let map_settings_binding = use_radio::<Data, DataChannel>(DataChannel::MapSettingsUpdate);
+        let map_settings = map_settings_binding.read().settings.map_settings.clone();
 
-        rect().padding(8.0).child(
-            MapComponent::new()
-                .grid(map_settings_state.read().settings.map_settings.grid)
-                .markers(map_settings_state.read().settings.map_settings.markers)
-                .deaths(map_settings_state.read().settings.map_settings.deaths)
-                .monuments(map_settings_state.read().settings.map_settings.monuments)
-                .shops(map_settings_state.read().settings.map_settings.shops)
-                .center(map_settings_state.read().settings.map_settings.center)
-                .interactable(!map_settings_state.read().settings.map_settings.center),
-        )
+        let map_state_binding = use_radio::<Data, DataChannel>(DataChannel::MapStateUpdate);
+        let map_state = map_state_binding.read().map_state.clone();
+        let info_state_binding = use_radio::<Data, DataChannel>(DataChannel::InfoStateUpdate);
+        let info_state = info_state_binding.read().info_state.clone();
+        let marker_state_binding = use_radio::<Data, DataChannel>(DataChannel::MapMarkersUpdate);
+        let marker_state = marker_state_binding.read().map_markers.clone();
+        let team_info_binding = use_radio::<Data, DataChannel>(DataChannel::TeamInfoUpdate);
+        let team_info = team_info_binding.read().team_info.clone();
+
+        let mut zoom: State<f32> = use_state(|| 1.0);
+
+        if let (Some(map_state), Some(info_state), Some(marker_state), Some(team_info)) =
+            (map_state, info_state, marker_state, team_info)
+        {
+            rect().padding(8.0).child(
+                MapComponent::new()
+                    .grid(map_settings.grid)
+                    .markers(map_settings.markers)
+                    .deaths(map_settings.deaths)
+                    .monuments(map_settings.monuments)
+                    .shops(map_settings.shops)
+                    .zoom(zoom())
+                    .center(map_settings.center)
+                    .on_zoom(move |v| {
+                        zoom.set(v);
+                    })
+                    .on_center_cancel({
+                        let mut map_settings_binding = map_settings_binding.clone();
+                        move |_| {
+                            map_settings_binding.write().settings.map_settings.center = false;
+                        }
+                    }),
+            )
+        } else {
+            rect()
+                .margin(8.0)
+                .expanded()
+                .background(Color::from_hex("#191919e6").unwrap())
+                .corner_radius(CornerRadius::new_all(16.0))
+                .center()
+                .child(label().text("Map data is loading..."))
+        }
     }
 }

@@ -1,7 +1,8 @@
 use freya::prelude::*;
 use freya_router::prelude::RouterContext;
 
-use crate::{app::Route, components::Button};
+use crate::app::Route;
+use crate::components::Button;
 
 #[derive(Clone, PartialEq)]
 pub struct Sidebar {}
@@ -12,7 +13,7 @@ impl Sidebar {
     }
 }
 
-impl Render for Sidebar {
+impl Component for Sidebar {
     fn render(&self) -> impl IntoElement {
         rect()
             .height(Size::percent(100.0))

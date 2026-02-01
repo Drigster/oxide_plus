@@ -3,6 +3,8 @@ use image::imageops::FilterType;
 use std::fs;
 use std::path::PathBuf;
 
+use crate::utils::APP_DIR_NAME;
+
 /// Gets the local image path from the assets/images directory.
 ///
 /// Extracts the filename from the URL and looks for it in the local assets/images folder.
@@ -29,11 +31,6 @@ pub async fn get_cached_image(image_uri: String) -> Result<PathBuf, Box<dyn std:
         return Ok(local_path);
     }
 
-    println!(
-        "Local image not found: {:?}, will need to download",
-        local_path
-    );
-
     // If not found locally, fall back to downloading (for any missing images)
     download_and_cache_image(image_uri, &filename).await
 }
@@ -50,13 +47,10 @@ async fn download_and_cache_image(
     if cache_path.exists() {
         if let Ok(metadata) = fs::metadata(&cache_path) {
             if metadata.len() > 0 {
-                println!("Cache hit: {:?}", cache_path);
                 return Ok(cache_path);
             }
         }
     }
-
-    println!("Downloading: {}", image_uri);
 
     // Download the image
     let cache_path_clone = cache_path.clone();
@@ -81,8 +75,6 @@ async fn download_and_cache_image(
             // Atomically rename
             fs::rename(&temp_path, &cache_path_clone)?;
 
-            println!("Downloaded and cached: {:?}", cache_path_clone);
-
             Ok(())
         },
     )
@@ -97,7 +89,7 @@ fn get_cache_dir() -> Result<PathBuf, Box<dyn std::error::Error>> {
     use std::fs;
 
     let cache_dir = if let Some(base_dirs) = dirs::cache_dir() {
-        base_dirs.join("rustplus_freya").join("images")
+        base_dirs.join(APP_DIR_NAME).join("images")
     } else {
         PathBuf::from(".cache").join("images")
     };
