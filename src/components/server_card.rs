@@ -1,16 +1,18 @@
 use freya::prelude::*;
 
+use crate::components::CachedImage;
+
 #[derive(Clone, PartialEq)]
 pub struct ServerCard {
-    pub icon: (&'static str, &'static [u8]),
+    pub icon_url: String,
     pub name: String,
     pub on_press: Option<EventHandler<Event<PressEventData>>>,
 }
 
 impl ServerCard {
-    pub fn new(icon: (&'static str, &'static [u8]), name: String) -> Self {
+    pub fn new(icon_url: String, name: String) -> Self {
         Self {
-            icon,
+            icon_url,
             name,
             on_press: None,
         }
@@ -22,7 +24,7 @@ impl ServerCard {
     }
 }
 
-impl Render for ServerCard {
+impl Component for ServerCard {
     fn render(&self) -> impl IntoElement {
         let mut hovering = use_state(|| false);
 
@@ -73,7 +75,7 @@ impl Render for ServerCard {
                 }
             })
             .children([
-                ImageViewer::new(self.icon).into(),
+                CachedImage::new(self.icon_url.clone()).into_element(),
                 rect()
                     .padding(8.0)
                     .child(

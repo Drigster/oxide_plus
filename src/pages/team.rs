@@ -17,7 +17,7 @@ impl TeamMember {
     }
 }
 
-impl Render for TeamMember {
+impl Component for TeamMember {
     fn render(&self) -> impl IntoElement {
         rect()
             .width(Size::Fill)
@@ -47,7 +47,7 @@ impl Render for TeamMember {
 
 #[derive(PartialEq)]
 pub struct Team {}
-impl Render for Team {
+impl Component for Team {
     fn render(&self) -> impl IntoElement {
         rect()
             .width(Size::Fill)

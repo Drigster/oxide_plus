@@ -1,48 +1,55 @@
-use std::vec;
-
-use freya::prelude::*;
-use freya_radio::hooks::use_radio;
+use freya::{prelude::*, radio::*};
 use freya_router::prelude::RouterContext;
 
-use crate::{
-    app::{Data, DataChannel, Route},
-    components::ServerCard,
-    utils::settings::{ServerData, save_servers},
-};
+use crate::{Data, DataChannel, app::Route, components::ServerCard};
 
 #[derive(PartialEq)]
 pub struct ServerSelect {}
-impl Render for ServerSelect {
+impl Component for ServerSelect {
     fn render(&self) -> impl IntoElement {
         let radio = use_radio::<Data, DataChannel>(DataChannel::ServersUpdate);
-        let servers = radio.read().servers.clone();
+        let state_tx = radio.read().state_tx.clone().unwrap();
 
         rect()
             .children(
-                servers
-                    .iter()
-                    .map(|server| {
-                        ServerCard::new(PROFILE_ICON, server.name.clone())
-                            .on_press(move |_| {
-                                RouterContext::get().replace(Route::Info);
-                            })
-                            .into()
+                radio
+                    .read()
+                    .servers
+                    .clone()
+                    .into_iter()
+                    .filter_map(|server| {
+                        Some(
+                            ServerCard::new(server.logo.clone(), server.name.clone())
+                                .on_press({
+                                    let state_tx = state_tx.clone();
+                                    move |_| {
+                                        state_tx
+                                            .unbounded_send(
+                                                crate::ChannelSend::SelectedServerUpdate(Some(
+                                                    server.clone(),
+                                                )),
+                                            )
+                                            .unwrap();
+                                        RouterContext::get().replace(Route::Info);
+                                    }
+                                })
+                                .into(),
+                        )
                     })
                     .collect::<Vec<Element>>(),
             )
-            .child(
-                ServerCard::new(PROFILE_ICON, "Pair new server...".to_string()).on_press(
-                    move |_| {
-                        save_servers(vec![ServerData {
-                            name: format!("{} {}", "New server name", servers.len()).to_string(),
-                            address: "127.0.0.1:28082".to_string(),
-                        }])
-                        .unwrap();
-                    },
-                ),
-            )
+            .maybe_child({
+                if radio.read().servers.is_empty() {
+                    Some(
+                        label()
+                            .font_size(20.0)
+                            .font_weight(FontWeight::BOLD)
+                            .color(Color::from_hex("#E4DAD1").unwrap())
+                            .text("No servers found"),
+                    )
+                } else {
+                    None
+                }
+            })
     }
 }
-
-static PROFILE_ICON: (&'static str, &'static [u8]) =
-    ("Drigster", include_bytes!("../assets/Drigster.png"));

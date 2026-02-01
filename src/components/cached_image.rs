@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use freya::prelude::*;
 
-use crate::utils::image_utils::get_cached_image;
+use crate::utils::get_cached_image;
 
 #[derive(Clone, PartialEq)]
 pub struct CachedImage {
@@ -11,6 +11,7 @@ pub struct CachedImage {
     height: Size,
 }
 
+#[allow(dead_code)]
 impl CachedImage {
     pub fn new(uri: String) -> Self {
         Self {
@@ -31,7 +32,7 @@ impl CachedImage {
     }
 }
 
-impl Render for CachedImage {
+impl Component for CachedImage {
     fn render(&self) -> impl IntoElement {
         let mut path = use_state(|| None::<PathBuf>);
 
@@ -61,7 +62,7 @@ impl Render for CachedImage {
                 .height(self.height.clone())
                 .background(Color::TRANSPARENT)
                 .center()
-                .into()
+                .into_element()
         }
     }
 }

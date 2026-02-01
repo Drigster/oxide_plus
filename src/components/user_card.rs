@@ -9,7 +9,7 @@ impl UserCard {
     }
 }
 
-impl Render for UserCard {
+impl Component for UserCard {
     fn render(&self) -> impl IntoElement {
         rect()
             .direction(Direction::Horizontal)
