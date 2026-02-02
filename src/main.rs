@@ -8,10 +8,11 @@ use freya::{
     radio::{RadioChannel, RadioStation},
     tray::{
         TrayEvent, TrayIconBuilder,
+        dpi::PhysicalPosition,
         menu::{Menu, MenuEvent, MenuItem},
     },
     webview::plugin::WebViewPlugin,
-    winit::window::WindowId,
+    winit::window::{WindowId, WindowLevel},
 };
 use futures_lite::StreamExt;
 use rustplus_rs::{AppInfo, AppMap, AppMapMarkers, AppTeamInfo};
@@ -68,22 +69,31 @@ fn main() {
                     }
                 };
             }
-            main_window_id = Some(
-                ctx.launch_window(
-                    WindowConfig::new(AppComponent::new(App { radio_station }))
-                        .with_size(1200.0, 800.0)
-                        .with_resizable(false)
-                        .with_title("Oxide+")
-                        .with_window_attributes(|mut attributes, _| {
-                            #[cfg(target_os = "linux")]
-                            {
-                                attributes = attributes.with_name("oxide_plus", "oxide_plus");
-                            }
+            main_window_id = Some(ctx.launch_window(WindowConfig::new(AppComponent::new(App { radio_station }))
+                .with_size(1200.0, 800.0)
+                .with_resizable(false)
+                .with_title("Oxide+")
+                .with_window_attributes(|mut attributes, _| {
+                    #[cfg(target_os = "linux")]
+                    {
+                        use crate::utils::{SystemType, get_system_type};
 
-                            attributes
-                        }),
-                ),
-            );
+                        match get_system_type() {
+                            SystemType::Wayland => {
+                                use freya::winit::platform::wayland::WindowAttributesExtWayland;
+                                attributes = attributes.with_name("oxide_plus", "oxide_plus2");
+                            }
+                            SystemType::X11 => {
+                                use freya::winit::platform::x11::WindowAttributesExtX11;
+                                attributes = attributes.with_name("oxide_plus", "oxide_plus2");
+                            }
+                            _ => {}
+                        }
+                    }
+
+                    attributes
+                }
+            )));
         }
         TrayEvent::Menu(MenuEvent { id }) if id == "toggle_minimap" => {
             let minimap_state = radio_station.read().settings.minimap_settings.enabled;
@@ -200,41 +210,56 @@ fn main() {
                                     };
                                 } else {
                                     match proxy.with(move |ctx| {
+                                        let minimap_settings = radio_station.read().settings.minimap_settings.clone();
                                         ctx.launch_window(
-                                                WindowConfig::new(move || {
-                                                    use_provide_context(move || radio_station);
+                                            WindowConfig::new(move || {
+                                                use_provide_context(move || radio_station);
 
-                                                    Minimap::new()
-                                                })
-                                                .with_size(250.0, 250.0)
-                                                .with_background(Color::TRANSPARENT)
-                                                .with_transparency(true)
-                                                .with_decorations(false)
-                                                .with_resizable(false)
-                                                .with_window_attributes({
-                                                    move |mut attributes, _| {
-                                                        #[cfg(not(target_os = "linux"))]
-                                                        {
-                                                            use freya::winit::{dpi::PhysicalPosition, platform::windows::WindowAttributesExtWindows, window::WindowLevel};
+                                                Minimap::new()
+                                            })
+                                            .with_size(minimap_settings.size as f64, minimap_settings.size as f64)
+                                            .with_background(Color::TRANSPARENT)
+                                            .with_transparency(true)
+                                            .with_decorations(false)
+                                            .with_resizable(false)
+                                            .with_title("Oxide+ - Minimap")
+                                            .with_window_attributes({
+                                                move |mut attributes, _| {
+                                                    attributes = attributes
+                                                        .with_window_level(WindowLevel::AlwaysOnTop)
+                                                        .with_position(PhysicalPosition::new(
+                                                            0.0, 0.0,
+                                                        ));
 
-                                                            attributes = attributes
-                                                                .with_window_level(WindowLevel::AlwaysOnTop)
-                                                                .with_position(PhysicalPosition::new(
-                                                                    0.0, 0.0,
-                                                                ))
-                                                                .with_skip_taskbar(true);
-                                                        }
+                                                    #[cfg(not(target_os = "linux"))]
+                                                    {
+                                                        use freya::winit::{dpi::PhysicalPosition, platform::windows::WindowAttributesExtWindows, window::WindowLevel};
 
-                                                        #[cfg(target_os = "linux")]
-                                                        {
-                                                            attributes = attributes
-                                                                .with_name("oxide_plus", "oxide_plus");
-                                                        }
-
-                                                        attributes
+                                                        attributes = attributes
+                                                            .with_skip_taskbar(true);
                                                     }
-                                                }),
-                                            )
+
+                                                    #[cfg(target_os = "linux")]
+                                                    {
+                                                        use crate::utils::{SystemType, get_system_type};
+
+                                                        match get_system_type() {
+                                                            SystemType::Wayland => {
+                                                                use freya::winit::platform::wayland::WindowAttributesExtWayland;
+                                                                attributes = attributes.with_name("oxide_plus", "oxide_plus2");
+                                                            }
+                                                            SystemType::X11 => {
+                                                                use freya::winit::platform::x11::WindowAttributesExtX11;
+                                                                attributes = attributes.with_name("oxide_plus", "oxide_plus2");
+                                                            }
+                                                            _ => {}
+                                                        }
+                                                    }
+
+                                                    attributes
+                                                }
+                                            }),
+                                        )
                                     }).await {
                                         Ok(new_window_id) => {
                                             window_id = Some(new_window_id);
@@ -271,22 +296,32 @@ fn main() {
                     }
                 }
             })
-            .with_plugin(WebViewPlugin::new())
-            .with_tray(tray_icon, tray_handler)
-            .with_window(
-                WindowConfig::new(AppComponent::new(App { radio_station }))
-                    .with_size(1200.0, 800.0)
-                    .with_resizable(false)
-                    .with_title("Oxide+")
-                    .with_window_attributes(|mut attributes, _| {
-                        #[cfg(target_os = "linux")]
-                        {
-                            attributes = attributes.with_name("oxide_plus", "oxide_plus");
-                        }
+        .with_plugin(WebViewPlugin::new())
+        //.with_tray(tray_icon, tray_handler)
+        .with_window(WindowConfig::new(AppComponent::new(App { radio_station }))
+        .with_size(1200.0, 800.0)
+        .with_resizable(false)
+        .with_title("Oxide+")
+        .with_window_attributes(|mut attributes, _| {
+            #[cfg(target_os = "linux")]
+            {
+                use crate::utils::{SystemType, get_system_type};
 
-                        attributes
-                    }),
-            ),
+                match get_system_type() {
+                    SystemType::Wayland => {
+                        use freya::winit::platform::wayland::WindowAttributesExtWayland;
+                        attributes = attributes.with_name("oxide_plus", "oxide_plus");
+                    }
+                    SystemType::X11 => {
+                        use freya::winit::platform::x11::WindowAttributesExtX11;
+                        attributes = attributes.with_name("oxide_plus", "oxide_plus");
+                    }
+                    _ => {}
+                }
+            }
+
+            attributes
+        })),
     );
 }
 

@@ -1929,7 +1929,7 @@ dependencies = [
 [[package]]
 name = "freya"
 version = "0.4.0-rc.6"
-source = "git+https://github.com/marc2332/freya?branch=chore%2Fremove-send-bound-for-event-loop-callbacks#3753d2c0a5797a3db04c89cf79ec47a017b35f07"
+source = "git+https://github.com/marc2332/freya#856cf1cc79f3201f197ae05aafca60939d6c8011"
 dependencies = [
  "cfg-if",
  "freya-animation",
@@ -1949,7 +1949,7 @@ dependencies = [
 [[package]]
 name = "freya-animation"
 version = "0.4.0-rc.6"
-source = "git+https://github.com/marc2332/freya?branch=chore%2Fremove-send-bound-for-event-loop-callbacks#3753d2c0a5797a3db04c89cf79ec47a017b35f07"
+source = "git+https://github.com/marc2332/freya#856cf1cc79f3201f197ae05aafca60939d6c8011"
 dependencies = [
  "async-io",
  "easer",
@@ -1959,7 +1959,7 @@ dependencies = [
 [[package]]
 name = "freya-clipboard"
 version = "0.4.0-rc.6"
-source = "git+https://github.com/marc2332/freya?branch=chore%2Fremove-send-bound-for-event-loop-callbacks#3753d2c0a5797a3db04c89cf79ec47a017b35f07"
+source = "git+https://github.com/marc2332/freya#856cf1cc79f3201f197ae05aafca60939d6c8011"
 dependencies = [
  "copypasta",
  "freya-core",
@@ -1968,7 +1968,7 @@ dependencies = [
 [[package]]
 name = "freya-components"
 version = "0.4.0-rc.6"
-source = "git+https://github.com/marc2332/freya?branch=chore%2Fremove-send-bound-for-event-loop-callbacks#3753d2c0a5797a3db04c89cf79ec47a017b35f07"
+source = "git+https://github.com/marc2332/freya#856cf1cc79f3201f197ae05aafca60939d6c8011"
 dependencies = [
  "accesskit",
  "anyhow",
@@ -1992,7 +1992,7 @@ dependencies = [
 [[package]]
 name = "freya-core"
 version = "0.4.0-rc.6"
-source = "git+https://github.com/marc2332/freya?branch=chore%2Fremove-send-bound-for-event-loop-callbacks#3753d2c0a5797a3db04c89cf79ec47a017b35f07"
+source = "git+https://github.com/marc2332/freya#856cf1cc79f3201f197ae05aafca60939d6c8011"
 dependencies = [
  "accesskit",
  "async-broadcast",
@@ -2019,7 +2019,7 @@ dependencies = [
 [[package]]
 name = "freya-edit"
 version = "0.4.0-rc.6"
-source = "git+https://github.com/marc2332/freya?branch=chore%2Fremove-send-bound-for-event-loop-callbacks#3753d2c0a5797a3db04c89cf79ec47a017b35f07"
+source = "git+https://github.com/marc2332/freya#856cf1cc79f3201f197ae05aafca60939d6c8011"
 dependencies = [
  "bitflags 2.10.0",
  "freya-clipboard",
@@ -2033,7 +2033,7 @@ dependencies = [
 [[package]]
 name = "freya-engine"
 version = "0.4.0-rc.6"
-source = "git+https://github.com/marc2332/freya?branch=chore%2Fremove-send-bound-for-event-loop-callbacks#3753d2c0a5797a3db04c89cf79ec47a017b35f07"
+source = "git+https://github.com/marc2332/freya#856cf1cc79f3201f197ae05aafca60939d6c8011"
 dependencies = [
  "bitflags 2.10.0",
  "glutin",
@@ -2043,7 +2043,7 @@ dependencies = [
 [[package]]
 name = "freya-icons"
 version = "0.4.0-rc.6"
-source = "git+https://github.com/marc2332/freya?branch=chore%2Fremove-send-bound-for-event-loop-callbacks#3753d2c0a5797a3db04c89cf79ec47a017b35f07"
+source = "git+https://github.com/marc2332/freya#856cf1cc79f3201f197ae05aafca60939d6c8011"
 dependencies = [
  "bytes",
 ]
@@ -2051,7 +2051,7 @@ dependencies = [
 [[package]]
 name = "freya-radio"
 version = "0.4.0-rc.6"
-source = "git+https://github.com/marc2332/freya?branch=chore%2Fremove-send-bound-for-event-loop-callbacks#3753d2c0a5797a3db04c89cf79ec47a017b35f07"
+source = "git+https://github.com/marc2332/freya#856cf1cc79f3201f197ae05aafca60939d6c8011"
 dependencies = [
  "freya-core",
 ]
@@ -2059,7 +2059,7 @@ dependencies = [
 [[package]]
 name = "freya-router"
 version = "0.4.0-rc.6"
-source = "git+https://github.com/marc2332/freya?branch=chore%2Fremove-send-bound-for-event-loop-callbacks#3753d2c0a5797a3db04c89cf79ec47a017b35f07"
+source = "git+https://github.com/marc2332/freya#856cf1cc79f3201f197ae05aafca60939d6c8011"
 dependencies = [
  "freya-core",
  "freya-router-macro",
@@ -2071,7 +2071,7 @@ dependencies = [
 [[package]]
 name = "freya-router-macro"
 version = "0.4.0-rc.6"
-source = "git+https://github.com/marc2332/freya?branch=chore%2Fremove-send-bound-for-event-loop-callbacks#3753d2c0a5797a3db04c89cf79ec47a017b35f07"
+source = "git+https://github.com/marc2332/freya#856cf1cc79f3201f197ae05aafca60939d6c8011"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2082,7 +2082,7 @@ dependencies = [
 [[package]]
 name = "freya-sdk"
 version = "0.4.0-rc.6"
-source = "git+https://github.com/marc2332/freya?branch=chore%2Fremove-send-bound-for-event-loop-callbacks#3753d2c0a5797a3db04c89cf79ec47a017b35f07"
+source = "git+https://github.com/marc2332/freya#856cf1cc79f3201f197ae05aafca60939d6c8011"
 dependencies = [
  "async-io",
  "freya-core",
@@ -2092,7 +2092,7 @@ dependencies = [
 [[package]]
 name = "freya-webview"
 version = "0.4.0-rc.6"
-source = "git+https://github.com/marc2332/freya?branch=chore%2Fremove-send-bound-for-event-loop-callbacks#3753d2c0a5797a3db04c89cf79ec47a017b35f07"
+source = "git+https://github.com/marc2332/freya#856cf1cc79f3201f197ae05aafca60939d6c8011"
 dependencies = [
  "accesskit",
  "freya-core",
@@ -2110,7 +2110,7 @@ dependencies = [
 [[package]]
 name = "freya-winit"
 version = "0.4.0-rc.6"
-source = "git+https://github.com/marc2332/freya?branch=chore%2Fremove-send-bound-for-event-loop-callbacks#3753d2c0a5797a3db04c89cf79ec47a017b35f07"
+source = "git+https://github.com/marc2332/freya#856cf1cc79f3201f197ae05aafca60939d6c8011"
 dependencies = [
  "accesskit",
  "accesskit_winit",
@@ -4313,7 +4313,7 @@ checksum = "df94ce210e5bc13cb6651479fa48d14f601d9858cfe0467f43ae157023b938d3"
 [[package]]
 name = "pathgraph"
 version = "0.4.0-rc.6"
-source = "git+https://github.com/marc2332/freya?branch=chore%2Fremove-send-bound-for-event-loop-callbacks#3753d2c0a5797a3db04c89cf79ec47a017b35f07"
+source = "git+https://github.com/marc2332/freya#856cf1cc79f3201f197ae05aafca60939d6c8011"
 
 [[package]]
 name = "pem-rfc7468"
@@ -4858,7 +4858,7 @@ checksum = "69cdb34c158ceb288df11e18b4bd39de994f6657d83847bdffdbd7f346754b0f"
 [[package]]
 name = "ragnarok"
 version = "0.4.0-rc.6"
-source = "git+https://github.com/marc2332/freya?branch=chore%2Fremove-send-bound-for-event-loop-callbacks#3753d2c0a5797a3db04c89cf79ec47a017b35f07"
+source = "git+https://github.com/marc2332/freya#856cf1cc79f3201f197ae05aafca60939d6c8011"
 dependencies = [
  "euclid",
  "hotpath",
@@ -6403,7 +6403,7 @@ checksum = "ab16f14aed21ee8bfd8ec22513f7287cd4a91aa92e44edfe2c17ddd004e92607"
 [[package]]
 name = "torin"
 version = "0.4.0-rc.6"
-source = "git+https://github.com/marc2332/freya?branch=chore%2Fremove-send-bound-for-event-loop-callbacks#3753d2c0a5797a3db04c89cf79ec47a017b35f07"
+source = "git+https://github.com/marc2332/freya#856cf1cc79f3201f197ae05aafca60939d6c8011"
 dependencies = [
  "euclid",
  "itertools 0.14.0",
@@ -7961,9 +7961,9 @@ dependencies = [
 
 [[package]]
 name = "zmij"
-version = "1.0.18"
+version = "1.0.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1966f8ac2c1f76987d69a74d0e0f929241c10e78136434e3be70ff7f58f64214"
+checksum = "3ff05f8caa9038894637571ae6b9e29466c1f4f829d26c9b28f869a29cbe3445"
 
 [[package]]
 name = "zune-core"

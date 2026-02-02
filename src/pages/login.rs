@@ -39,11 +39,6 @@ impl Component for Login {
             .expanded()
             .height(Size::fill())
             .background((35, 35, 35))
-            .child("Login")
-            .child(
-                Button::new()
-                    .child("Test"),
-            )
             .child(
                 WebView::new("https://companion-rust.facepunch.com/login")
                     .expanded()

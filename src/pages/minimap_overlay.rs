@@ -1,4 +1,4 @@
-use freya::{prelude::*, radio::use_radio, tray::dpi::PhysicalPosition};
+use freya::{prelude::*, radio::use_radio};
 
 use crate::{
     components::Map as MapComponent,

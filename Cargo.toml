@@ -4,8 +4,15 @@ version = "0.2.0"
 edition = "2024"
 
 [dependencies]
-freya = { git = "https://github.com/marc2332/freya", branch = "chore/remove-send-bound-for-event-loop-callbacks", features = ["radio", "router", "tray", "webview"] }
-freya-icons = { git = "https://github.com/marc2332/freya", branch = "chore/remove-send-bound-for-event-loop-callbacks", features = ["lucide"] }
+freya = { git = "https://github.com/marc2332/freya", features = [
+    "radio",
+    "router",
+    "tray",
+    "webview",
+] }
+freya-icons = { git = "https://github.com/marc2332/freya", features = [
+    "lucide",
+] }
 openssl = { version = "0.10", features = ["vendored"] }
 futures-channel = "0.3.31"
 futures-lite = "2.6.1"
