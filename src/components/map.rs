@@ -144,13 +144,10 @@ impl Component for Map {
         let mut pos: State<Point2D<f32, ()>> =
             use_state(|| Point2D::new(map_size / 2.0, map_size / 2.0));
 
-        let mut me_pos = use_state(|| Point2D::new(0.0, 0.0));
-
         let map_state_clone = map_state.clone();
         let image_bytes: &'static [u8] = Box::leak(map_state_clone.jpg_image.into_boxed_slice());
 
         rect()
-            .corner_radius(8.0)
             .overflow(Overflow::Clip)
             .width(Size::Fill)
             .height(Size::Fill)
@@ -164,11 +161,12 @@ impl Component for Map {
             .children([DragableCanvas::new()
                 .interactable(self.interactable)
                 .children_size(Point2D::new(map_size, map_size))
+                .zoom(self.zoom)
                 .on_zoom({
                     let on_zoom = self.on_zoom.clone();
-                    move |v| {
+                    move |value| {
                         if let Some(on_zoom) = &on_zoom {
-                            on_zoom.call(v);
+                            on_zoom.call(value);
                         }
                     }
                 })
@@ -183,13 +181,7 @@ impl Component for Map {
                         pos.set(value);
                     }
                 })
-                .maybe(true, |rect| {
-                    if self.center {
-                        rect.pos_centered(*me_pos.read())
-                    } else {
-                        rect.pos(*pos.read())
-                    }
-                })
+                .pos(pos())
                 .child(
                     rect()
                         .background(Color::BLUE)
@@ -302,7 +294,9 @@ impl Component for Map {
                                     -(member.x + margin),
                                     -(map_size - member.y - margin),
                                 );
-                                me_pos.set_if_modified(point);
+                                if self.center {
+                                    pos.set_if_modified(point);
+                                }
                             }
 
                             if member.is_alive == false && member.death_time == 0 {
