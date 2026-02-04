@@ -46,7 +46,7 @@ impl Component for Sidebar {
                     .on_press(move |_| {
                         RouterContext::get().replace(Route::Map);
                     })
-                    .active(use_activable_route())
+                    .active(RouterContext::get().full_route_string().starts_with("/map"))
                     .into(),
                 // Button::new()
                 //     .width(Size::Fill)
