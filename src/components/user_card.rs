@@ -1,5 +1,7 @@
 use freya::prelude::*;
 
+use crate::TEXT_COLOR;
+
 #[derive(PartialEq)]
 pub struct UserCard {}
 
@@ -23,7 +25,7 @@ impl Component for UserCard {
                     .children([
                         label()
                             .font_size(12.0)
-                            .color(Color::from_hex("#E4DAD1").unwrap())
+                            .color(Color::from_hex(TEXT_COLOR).unwrap())
                             .text("Drigster")
                             .into(),
                         label()

@@ -5,7 +5,7 @@ use freya_router::prelude::RouterContext;
 use serde::Deserialize;
 
 use crate::{
-    ChannelSend, Data, DataChannel,
+    ChannelSend, Data, DataChannel, TEXT_COLOR,
     app::Route,
     utils::{
         FcmData, ServerData, create_fcm_client, get_expo_push_token, load_expo_push_token,
@@ -335,7 +335,7 @@ impl Component for Loading {
             .children([label()
                 .font_size(20.0)
                 .font_weight(FontWeight::BOLD)
-                .color(Color::from_hex("#E4DAD1").unwrap())
+                .color(Color::from_hex(TEXT_COLOR).unwrap())
                 .text(radio.read().loading_state.clone())
                 .into()])
     }

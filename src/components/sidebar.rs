@@ -1,6 +1,7 @@
 use freya::prelude::*;
 use freya_router::prelude::RouterContext;
 
+use crate::ACCENT_COLOR;
 use crate::app::Route;
 use crate::components::Button;
 
@@ -23,8 +24,8 @@ impl Component for Sidebar {
             .background_linear_gradient(
                 LinearGradient::new()
                     .angle(0.0)
-                    .stop((Color::from_hex("#51241C00").unwrap(), 5.0))
-                    .stop((Color::from_hex("#51241C").unwrap(), 100.0)),
+                    .stop((Color::from_hex(ACCENT_COLOR).unwrap().with_a(13), 5.0))
+                    .stop((Color::from_hex(ACCENT_COLOR).unwrap(), 100.0)),
             )
             .children([
                 Button::new()
@@ -47,26 +48,26 @@ impl Component for Sidebar {
                     })
                     .active(use_activable_route())
                     .into(),
-                Button::new()
-                    .width(Size::Fill)
-                    .height(Size::px(40.0))
-                    .icon(freya_icons::lucide::store())
-                    .text("SHOPS")
-                    .on_press(move |_| {
-                        RouterContext::get().replace(Route::Shops);
-                    })
-                    .active(RouterContext::get().current::<Route>() == Route::Shops)
-                    .into(),
-                Button::new()
-                    .width(Size::Fill)
-                    .height(Size::px(40.0))
-                    .icon(freya_icons::lucide::users_round())
-                    .text("TEAM")
-                    .on_press(move |_| {
-                        RouterContext::get().replace(Route::Team);
-                    })
-                    .active(RouterContext::get().current::<Route>() == Route::Team)
-                    .into(),
+                // Button::new()
+                //     .width(Size::Fill)
+                //     .height(Size::px(40.0))
+                //     .icon(freya_icons::lucide::store())
+                //     .text("SHOPS")
+                //     .on_press(move |_| {
+                //         RouterContext::get().replace(Route::Shops);
+                //     })
+                //     .active(RouterContext::get().current::<Route>() == Route::Shops)
+                //     .into(),
+                // Button::new()
+                //     .width(Size::Fill)
+                //     .height(Size::px(40.0))
+                //     .icon(freya_icons::lucide::users_round())
+                //     .text("TEAM")
+                //     .on_press(move |_| {
+                //         RouterContext::get().replace(Route::Team);
+                //     })
+                //     .active(RouterContext::get().current::<Route>() == Route::Team)
+                //     .into(),
             ])
     }
 }

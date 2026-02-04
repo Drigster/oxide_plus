@@ -1,7 +1,7 @@
 use freya::{prelude::*, radio::*};
 use freya_router::prelude::RouterContext;
 
-use crate::{Data, DataChannel, app::Route, components::ServerCard};
+use crate::{Data, DataChannel, TEXT_COLOR, app::Route, components::ServerCard};
 
 #[derive(PartialEq)]
 pub struct ServerSelect {}
@@ -44,7 +44,7 @@ impl Component for ServerSelect {
                         label()
                             .font_size(20.0)
                             .font_weight(FontWeight::BOLD)
-                            .color(Color::from_hex("#E4DAD1").unwrap())
+                            .color(Color::from_hex(TEXT_COLOR).unwrap())
                             .text("No servers found"),
                     )
                 } else {

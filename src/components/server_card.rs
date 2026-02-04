@@ -1,6 +1,6 @@
 use freya::prelude::*;
 
-use crate::components::CachedImage;
+use crate::{TEXT_COLOR, components::CachedImage};
 
 #[derive(Clone, PartialEq)]
 pub struct ServerCard {
@@ -82,7 +82,7 @@ impl Component for ServerCard {
                         label()
                             .font_size(12.0)
                             .font_weight(FontWeight::BOLD)
-                            .color(Color::from_hex("#E4DAD1").unwrap())
+                            .color(Color::from_hex(TEXT_COLOR).unwrap())
                             .text(self.name.clone()),
                     )
                     .into(),

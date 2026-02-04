@@ -1,5 +1,7 @@
 use freya::prelude::*;
 
+use crate::{SELECT_COLOR, TEXT_COLOR};
+
 #[derive(Clone, PartialEq)]
 pub struct Slider {
     value: f32,
@@ -21,7 +23,7 @@ impl Slider {
             min: 0.0,
             max: 100.0,
             step: 1.0,
-            background: Color::from_hex("#5D7238").unwrap(),
+            background: Color::from_hex(SELECT_COLOR).unwrap(),
             background_fill: Color::from_hex("#434140").unwrap(),
             on_changed: None,
         }
@@ -86,7 +88,7 @@ impl Component for Slider {
                     .child(
                         label()
                             .font_size(16.0)
-                            .color(Color::from_hex("#E4DAD1").unwrap())
+                            .color(Color::from_hex(TEXT_COLOR).unwrap())
                             .text(self.value.to_string()),
                     )
                     .into(),
@@ -97,8 +99,8 @@ impl Component for Slider {
                     .background_linear_gradient(
                         LinearGradient::new()
                             .angle(-90.0)
-                            .stop((Color::from_hex("#5d7238").unwrap(), 0.0))
-                            .stop((Color::from_hex("#5d7238").unwrap(), slider_pos()))
+                            .stop((Color::from_hex(SELECT_COLOR).unwrap(), 0.0))
+                            .stop((Color::from_hex(SELECT_COLOR).unwrap(), slider_pos()))
                             .stop((Color::from_hex("#434140").unwrap(), slider_pos())),
                     )
                     .on_mouse_down(move |e: Event<MouseEventData>| {
