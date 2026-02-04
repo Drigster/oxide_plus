@@ -1,6 +1,6 @@
 use freya::{prelude::*, radio::*};
 
-use crate::{Data, DataChannel, components::CachedImage};
+use crate::{Data, DataChannel, TEXT_COLOR, components::CachedImage};
 
 #[derive(Clone, PartialEq)]
 pub struct Dropdown {}
@@ -62,7 +62,7 @@ impl Component for Dropdown {
                                 label()
                                     .font_size(12.0)
                                     .font_weight(FontWeight::BOLD)
-                                    .color(Color::from_hex("#E4DAD1").unwrap())
+                                    .color(Color::from_hex(TEXT_COLOR).unwrap())
                                     .font_size(12.0)
                                     .text(if let Some(info_state) = &info_state {
                                         info_state.name.clone()
@@ -74,7 +74,7 @@ impl Component for Dropdown {
                             .into(),
                         svg(freya_icons::lucide::chevron_up())
                             .height(Size::Fill)
-                            .color(Color::from_hex("#E4DAD1").unwrap())
+                            .color(Color::from_hex(TEXT_COLOR).unwrap())
                             .into(),
                     ])
                     .into(),
@@ -115,7 +115,7 @@ impl Component for Dropdown {
                 // label()
                 //     .font_size(12.0)
                 //     .font_weight(FontWeight::BOLD)
-                //     .color(Color::from_hex("#E4DAD1").unwrap())
+                //     .color(Color::from_hex(TEXT_COLOR).unwrap())
                 //     .text(connection_state)
                 //     .into(),
             ])

@@ -2,7 +2,10 @@ use std::borrow::Cow;
 
 use freya::prelude::*;
 
-use crate::components::{Button, Slider};
+use crate::{
+    TEXT_COLOR,
+    components::{Button, Slider},
+};
 
 #[derive(PartialEq)]
 pub struct ToggleSettings {
@@ -62,7 +65,7 @@ impl Component for Setting {
                 label()
                     .font_size(20.0)
                     .font_weight(FontWeight::BOLD)
-                    .color(Color::from_hex("#E4DAD1").unwrap())
+                    .color(Color::from_hex(TEXT_COLOR).unwrap())
                     .text(self.text.clone())
                     .into(),
                 match &self.setting_type {

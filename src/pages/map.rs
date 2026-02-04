@@ -50,7 +50,7 @@ impl Component for Map {
         if let (Some(map_state), Some(info_state), Some(marker_state), Some(team_info)) =
             (map_state, info_state, marker_state, team_info)
         {
-            rect().padding(8.0).child(
+            rect().child(
                 MapComponent::new()
                     .grid(map_settings.grid)
                     .markers(map_settings.markers)
@@ -71,10 +71,8 @@ impl Component for Map {
             )
         } else {
             rect()
-                .margin(8.0)
                 .expanded()
                 .background(Color::from_hex("#191919e6").unwrap())
-                .corner_radius(CornerRadius::new_all(16.0))
                 .center()
                 .child(label().text("Map data is loading..."))
         }

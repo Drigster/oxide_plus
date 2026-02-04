@@ -12,7 +12,7 @@ use freya::{
         menu::{Menu, MenuEvent, MenuItem},
     },
     webview::plugin::WebViewPlugin,
-    winit::window::{WindowId, WindowLevel},
+    winit::window::{Icon, WindowId, WindowLevel},
 };
 use futures_lite::StreamExt;
 use rustplus_rs::{AppInfo, AppMap, AppMapMarkers, AppTeamInfo};
@@ -29,7 +29,13 @@ use crate::{
 };
 use app::App;
 
-const ICON: &[u8] = include_bytes!("./freya_icon.png");
+const ICON: &[u8] = include_bytes!("./assets/oxide_plus_icon.png");
+const SELECT_COLOR: &str = "#911818";
+const ACCENT_COLOR: &str = "#13455C";
+const SIDEBAR_BUTTON_BACKGROUND: &str = "#00000066";
+const SIDEBAR_BUTTON_BACKGROUND_HOVER: &str = "#FFFFFF1A";
+const TEXT_COLOR: &str = "#E4DAD1";
+const ICON_COLOR: &str = "#605B55";
 
 fn main() {
     let mut radio_station = RadioStation::create_global(Data::default());
@@ -69,10 +75,12 @@ fn main() {
                     }
                 };
             }
-            main_window_id = Some(ctx.launch_window(WindowConfig::new(AppComponent::new(App { radio_station }))
+            main_window_id = Some(ctx.launch_window(
+            WindowConfig::new(AppComponent::new(App { radio_station }))
                 .with_size(1200.0, 800.0)
                 .with_resizable(false)
                 .with_title("Oxide+")
+                .with_icon(LaunchConfig::window_icon(ICON))
                 .with_window_attributes(|mut attributes, _| {
                     #[cfg(target_os = "linux")]
                     {
@@ -81,19 +89,19 @@ fn main() {
                         match get_system_type() {
                             SystemType::Wayland => {
                                 use freya::winit::platform::wayland::WindowAttributesExtWayland;
-                                attributes = attributes.with_name("oxide_plus", "oxide_plus2");
+                                attributes = attributes.with_name("oxide_plus", "oxide_plus");
                             }
                             SystemType::X11 => {
                                 use freya::winit::platform::x11::WindowAttributesExtX11;
-                                attributes = attributes.with_name("oxide_plus", "oxide_plus2");
+                                attributes = attributes.with_name("oxide_plus", "oxide_plus");
                             }
                             _ => {}
                         }
                     }
 
                     attributes
-                }
-            )));
+                })
+            ));
         }
         TrayEvent::Menu(MenuEvent { id }) if id == "toggle_minimap" => {
             let minimap_state = radio_station.read().settings.minimap_settings.enabled;
@@ -223,17 +231,19 @@ fn main() {
                                             .with_decorations(false)
                                             .with_resizable(false)
                                             .with_title("Oxide+ - Minimap")
+                                            .with_icon(LaunchConfig::window_icon(ICON))
                                             .with_window_attributes({
                                                 move |mut attributes, _| {
                                                     attributes = attributes
                                                         .with_window_level(WindowLevel::AlwaysOnTop)
                                                         .with_position(PhysicalPosition::new(
-                                                            0.0, 0.0,
+                                                            minimap_settings.offset_x,
+                                                            minimap_settings.offset_y
                                                         ));
 
                                                     #[cfg(not(target_os = "linux"))]
                                                     {
-                                                        use freya::winit::{dpi::PhysicalPosition, platform::windows::WindowAttributesExtWindows, window::WindowLevel};
+                                                        use freya::winit::platform::windows::WindowAttributesExtWindows;
 
                                                         attributes = attributes
                                                             .with_skip_taskbar(true);
@@ -297,11 +307,13 @@ fn main() {
                 }
             })
         .with_plugin(WebViewPlugin::new())
-        //.with_tray(tray_icon, tray_handler)
-        .with_window(WindowConfig::new(AppComponent::new(App { radio_station }))
+        .with_tray(tray_icon, tray_handler)
+        .with_window(
+            WindowConfig::new(AppComponent::new(App { radio_station }))
         .with_size(1200.0, 800.0)
         .with_resizable(false)
         .with_title("Oxide+")
+            .with_icon(LaunchConfig::window_icon(ICON))
         .with_window_attributes(|mut attributes, _| {
             #[cfg(target_os = "linux")]
             {
@@ -321,7 +333,8 @@ fn main() {
             }
 
             attributes
-        })),
+            })
+        ),
     );
 }
 

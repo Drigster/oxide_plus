@@ -2,7 +2,7 @@ use chrono::prelude::*;
 use freya::{prelude::*, radio::use_radio};
 use timeago::Formatter;
 
-use crate::{Data, DataChannel, components::CachedImage};
+use crate::{Data, DataChannel, TEXT_COLOR, components::CachedImage};
 
 #[derive(PartialEq)]
 pub struct Info {}
@@ -49,13 +49,13 @@ impl Component for Info {
                                 label()
                                     .font_size(24.0)
                                     .font_weight(FontWeight::BOLD)
-                                    .color(Color::from_hex("#E4DAD1").unwrap())
+                                    .color(Color::from_hex(TEXT_COLOR).unwrap())
                                     .text(info_state.name)
                                     .into(),
                                 label()
                                     .font_size(16.0)
                                     .font_weight(FontWeight::BOLD)
-                                    .color(Color::from_hex("#E4DAD1").unwrap())
+                                    .color(Color::from_hex(TEXT_COLOR).unwrap())
                                     .text(format!(
                                         "{}/{} Players",
                                         info_state.players, info_state.max_players
@@ -93,7 +93,8 @@ impl Component for Info {
                                                             .font_size(12.0)
                                                             .font_weight(FontWeight::BOLD)
                                                             .color(
-                                                                Color::from_hex("#E4DAD1").unwrap(),
+                                                                Color::from_hex(TEXT_COLOR)
+                                                                    .unwrap(),
                                                             )
                                                             .text(
                                                                 info_state
@@ -132,7 +133,8 @@ impl Component for Info {
                                                             .font_size(12.0)
                                                             .font_weight(FontWeight::BOLD)
                                                             .color(
-                                                                Color::from_hex("#E4DAD1").unwrap(),
+                                                                Color::from_hex(TEXT_COLOR)
+                                                                    .unwrap(),
                                                             )
                                                             .text("00:00")
                                                             .into(),
@@ -174,7 +176,8 @@ impl Component for Info {
                                                             .font_size(12.0)
                                                             .font_weight(FontWeight::BOLD)
                                                             .color(
-                                                                Color::from_hex("#E4DAD1").unwrap(),
+                                                                Color::from_hex(TEXT_COLOR)
+                                                                    .unwrap(),
                                                             )
                                                             .text(wipe_time)
                                                             .into(),
@@ -209,7 +212,8 @@ impl Component for Info {
                                                             .font_size(12.0)
                                                             .font_weight(FontWeight::BOLD)
                                                             .color(
-                                                                Color::from_hex("#E4DAD1").unwrap(),
+                                                                Color::from_hex(TEXT_COLOR)
+                                                                    .unwrap(),
                                                             )
                                                             .text(info_state.map)
                                                             .into(),

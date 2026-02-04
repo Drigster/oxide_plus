@@ -1,6 +1,6 @@
 use freya::{prelude::*, router::prelude::Outlet};
 
-use crate::app::Route;
+use crate::{TEXT_COLOR, app::Route};
 
 #[derive(PartialEq)]
 pub struct LoginLayout;
@@ -23,7 +23,7 @@ impl Component for LoginLayout {
                     .padding(16.0)
                     .child(
                         label()
-                            .color(Color::from_hex("#E4DAD1").unwrap())
+                            .color(Color::from_hex(TEXT_COLOR).unwrap())
                             .font_size(80.0)
                             .font_weight(FontWeight::BOLD)
                             .text("Oxide+"),

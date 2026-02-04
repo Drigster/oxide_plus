@@ -18,7 +18,7 @@ pub struct Poller {
     state_tx: UnboundedSender<ChannelSend>,
 }
 
-const POLL_INTERVAL_MS: u64 = 5000;
+const POLL_INTERVAL_MS: u64 = 1000;
 
 impl Poller {
     pub fn new(details: Option<ServerData>, state_tx: UnboundedSender<ChannelSend>) -> Self {
