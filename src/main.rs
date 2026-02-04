@@ -57,7 +57,7 @@ fn main() {
         let _ = tray_menu.append(&MenuItem::with_id("exit", "Exit", true, None));
         TrayIconBuilder::new()
             .with_menu(Box::new(tray_menu))
-            .with_tooltip("Freya Tray")
+            .with_tooltip("Oxide+")
             .with_icon(LaunchConfig::tray_icon(ICON))
             .build()
             .unwrap()
