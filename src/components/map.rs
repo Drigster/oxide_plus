@@ -295,7 +295,16 @@ impl Component for Map {
                                     -(map_size - member.y - margin),
                                 );
                                 if self.center {
-                                    pos.set_if_modified(point);
+                                    // Scale the position and compensate for scale offset
+                                    // When content is scaled from top-left, we need to offset
+                                    // by half the size change to keep the target centered
+                                    let zoom = self.zoom;
+                                    let scale_offset = map_size * (zoom - 1.0) / 2.0;
+                                    let scaled_point = Point2D::new(
+                                        point.x * zoom + scale_offset,
+                                        point.y * zoom + scale_offset,
+                                    );
+                                    pos.set_if_modified(scaled_point);
                                 }
                             }
 
