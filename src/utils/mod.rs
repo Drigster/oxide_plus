@@ -12,6 +12,8 @@ mod rustplus_poller;
 pub use rustplus_poller::*;
 mod text_utils;
 pub use text_utils::*;
+mod steam_utils;
+pub use steam_utils::*;
 
 #[cfg(target_os = "linux")]
 pub enum SystemType {

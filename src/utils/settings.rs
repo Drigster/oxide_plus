@@ -72,7 +72,7 @@ pub fn load_servers() -> Result<Vec<ServerData>, Box<dyn std::error::Error>> {
     return Ok(servers);
 }
 
-pub fn save_server(server: ServerData) -> Result<(), Box<dyn std::error::Error>> {
+pub fn save_server(mut server: ServerData) -> Result<(), Box<dyn std::error::Error>> {
     let config_dir = dirs::config_dir().unwrap();
     let config_path = config_dir.join(APP_DIR_NAME).join(SERVERS_FILENAME);
 
@@ -99,6 +99,8 @@ pub fn save_server(server: ServerData) -> Result<(), Box<dyn std::error::Error>>
         },
         None => vec![],
     };
+
+    server.desc = server.desc.replace(r#"\\n"#, r#"\"#);
 
     let mut existing_server = servers.iter().find(|s| s.id == server.id);
 

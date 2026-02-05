@@ -23,3 +23,5 @@ pub use setting::*;
 mod slider;
 pub use slider::*;
 pub mod markers;
+mod player_card;
+pub use player_card::*;
