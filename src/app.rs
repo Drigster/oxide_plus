@@ -5,7 +5,7 @@ use freya::{
 };
 use freya_router::prelude::Router;
 
-use crate::layouts::{LoginLayout, MainLayout, MapLayout, RouteChangeRecieverLayout};
+use crate::layouts::{LoginLayout, MainLayout, MapLayout};
 use crate::pages::{Info, Loading, Login, Map, MinimapSettingsPage, ServerSelect, Shops, Team};
 use crate::{Data, DataChannel};
 
@@ -24,28 +24,27 @@ impl Component for App {
 #[derive(Routable, Clone, PartialEq)]
 #[rustfmt::skip]
 pub enum Route {
-    #[layout(RouteChangeRecieverLayout)]
-        #[route("/login")]
-        Login,
-        #[layout(LoginLayout)]
-            #[route("/")]
-            Loading,
-            #[route("/select_server")]
-            ServerSelect,
-        #[end_layout]
-        #[layout(MainLayout)]
-            #[route("/info")]
-            Info,
-            #[nest("/map")]
-                #[layout(MapLayout)]
-                    #[route("/")]
-                    Map,
-                    #[route("/minimap_settings")]
-                    MinimapSettingsPage,
-                #[end_layout]
-            #[end_nest]
-        #[route("/team")]
-        Team,
-        #[route("/shops")]
-        Shops,
+    #[route("/login")]
+    Login,
+    #[layout(LoginLayout)]
+        #[route("/")]
+        Loading,
+        #[route("/select_server")]
+        ServerSelect,
+    #[end_layout]
+    #[layout(MainLayout)]
+        #[route("/info")]
+        Info,
+        #[nest("/map")]
+            #[layout(MapLayout)]
+                #[route("/")]
+                Map,
+                #[route("/minimap_settings")]
+                MinimapSettingsPage,
+            #[end_layout]
+        #[end_nest]
+    #[route("/team")]
+    Team,
+    #[route("/shops")]
+    Shops,
 }
