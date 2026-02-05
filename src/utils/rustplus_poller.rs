@@ -40,7 +40,7 @@ impl Poller {
 
         let state_tx = self.state_tx.clone();
         let handle = thread::spawn(move || {
-            async_std::task::block_on(async move {
+            smol::block_on(async move {
                 println!("Polling thread started");
                 let server_data = {
                     let d = details.lock().unwrap();
@@ -93,6 +93,8 @@ impl Poller {
 
                 match get_info.await {
                     Ok(info) => {
+                        std::fs::write("info.json", serde_json::to_string_pretty(&info).unwrap())
+                            .unwrap();
                         state_tx
                             .unbounded_send(ChannelSend::InfoStateUpdate(Some(info.clone())))
                             .unwrap();
@@ -108,6 +110,8 @@ impl Poller {
 
                 match get_map.await {
                     Ok(map) => {
+                        std::fs::write("map.json", serde_json::to_string_pretty(&map).unwrap())
+                            .unwrap();
                         state_tx
                             .unbounded_send(ChannelSend::MapStateUpdate(Some(map.clone())))
                             .unwrap();
@@ -123,6 +127,11 @@ impl Poller {
 
                 match get_map_markers.await {
                     Ok(markers) => {
+                        std::fs::write(
+                            "markers.json",
+                            serde_json::to_string_pretty(&markers).unwrap(),
+                        )
+                        .unwrap();
                         state_tx
                             .unbounded_send(ChannelSend::MapMarkersUpdate(Some(markers)))
                             .unwrap();
@@ -138,9 +147,13 @@ impl Poller {
 
                 match get_team_info.await {
                     Ok(team_info) => {
-                        println!("Team info: {:?}", team_info);
+                        std::fs::write(
+                            "team_info.json",
+                            serde_json::to_string_pretty(&team_info).unwrap(),
+                        )
+                        .unwrap();
                         state_tx
-                            .unbounded_send(ChannelSend::TeamInfoUpdate(Some(team_info)))
+                            .unbounded_send(ChannelSend::TeamInfoUpdate(Some(team_info.clone())))
                             .unwrap();
                     }
                     Err(e) => {

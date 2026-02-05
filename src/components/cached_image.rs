@@ -9,6 +9,7 @@ pub struct CachedImage {
     image_uri: String,
     width: Size,
     height: Size,
+    aspect_ratio: AspectRatio,
 }
 
 #[allow(dead_code)]
@@ -18,6 +19,7 @@ impl CachedImage {
             image_uri: uri,
             width: Size::default(),
             height: Size::default(),
+            aspect_ratio: AspectRatio::default(),
         }
     }
 
@@ -28,6 +30,11 @@ impl CachedImage {
 
     pub fn height(mut self, height: Size) -> Self {
         self.height = height;
+        self
+    }
+
+    pub fn aspect_ratio(mut self, aspect_ratio: AspectRatio) -> Self {
+        self.aspect_ratio = aspect_ratio;
         self
     }
 }
@@ -55,6 +62,7 @@ impl Component for CachedImage {
             ImageViewer::new(image_path)
                 .width(self.width.clone())
                 .height(self.height.clone())
+                .aspect_ratio(self.aspect_ratio.clone())
                 .into_element()
         } else {
             rect()

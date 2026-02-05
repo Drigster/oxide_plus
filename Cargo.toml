@@ -26,10 +26,12 @@ uuid = { version = "1.20.0", features = ["v4"] }
 image = "0.25.9"
 blocking = "1.6.2"
 rustplus_rs = { path = "./rustplus_rs" }
-async-std = "1.13.2"
 http = "1.4.0"
 chrono = "0.4.43"
 timeago = "0.5.0"
-regex = "1.12.2"
+regex = "1.12.3"
 capitalize = "0.3.4"
 euclid = "0.22.13"
+smol = "2.0.2"
+url = "2.5.8"
+quick-xml = { version = "0.39.0", features = ["serialize"] }

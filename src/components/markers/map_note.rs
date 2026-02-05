@@ -38,16 +38,13 @@ impl Component for MapNote {
         .main_align(Alignment::Center)
         .cross_align(Alignment::Center)
         .child(match self.map_note.icon {
-            0 => {
-                println!("Note: {:?}", self.map_note);
-                svg(index_to_icon(self.map_note.icon))
-                    .position(Position::new_absolute())
-                    .width(Size::px(24.0))
-                    .height(Size::px(24.0))
-                    .color(color)
-                    .stroke(Color::BLACK)
-                    .into_element()
-            }
+            0 => svg(index_to_icon(self.map_note.icon))
+                .position(Position::new_absolute())
+                .width(Size::px(24.0))
+                .height(Size::px(24.0))
+                .color(color)
+                .stroke(Color::BLACK)
+                .into_element(),
             _ => rect()
                 .position(Position::new_absolute())
                 .width(Size::px(24.0))

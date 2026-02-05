@@ -1,4 +1,4 @@
-use freya::{prelude::*, radio::use_radio};
+use freya::prelude::*;
 
 mod player;
 pub use player::*;
@@ -12,8 +12,6 @@ mod vending;
 pub use vending::*;
 mod cargo;
 pub use cargo::*;
-
-use crate::{Data, DataChannel};
 
 #[derive(PartialEq)]
 pub enum Align {

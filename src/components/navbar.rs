@@ -1,6 +1,9 @@
 use freya::prelude::*;
 
-use crate::components::{Dropdown, UserCard};
+use crate::{
+    BORDER_COLOR,
+    components::{Dropdown, UserCard},
+};
 
 #[derive(Clone, PartialEq)]
 pub struct Navbar {}
@@ -34,7 +37,7 @@ impl Component for Navbar {
                         left: 0.0,
                     })
                     .alignment(BorderAlignment::Outer)
-                    .fill(Color::from_hex("#393834").unwrap()),
+                    .fill(Color::from_hex(BORDER_COLOR).unwrap()),
             )
             .children([Dropdown::new().into(), UserCard::new().into()])
     }

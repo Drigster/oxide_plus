@@ -52,7 +52,7 @@ impl Component for ServerCard {
             //             left: 0.0,
             //         })
             //         .alignment(BorderAlignment::Outer)
-            //         .fill(Color::from_hex("#393834").unwrap()),
+            //         .fill(Color::from_hex(BORDER_COLOR).unwrap()),
             // )
             .on_press({
                 let on_press = self.on_press.clone();

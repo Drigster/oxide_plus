@@ -18,12 +18,7 @@ impl Component for MainLayout {
                 rect()
                     .width(Size::percent(100.0))
                     .height(Size::Fill)
-                    .background_linear_gradient(
-                        LinearGradient::new()
-                            .angle(0.0)
-                            .stop((Color::from_hex("#1D1D1B").unwrap(), 0.0))
-                            .stop((Color::from_hex("#0E0E0D").unwrap(), 100.0)),
-                    )
+                    .background(Color::from_hex("#0E0E0D").unwrap())
                     .direction(Direction::Horizontal)
                     .children([
                         Sidebar::new().into(),

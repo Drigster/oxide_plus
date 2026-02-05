@@ -1,9 +1,10 @@
+use crate::utils::APP_DIR_NAME;
 use image::DynamicImage;
 use image::imageops::FilterType;
+use regex::Regex;
 use std::fs;
 use std::path::PathBuf;
-
-use crate::utils::APP_DIR_NAME;
+use url::Url;
 
 /// Gets the local image path from the assets/images directory.
 ///
@@ -17,22 +18,38 @@ use crate::utils::APP_DIR_NAME;
 /// * `Ok(PathBuf)` - Path to the local or cached image file
 /// * `Err` - If the image cannot be found or downloaded
 pub async fn get_cached_image(image_uri: String) -> Result<PathBuf, Box<dyn std::error::Error>> {
-    // Extract the filename from the URL
-    let filename = image_uri
-        .split('/')
-        .last()
-        .ok_or("Invalid URL: no filename found")?
-        .to_string();
+    let re = Regex::new(r"[^a-zA-Z0-9\-_]+").unwrap();
+
+    let url = Url::parse(&image_uri)?;
+
+    let domain = url.domain().ok_or("Failed to get domain")?;
+    let domain = re.replace_all(domain, "_");
+
+    let path = url.path();
+    let path = if path.ends_with(".png") {
+        let temp = path.strip_suffix(".png").unwrap();
+        let temp = re.replace_all(temp, "_");
+        format!("{}.png", temp)
+    } else if path.ends_with(".jpg") {
+        let temp = path.strip_suffix(".jpg").unwrap();
+        let temp = re.replace_all(temp, "_");
+        format!("{}.jpg", temp)
+    } else {
+        path.to_string()
+    };
+
+    let filename = format!("{}{}", domain, path);
 
     // Check local assets folder first
-    let local_path = PathBuf::from("src/assets/images").join(&filename);
+    let local_path = PathBuf::from("src/assets/images").join(&*filename);
 
     if local_path.exists() {
+        println!("Found local image: {}", local_path.display());
         return Ok(local_path);
     }
 
     // If not found locally, fall back to downloading (for any missing images)
-    download_and_cache_image(image_uri, &filename).await
+    download_and_cache_image(image_uri.clone(), &filename).await
 }
 
 /// Downloads an image and caches it (fallback for missing local images)
@@ -63,17 +80,9 @@ async fn download_and_cache_image(
                 return Err("Downloaded file is empty".into());
             }
 
-            let downscaled_bytes = downscale_image(bytes, 96, 96);
+            let image = image::load_from_memory(&bytes)?;
 
-            // Write to temporary file first
-            let temp_path = cache_path_clone.with_extension("png");
-
-            {
-                downscaled_bytes.save_with_format(&temp_path, image::ImageFormat::Png)?;
-            }
-
-            // Atomically rename
-            fs::rename(&temp_path, &cache_path_clone)?;
+            image.save(cache_path_clone)?;
 
             Ok(())
         },

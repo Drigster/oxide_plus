@@ -3,6 +3,8 @@
     windows_subsystem = "windows"
 )]
 
+use std::{collections::HashMap, hash::Hash};
+
 use freya::{
     prelude::*,
     radio::{RadioChannel, RadioStation},
@@ -25,17 +27,18 @@ mod utils;
 
 use crate::{
     pages::{MapSettings, Minimap, MinimapSettings, UserData},
-    utils::{Poller, ServerData},
+    utils::{Poller, Profile, ServerData, get_profile_pic},
 };
 use app::App;
 
 const ICON: &[u8] = include_bytes!("./assets/oxide_plus_icon.png");
-const SELECT_COLOR: &str = "#911818";
+const SELECT_COLOR: &str = "#135C4F";
 const ACCENT_COLOR: &str = "#13455C";
 const SIDEBAR_BUTTON_BACKGROUND: &str = "#00000066";
 const SIDEBAR_BUTTON_BACKGROUND_HOVER: &str = "#FFFFFF1A";
 const TEXT_COLOR: &str = "#E4DAD1";
 const ICON_COLOR: &str = "#605B55";
+const BORDER_COLOR: &str = "#393834";
 
 fn main() {
     let mut radio_station = RadioStation::create_global(Data::default());
@@ -193,7 +196,24 @@ fn main() {
                         ChannelSend::TeamInfoUpdate(team_info) => {
                             radio_station
                                 .write_channel(DataChannel::TeamInfoUpdate)
-                                .team_info = team_info;
+                                .team_info = team_info.clone();
+
+                            if let Some(team_info) = &team_info {
+                                let steam_profiles = radio_station.read().steam_profiles.clone();
+                                for member in &team_info.members {
+                                    if steam_profiles.contains_key(&member.steam_id) {
+                                        continue;
+                                    }
+                                    let steam_profile = get_profile_pic(member.steam_id).await;
+
+                                    if let Ok(steam_profile) = steam_profile {
+                                        radio_station
+                                            .write_channel(DataChannel::SteamProfileUpdate(member.steam_id))
+                                            .steam_profiles
+                                            .insert(member.steam_id, steam_profile);
+                                    }
+                                }
+                            }
                         }
                         ChannelSend::ToggleMinimap(toggle) => {
                             radio_station
@@ -356,6 +376,7 @@ pub struct Data {
     pub map_state: Option<AppMap>,
     pub map_markers: Option<AppMapMarkers>,
     pub team_info: Option<AppTeamInfo>,
+    pub steam_profiles: HashMap<u64, Profile>,
 
     pub state_tx: Option<futures_channel::mpsc::UnboundedSender<ChannelSend>>,
     pub minimap_window_id: Option<WindowId>,
@@ -376,6 +397,7 @@ pub enum DataChannel {
     SettingsUpdate,
     MapSettingsUpdate,
     MinimapSettingsUpdate,
+    SteamProfileUpdate(u64),
 }
 
 impl RadioChannel<Data> for DataChannel {}

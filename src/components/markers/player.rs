@@ -1,5 +1,5 @@
 use freya::prelude::*;
-use rustplus_rs::{AppMarker, app_team_info::Member};
+use rustplus_rs::app_team_info::Member;
 
 use crate::components::markers::{Align, base_marker};
 
