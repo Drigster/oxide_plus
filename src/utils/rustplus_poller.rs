@@ -93,8 +93,8 @@ impl Poller {
 
                 match get_info.await {
                     Ok(info) => {
-                        std::fs::write("info.json", serde_json::to_string_pretty(&info).unwrap())
-                            .unwrap();
+                        // std::fs::write("info.json", serde_json::to_string_pretty(&info).unwrap())
+                        //     .unwrap();
                         state_tx
                             .unbounded_send(ChannelSend::InfoStateUpdate(Some(info.clone())))
                             .unwrap();
@@ -110,8 +110,8 @@ impl Poller {
 
                 match get_map.await {
                     Ok(map) => {
-                        std::fs::write("map.json", serde_json::to_string_pretty(&map).unwrap())
-                            .unwrap();
+                        // std::fs::write("map.json", serde_json::to_string_pretty(&map).unwrap())
+                        //     .unwrap();
                         state_tx
                             .unbounded_send(ChannelSend::MapStateUpdate(Some(map.clone())))
                             .unwrap();
@@ -127,11 +127,11 @@ impl Poller {
 
                 match get_map_markers.await {
                     Ok(markers) => {
-                        std::fs::write(
-                            "markers.json",
-                            serde_json::to_string_pretty(&markers).unwrap(),
-                        )
-                        .unwrap();
+                        // std::fs::write(
+                        //     "markers.json",
+                        //     serde_json::to_string_pretty(&markers).unwrap(),
+                        // )
+                        // .unwrap();
                         state_tx
                             .unbounded_send(ChannelSend::MapMarkersUpdate(Some(markers)))
                             .unwrap();
@@ -147,11 +147,11 @@ impl Poller {
 
                 match get_team_info.await {
                     Ok(team_info) => {
-                        std::fs::write(
-                            "team_info.json",
-                            serde_json::to_string_pretty(&team_info).unwrap(),
-                        )
-                        .unwrap();
+                        // std::fs::write(
+                        //     "team_info.json",
+                        //     serde_json::to_string_pretty(&team_info).unwrap(),
+                        // )
+                        // .unwrap();
                         state_tx
                             .unbounded_send(ChannelSend::TeamInfoUpdate(Some(team_info.clone())))
                             .unwrap();

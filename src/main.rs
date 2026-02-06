@@ -17,7 +17,10 @@ use freya::{
     winit::window::{Icon, WindowId, WindowLevel},
 };
 use futures_lite::StreamExt;
-use rustplus_rs::{AppInfo, AppMap, AppMapMarkers, AppTeamInfo};
+use rustplus_rs::{
+    AppInfo, AppMap, AppMapMarkers, AppTeamInfo,
+    app_team_info::{Member, Note},
+};
 
 mod app;
 mod components;
@@ -181,7 +184,28 @@ fn main() {
                         ChannelSend::InfoStateUpdate(info_state) => {
                             radio_station
                                 .write_channel(DataChannel::InfoStateUpdate)
-                                .info_state = info_state;
+                                .info_state = if let Some(info_state) = info_state {
+                                    InfoState {
+                                        name: Some(info_state.name),
+                                        header_image: Some(info_state.header_image),
+                                        url: Some(info_state.url),
+                                        map: Some(info_state.map),
+                                        map_size: Some(info_state.map_size),
+                                        wipe_time: Some(info_state.wipe_time),
+                                        players: Some(info_state.players),
+                                        max_players: Some(info_state.max_players),
+                                        queued_players: Some(info_state.queued_players),
+                                        seed: Some(info_state.seed),
+                                        salt: Some(info_state.salt),
+                                        logo_image: Some(info_state.logo_image),
+                                        nexus: Some(info_state.nexus),
+                                        nexus_id: Some(info_state.nexus_id),
+                                        nexus_zone: Some(info_state.nexus_zone),
+                                        cameras_enabled: Some(info_state.cameras_enabled),
+                                    }
+                                } else {
+                                    InfoState::default()
+                                };
                         }
                         ChannelSend::MapStateUpdate(map_state) => {
                             radio_station
@@ -196,7 +220,16 @@ fn main() {
                         ChannelSend::TeamInfoUpdate(team_info) => {
                             radio_station
                                 .write_channel(DataChannel::TeamInfoUpdate)
-                                .team_info = team_info.clone();
+                                .team_info = if let Some(team_info) = &team_info {
+                                    TeamInfo {
+                                        leader_steam_id: Some(team_info.leader_steam_id),
+                                        members: team_info.members.clone(),
+                                        map_notes: team_info.map_notes.clone(),
+                                        leader_map_notes: team_info.leader_map_notes.clone(),
+                                    }
+                                } else {
+                                    TeamInfo::default()
+                                };
 
                             if let Some(team_info) = &team_info {
                                 let steam_profiles = radio_station.read().steam_profiles.clone();
@@ -327,7 +360,7 @@ fn main() {
                 }
             })
         .with_plugin(WebViewPlugin::new())
-        .with_tray(tray_icon, tray_handler)
+        //.with_tray(tray_icon, tray_handler)
         .with_window(
             WindowConfig::new_app(MyApp { radio_station })
         .with_size(1200.0, 800.0)
@@ -365,6 +398,34 @@ pub struct Settings {
 }
 
 #[derive(Default)]
+pub struct InfoState {
+    pub name: Option<String>,
+    pub header_image: Option<String>,
+    pub url: Option<String>,
+    pub map: Option<String>,
+    pub map_size: Option<u32>,
+    pub wipe_time: Option<u32>,
+    pub players: Option<u32>,
+    pub max_players: Option<u32>,
+    pub queued_players: Option<u32>,
+    pub seed: Option<u32>,
+    pub salt: Option<u32>,
+    pub logo_image: Option<String>,
+    pub nexus: Option<String>,
+    pub nexus_id: Option<i32>,
+    pub nexus_zone: Option<String>,
+    pub cameras_enabled: Option<bool>,
+}
+
+#[derive(Default)]
+pub struct TeamInfo {
+    pub leader_steam_id: Option<u64>,
+    pub members: Vec<Member>,
+    pub map_notes: Vec<Note>,
+    pub leader_map_notes: Vec<Note>,
+}
+
+#[derive(Default)]
 pub struct Data {
     pub user_data: Option<UserData>,
     pub servers: Vec<ServerData>,
@@ -372,10 +433,10 @@ pub struct Data {
     pub loading_state: String,
     pub settings: Settings,
 
-    pub info_state: Option<AppInfo>,
+    pub info_state: InfoState,
     pub map_state: Option<AppMap>,
     pub map_markers: Option<AppMapMarkers>,
-    pub team_info: Option<AppTeamInfo>,
+    pub team_info: TeamInfo,
     pub steam_profiles: HashMap<u64, Profile>,
 
     pub state_tx: Option<futures_channel::mpsc::UnboundedSender<ChannelSend>>,

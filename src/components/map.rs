@@ -110,11 +110,7 @@ impl Component for Map {
             .clone()
             .expect("Map state should be loaded");
         let info_state_binding = use_radio::<Data, DataChannel>(DataChannel::InfoStateUpdate);
-        let info_state = info_state_binding
-            .read()
-            .info_state
-            .clone()
-            .expect("Server info should be loaded");
+        let info_state = &info_state_binding.read().info_state;
         let marker_state_binding = use_radio::<Data, DataChannel>(DataChannel::MapMarkersUpdate);
         let marker_state = marker_state_binding
             .read()
@@ -122,11 +118,7 @@ impl Component for Map {
             .clone()
             .expect("Map markers should be loaded");
         let team_info_binding = use_radio::<Data, DataChannel>(DataChannel::TeamInfoUpdate);
-        let team_info = team_info_binding
-            .read()
-            .team_info
-            .clone()
-            .expect("Team info should be loaded");
+        let team_info = &team_info_binding.read().team_info;
         let user_data_binding = use_radio::<Data, DataChannel>(DataChannel::UserDataUpdate);
         let user_data = user_data_binding
             .read()
@@ -134,7 +126,7 @@ impl Component for Map {
             .clone()
             .expect("User data should be loaded");
 
-        let scale = info_state.map_size as f32
+        let scale = info_state.map_size.unwrap_or(0) as f32
             / (map_state.width as f32 - map_state.ocean_margin as f32 * 2.0);
 
         let map_size = map_state.width as f32 * scale;
