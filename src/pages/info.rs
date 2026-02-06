@@ -5,7 +5,6 @@ use timeago::Formatter;
 use crate::{
     Data, DataChannel, ICON_COLOR, TEXT_COLOR,
     components::{CachedImage, PlayerCard},
-    pages::team,
 };
 
 #[derive(PartialEq)]
@@ -15,22 +14,8 @@ impl Component for Info {
         let radio = use_radio::<Data, DataChannel>(DataChannel::InfoStateUpdate);
         let team_info_binding = use_radio::<Data, DataChannel>(DataChannel::TeamInfoUpdate);
 
-        let info_state = radio.read().info_state.clone();
-        if info_state.is_none() {
-            return rect();
-        }
-        let info_state = info_state.unwrap();
-
-        let team_info = team_info_binding.read().team_info.clone();
-        if team_info.is_none() {
-            return rect();
-        }
-        let team_info = team_info.unwrap();
-
-        let formatter = Formatter::new();
-        let timestamp = DateTime::from_timestamp(info_state.wipe_time.into(), 0).unwrap();
-        let now = Utc::now();
-        let wipe_time = formatter.convert_chrono(timestamp, now);
+        let info_state = &radio.read().info_state;
+        let team_info = &team_info_binding.read().team_info;
 
         rect()
             .width(Size::Fill)
@@ -56,9 +41,9 @@ impl Component for Info {
                                     .position(Position::new_absolute())
                                     .background(Color::from_hex("#00000080").unwrap()),
                             )
-                            .maybe_child(if !info_state.header_image.is_empty() {
+                            .maybe_child(if let Some(header_image) = &info_state.header_image {
                                 Some(
-                                    CachedImage::new(info_state.header_image)
+                                    CachedImage::new(header_image.to_string())
                                         .width(Size::Fill)
                                         .height(Size::Fill)
                                         .aspect_ratio(AspectRatio::Max),
@@ -89,8 +74,15 @@ impl Component for Info {
                                 )
                                 .into(),
                                 InfoCard::new(
-                                    info_state.map,
-                                    format!("Map {}K", info_state.map_size as f32 / 1000.0),
+                                    info_state
+                                        .map
+                                        .clone()
+                                        .unwrap_or("Retrieving...".to_string()),
+                                    if let Some(map_size) = &info_state.map_size {
+                                        format!("Map {}K", *map_size as f32 / 1000.0)
+                                    } else {
+                                        "Retrieving...".to_string()
+                                    },
                                     Bytes::from_static(include_bytes!("../assets/MDI/map.svg")),
                                 )
                                 .into(),
@@ -126,14 +118,30 @@ impl Component for Info {
                                             .color(Color::from_hex(TEXT_COLOR).unwrap())
                                             .max_lines(1)
                                             .text_overflow(TextOverflow::Custom("...".to_string()))
-                                            .text(info_state.name)
+                                            .text(
+                                                info_state
+                                                    .name
+                                                    .clone()
+                                                    .unwrap_or("Retrieving...".to_string()),
+                                            )
                                             .into(),
                                         label()
                                             .font_family("WDXL Lubrifont")
                                             .font_size(16.0)
                                             .font_weight(FontWeight::BOLD)
                                             .color(Color::from_hex(ICON_COLOR).unwrap())
-                                            .text(format!("Wiped {}", wipe_time))
+                                            .text(if let Some(wipe_time) = &info_state.wipe_time {
+                                                let formatter = Formatter::new();
+                                                let timestamp = DateTime::from_timestamp(
+                                                    (*wipe_time).into(),
+                                                    0,
+                                                )
+                                                .unwrap();
+                                                let now = Utc::now();
+                                                formatter.convert_chrono(timestamp, now)
+                                            } else {
+                                                "Retrieving...".to_string()
+                                            })
                                             .into(),
                                     ])
                                     .into(),
@@ -161,10 +169,12 @@ impl Component for Info {
                                                     .corner_radius(1000.0)
                                                     .overflow(Overflow::Clip)
                                                     .maybe_child(
-                                                        if !info_state.logo_image.is_empty() {
+                                                        if let Some(logo_image) =
+                                                            &info_state.logo_image
+                                                        {
                                                             Some(
                                                                 CachedImage::new(
-                                                                    info_state.logo_image,
+                                                                    logo_image.to_string(),
                                                                 )
                                                                 .width(Size::px(70.0))
                                                                 .height(Size::px(70.0)),
@@ -183,17 +193,30 @@ impl Component for Info {
                                             .color(Color::from_hex(TEXT_COLOR).unwrap())
                                             .max_lines(1)
                                             .text_overflow(TextOverflow::Custom("...".to_string()))
-                                            .text(format!(
-                                                "{}/{} Players",
-                                                info_state.players, info_state.max_players
-                                            ))
+                                            .text(if let Some(players) = &info_state.players {
+                                                format!(
+                                                    "{}/{} Players",
+                                                    players,
+                                                    info_state.max_players.unwrap_or(0)
+                                                )
+                                            } else {
+                                                "Retrieving...".to_string()
+                                            })
                                             .into(),
                                         label()
                                             .font_family("WDXL Lubrifont")
                                             .font_size(16.0)
                                             .font_weight(FontWeight::BOLD)
                                             .color(Color::from_hex(ICON_COLOR).unwrap())
-                                            .text(format!("{} Queued", info_state.queued_players))
+                                            .text(
+                                                if let Some(queued_players) =
+                                                    &info_state.queued_players
+                                                {
+                                                    format!("{} Queued", queued_players)
+                                                } else {
+                                                    "Retrieving...".to_string()
+                                                },
+                                            )
                                             .into(),
                                     ])
                                     .into(),
@@ -211,67 +234,85 @@ impl Component for Info {
                                     .height(Size::Fill)
                                     .background(Color::from_hex("#1D1D1B").unwrap())
                                     .corner_radius(8.0)
-                                    .child(
-                                        ScrollView::new().child(
-                                            rect()
-                                                .padding(8.0)
-                                                .spacing(8.0)
-                                                .direction(Direction::Horizontal)
-                                                .content(Content::Flex)
-                                                .children([
-                                                    rect()
-                                                        .width(Size::flex(1.0))
-                                                        .spacing(8.0)
-                                                        .children(
-                                                            team_info
-                                                                .members
-                                                                .iter()
-                                                                .enumerate()
-                                                                .filter_map(|(i, member)| {
-                                                                    if i % 2 == 1 {
-                                                                        None
-                                                                    } else {
-                                                                        Some(
-                                                                            PlayerCard::new(
-                                                                                member.name.clone(),
-                                                                                member.steam_id,
-                                                                                member.is_online,
+                                    .child(if team_info.members.len() > 0 {
+                                        ScrollView::new()
+                                            .child(
+                                                rect()
+                                                    .padding(8.0)
+                                                    .spacing(8.0)
+                                                    .direction(Direction::Horizontal)
+                                                    .content(Content::Flex)
+                                                    .children([
+                                                        rect()
+                                                            .width(Size::flex(1.0))
+                                                            .spacing(8.0)
+                                                            .children(
+                                                                team_info
+                                                                    .members
+                                                                    .iter()
+                                                                    .enumerate()
+                                                                    .filter_map(|(i, member)| {
+                                                                        if i % 2 == 1 {
+                                                                            None
+                                                                        } else {
+                                                                            Some(
+                                                                                PlayerCard::new(
+                                                                                    member
+                                                                                        .name
+                                                                                        .clone(),
+                                                                                    member.steam_id,
+                                                                                    member
+                                                                                        .is_online,
+                                                                                )
+                                                                                .into(),
                                                                             )
-                                                                            .into(),
-                                                                        )
-                                                                    }
-                                                                })
-                                                                .collect::<Vec<Element>>(),
-                                                        )
-                                                        .into(),
-                                                    rect()
-                                                        .width(Size::flex(1.0))
-                                                        .spacing(8.0)
-                                                        .children(
-                                                            team_info
-                                                                .members
-                                                                .iter()
-                                                                .enumerate()
-                                                                .filter_map(|(i, member)| {
-                                                                    if i % 2 == 0 {
-                                                                        None
-                                                                    } else {
-                                                                        Some(
-                                                                            PlayerCard::new(
-                                                                                member.name.clone(),
-                                                                                member.steam_id,
-                                                                                member.is_online,
+                                                                        }
+                                                                    })
+                                                                    .collect::<Vec<Element>>(),
+                                                            )
+                                                            .into(),
+                                                        rect()
+                                                            .width(Size::flex(1.0))
+                                                            .spacing(8.0)
+                                                            .children(
+                                                                team_info
+                                                                    .members
+                                                                    .iter()
+                                                                    .enumerate()
+                                                                    .filter_map(|(i, member)| {
+                                                                        if i % 2 == 0 {
+                                                                            None
+                                                                        } else {
+                                                                            Some(
+                                                                                PlayerCard::new(
+                                                                                    member
+                                                                                        .name
+                                                                                        .clone(),
+                                                                                    member.steam_id,
+                                                                                    member
+                                                                                        .is_online,
+                                                                                )
+                                                                                .into(),
                                                                             )
-                                                                            .into(),
-                                                                        )
-                                                                    }
-                                                                })
-                                                                .collect::<Vec<Element>>(),
-                                                        )
-                                                        .into(),
-                                                ]),
-                                        ),
-                                    )
+                                                                        }
+                                                                    })
+                                                                    .collect::<Vec<Element>>(),
+                                                            )
+                                                            .into(),
+                                                    ]),
+                                            )
+                                            .into_element()
+                                    } else {
+                                        rect()
+                                            .expanded()
+                                            .center()
+                                            .child(
+                                                label()
+                                                    .color(Color::from_hex(TEXT_COLOR).unwrap())
+                                                    .text("Retrieving..."),
+                                            )
+                                            .into_element()
+                                    })
                                     .into(),
                                 rect()
                                     .width(Size::flex(1.0))
@@ -279,21 +320,29 @@ impl Component for Info {
                                     .background(Color::from_hex("#1D1D1B").unwrap())
                                     .corner_radius(8.0)
                                     .child(
-                                        ScrollView::new().child(
-                                            label()
-                                                .font_size(16.0)
-                                                .font_weight(FontWeight::BOLD)
-                                                .color(Color::from_hex(TEXT_COLOR).unwrap())
-                                                .margin(8.0)
-                                                .text(
-                                                    radio
-                                                        .read()
-                                                        .selected_server
-                                                        .clone()
-                                                        .unwrap()
-                                                        .desc,
-                                                ),
-                                        ),
+                                        if let Some(selected_server) = &radio.read().selected_server
+                                        {
+                                            ScrollView::new()
+                                                .child(
+                                                    label()
+                                                        .font_size(16.0)
+                                                        .font_weight(FontWeight::BOLD)
+                                                        .color(Color::from_hex(TEXT_COLOR).unwrap())
+                                                        .margin(8.0)
+                                                        .text(selected_server.desc.clone()),
+                                                )
+                                                .into_element()
+                                        } else {
+                                            rect()
+                                                .expanded()
+                                                .center()
+                                                .child(
+                                                    label()
+                                                        .color(Color::from_hex(TEXT_COLOR).unwrap())
+                                                        .text("Retrieving..."),
+                                                )
+                                                .into_element()
+                                        },
                                     )
                                     .into(),
                             ])

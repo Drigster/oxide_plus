@@ -14,7 +14,7 @@ impl Dropdown {
 impl Component for Dropdown {
     fn render(&self) -> impl IntoElement {
         let info_state_binding = use_radio::<Data, DataChannel>(DataChannel::InfoStateUpdate);
-        let info_state = info_state_binding.read().info_state.clone();
+        let info_state = &info_state_binding.read().info_state;
 
         let mut hovering = use_state(|| false);
         let mut hovering2 = use_state(|| false);
@@ -54,8 +54,8 @@ impl Component for Dropdown {
                             .cross_align(Alignment::Center)
                             .spacing(8.0)
                             .children([
-                                if let Some(info_state) = &info_state {
-                                    CachedImage::new(info_state.logo_image.clone()).into()
+                                if let Some(logo_image) = &info_state.logo_image {
+                                    CachedImage::new(logo_image.clone()).into()
                                 } else {
                                     rect().into()
                                 },
@@ -64,8 +64,8 @@ impl Component for Dropdown {
                                     .font_weight(FontWeight::BOLD)
                                     .color(Color::from_hex(TEXT_COLOR).unwrap())
                                     .font_size(12.0)
-                                    .text(if let Some(info_state) = &info_state {
-                                        info_state.name.clone()
+                                    .text(if let Some(name) = &info_state.name {
+                                        name.clone()
                                     } else {
                                         "Retrieving...".to_string()
                                     })

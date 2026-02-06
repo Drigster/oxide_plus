@@ -38,18 +38,12 @@ impl Component for Map {
 
         let map_state_binding = use_radio::<Data, DataChannel>(DataChannel::MapStateUpdate);
         let map_state = map_state_binding.read().map_state.clone();
-        let info_state_binding = use_radio::<Data, DataChannel>(DataChannel::InfoStateUpdate);
-        let info_state = info_state_binding.read().info_state.clone();
         let marker_state_binding = use_radio::<Data, DataChannel>(DataChannel::MapMarkersUpdate);
         let marker_state = marker_state_binding.read().map_markers.clone();
-        let team_info_binding = use_radio::<Data, DataChannel>(DataChannel::TeamInfoUpdate);
-        let team_info = team_info_binding.read().team_info.clone();
 
         let mut zoom: State<f32> = use_state(|| 1.0);
 
-        if let (Some(map_state), Some(info_state), Some(marker_state), Some(team_info)) =
-            (map_state, info_state, marker_state, team_info)
-        {
+        if let (Some(map_state), Some(marker_state)) = (map_state, marker_state) {
             rect().child(
                 MapComponent::new()
                     .grid(map_settings.grid)
