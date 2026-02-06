@@ -1,4 +1,4 @@
-use freya::{prelude::*, radio::*, webview::prelude::WebView};
+use freya::{prelude::*, radio::*, webview::WebView};
 
 use freya_router::prelude::RouterContext;
 use serde::{Deserialize, Serialize};

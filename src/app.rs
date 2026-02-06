@@ -1,7 +1,7 @@
 use freya::{
     prelude::*,
     radio::{RadioStation, use_share_radio},
-    router::prelude::{Routable, RouterConfig},
+    router::{Routable, RouterConfig},
 };
 use freya_router::prelude::Router;
 
@@ -9,11 +9,11 @@ use crate::layouts::{LoginLayout, MainLayout, MapLayout};
 use crate::pages::{Info, Loading, Login, Map, MinimapSettingsPage, ServerSelect, Shops, Team};
 use crate::{Data, DataChannel};
 
-pub struct App {
+pub struct MyApp {
     pub radio_station: RadioStation<Data, DataChannel>,
 }
 
-impl Component for App {
+impl App for MyApp {
     fn render(&self) -> impl IntoElement {
         use_share_radio(move || self.radio_station);
 

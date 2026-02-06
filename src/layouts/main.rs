@@ -1,4 +1,4 @@
-use freya::{prelude::*, router::prelude::Outlet};
+use freya::{prelude::*, router::Outlet};
 
 use crate::{
     app::Route,

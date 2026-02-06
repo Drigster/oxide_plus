@@ -13,7 +13,7 @@ use freya::{
         dpi::PhysicalPosition,
         menu::{Menu, MenuEvent, MenuItem},
     },
-    webview::plugin::WebViewPlugin,
+    webview::WebViewPlugin,
     winit::window::{Icon, WindowId, WindowLevel},
 };
 use futures_lite::StreamExt;
@@ -29,7 +29,7 @@ use crate::{
     pages::{MapSettings, Minimap, MinimapSettings, UserData},
     utils::{Poller, Profile, ServerData, get_profile_pic},
 };
-use app::App;
+use app::MyApp;
 
 const ICON: &[u8] = include_bytes!("./assets/oxide_plus_icon.png");
 const SELECT_COLOR: &str = "#135C4F";
@@ -79,7 +79,7 @@ fn main() {
                 };
             }
             main_window_id = Some(ctx.launch_window(
-            WindowConfig::new(AppComponent::new(App { radio_station }))
+            WindowConfig::new_app(MyApp { radio_station })
                 .with_size(1200.0, 800.0)
                 .with_resizable(false)
                 .with_title("Oxide+")
@@ -329,7 +329,7 @@ fn main() {
         .with_plugin(WebViewPlugin::new())
         .with_tray(tray_icon, tray_handler)
         .with_window(
-            WindowConfig::new(AppComponent::new(App { radio_station }))
+            WindowConfig::new_app(MyApp { radio_station })
         .with_size(1200.0, 800.0)
         .with_resizable(false)
         .with_title("Oxide+")
