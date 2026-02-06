@@ -360,7 +360,7 @@ fn main() {
                 }
             })
         .with_plugin(WebViewPlugin::new())
-        //.with_tray(tray_icon, tray_handler)
+        .with_tray(tray_icon, tray_handler)
         .with_window(
             WindowConfig::new_app(MyApp { radio_station })
         .with_size(1200.0, 800.0)
