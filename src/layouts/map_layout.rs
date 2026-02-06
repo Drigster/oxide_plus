@@ -1,4 +1,4 @@
-use freya::{prelude::*, radio::use_radio, router::prelude::Outlet};
+use freya::{prelude::*, radio::use_radio, router::Outlet};
 use freya_router::prelude::RouterContext;
 
 use crate::{Data, DataChannel, app::Route, components::Button};
