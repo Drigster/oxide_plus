@@ -1,8 +1,9 @@
-use freya::prelude::*;
+use freya::{prelude::*, radio::use_radio, router::RouterContext};
 
 use crate::{
-    BORDER_COLOR,
-    components::{Dropdown, UserCard},
+    BORDER_COLOR, Data, DataChannel,
+    app::Route,
+    components::{Dropdown, ServerCard, UserCard},
 };
 
 #[derive(Clone, PartialEq)]
@@ -16,6 +17,13 @@ impl Navbar {
 
 impl Component for Navbar {
     fn render(&self) -> impl IntoElement {
+        let info_state_binding = use_radio::<Data, DataChannel>(DataChannel::InfoStateUpdate);
+        let info_state = &info_state_binding.read().info_state;
+        let servers_binding = use_radio::<Data, DataChannel>(DataChannel::ServersUpdate);
+        let servers = servers_binding.read().servers.clone();
+        let state_tx_binding = use_radio::<Data, DataChannel>(DataChannel::StateTxUpdate);
+        let state_tx = state_tx_binding.read().state_tx.clone().unwrap();
+
         rect()
             .width(Size::percent(100.0))
             .height(Size::px(48.0))
@@ -39,6 +47,40 @@ impl Component for Navbar {
                     .alignment(BorderAlignment::Outer)
                     .fill(Color::from_hex(BORDER_COLOR).unwrap()),
             )
-            .children([Dropdown::new().into(), UserCard::new().into()])
+            .children([
+                Dropdown::new()
+                    .title(if let Some(name) = &info_state.name {
+                        name.clone()
+                    } else {
+                        "Retrieving...".to_string()
+                    })
+                    .children(
+                        servers
+                            .into_iter()
+                            .map({
+                                let state_tx = state_tx.clone();
+                                move |server| {
+                                    ServerCard::new(server.logo.clone(), server.name.clone())
+                                        .on_press({
+                                            let state_tx = state_tx.clone();
+                                            move |_| {
+                                                state_tx
+                                                    .unbounded_send(
+                                                        crate::ChannelSend::SelectedServerUpdate(
+                                                            Some(server.clone()),
+                                                        ),
+                                                    )
+                                                    .unwrap();
+                                                RouterContext::get().replace(Route::Info);
+                                            }
+                                        })
+                                        .into()
+                                }
+                            })
+                            .collect::<Vec<Element>>(),
+                    )
+                    .into(),
+                UserCard::new().into(),
+            ])
     }
 }

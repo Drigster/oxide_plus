@@ -1,21 +1,48 @@
-use freya::{prelude::*, radio::*};
+use freya::{
+    animation::{AnimNum, Ease, use_animation},
+    prelude::*,
+    radio::*,
+};
 
 use crate::{Data, DataChannel, TEXT_COLOR, components::CachedImage};
 
 #[derive(Clone, PartialEq)]
-pub struct Dropdown {}
+pub struct Dropdown {
+    elements: Vec<Element>,
+
+    title: String,
+    icon: Option<String>,
+}
 
 impl Dropdown {
     pub fn new() -> Self {
-        Self {}
+        Self {
+            elements: Vec::new(),
+
+            title: "".to_string(),
+            icon: None,
+        }
+    }
+
+    pub fn title(mut self, title: String) -> Self {
+        self.title = title.into();
+        self
+    }
+
+    pub fn icon(mut self, icon: String) -> Self {
+        self.icon = Some(icon);
+        self
+    }
+}
+
+impl ChildrenExt for Dropdown {
+    fn get_children(&mut self) -> &mut Vec<Element> {
+        &mut self.elements
     }
 }
 
 impl Component for Dropdown {
     fn render(&self) -> impl IntoElement {
-        let info_state_binding = use_radio::<Data, DataChannel>(DataChannel::InfoStateUpdate);
-        let info_state = &info_state_binding.read().info_state;
-
         let mut hovering = use_state(|| false);
         let mut hovering2 = use_state(|| false);
 
@@ -24,6 +51,26 @@ impl Component for Dropdown {
                 Cursor::set(CursorIcon::default());
             }
         });
+
+        let mut animation = use_animation(|_| {
+            (
+                AnimNum::new(0., 100.).ease(Ease::InOut).time(200),
+                AnimNum::new(0., -180.).ease(Ease::InOut).time(200),
+            )
+        });
+
+        use_side_effect(move || {
+            if hovering() || hovering2() {
+                if animation.peek().0.value() != 100.0 {
+                    animation.start();
+                }
+            } else if animation.peek().0.value() != 0.0 {
+                animation.reverse();
+            }
+        });
+
+        let height = animation.read().0.value();
+        let rotation = animation.read().1.value();
 
         let background = if hovering() { "#333333" } else { "#222222" };
 
@@ -54,8 +101,8 @@ impl Component for Dropdown {
                             .cross_align(Alignment::Center)
                             .spacing(8.0)
                             .children([
-                                if let Some(logo_image) = &info_state.logo_image {
-                                    CachedImage::new(logo_image.clone()).into()
+                                if let Some(icon) = &self.icon {
+                                    CachedImage::new(icon.clone()).into()
                                 } else {
                                     rect().into()
                                 },
@@ -64,60 +111,42 @@ impl Component for Dropdown {
                                     .font_weight(FontWeight::BOLD)
                                     .color(Color::from_hex(TEXT_COLOR).unwrap())
                                     .font_size(12.0)
-                                    .text(if let Some(name) = &info_state.name {
-                                        name.clone()
-                                    } else {
-                                        "Retrieving...".to_string()
-                                    })
+                                    .text(self.title.clone())
                                     .into(),
                             ])
                             .into(),
                         svg(freya_icons::lucide::chevron_up())
+                            .rotate(rotation)
                             .height(Size::Fill)
                             .color(Color::from_hex(TEXT_COLOR).unwrap())
                             .into(),
                     ])
                     .into(),
-                if hovering() || hovering2() {
-                    rect()
-                        .width(Size::px(250.0))
-                        .layer(100)
-                        .position(Position::new_absolute().top(47.0))
-                        .background(Color::from_hex("#222222").unwrap())
-                        .on_press(move |_| {
-                            if hovering2() {
-                                Cursor::set(CursorIcon::default());
-                                hovering2.set(false);
-                            }
-                        })
-                        .on_pointer_enter(move |_| {
-                            Cursor::set(CursorIcon::Pointer);
-                            hovering2.set(true);
-                        })
-                        .on_pointer_leave(move |_| {
-                            if hovering2() {
-                                Cursor::set(CursorIcon::default());
-                                hovering2.set(false);
-                            }
-                        })
-                        .children([
-                            // ServerCard::new(PROFILE_ICON, "Rusty Moose | EU Hapis".to_string())
-                            //     .into(),
-                            // ServerCard::new(PROFILE_ICON, "Rusty Moose | EU Hapis".to_string())
-                            //     .into(),
-                            // ServerCard::new(PROFILE_ICON, "Rusty Moose | EU Hapis".to_string())
-                            //     .into(),
-                        ])
-                        .into()
-                } else {
-                    rect().into()
-                },
-                // label()
-                //     .font_size(12.0)
-                //     .font_weight(FontWeight::BOLD)
-                //     .color(Color::from_hex(TEXT_COLOR).unwrap())
-                //     .text(connection_state)
-                //     .into(),
+                rect()
+                    .width(Size::px(250.0))
+                    .layer(100)
+                    .position(Position::new_absolute().top(47.0))
+                    .background(Color::from_hex("#222222").unwrap())
+                    .overflow(Overflow::Clip)
+                    .visible_height(VisibleSize::inner_percent(height))
+                    .on_press(move |_| {
+                        if hovering2() {
+                            Cursor::set(CursorIcon::default());
+                            hovering2.set(false);
+                        }
+                    })
+                    .on_pointer_enter(move |_| {
+                        Cursor::set(CursorIcon::Pointer);
+                        hovering2.set(true);
+                    })
+                    .on_pointer_leave(move |_| {
+                        if hovering2() {
+                            Cursor::set(CursorIcon::default());
+                            hovering2.set(false);
+                        }
+                    })
+                    .children(self.elements.clone())
+                    .into(),
             ])
     }
 }
