@@ -14,12 +14,13 @@ use freya::{
         menu::{Menu, MenuEvent, MenuItem},
     },
     webview::WebViewPlugin,
-    winit::window::{Icon, WindowId, WindowLevel},
+    winit::window::{ WindowId, WindowLevel},
 };
 use futures_lite::StreamExt;
 use rustplus_rs::{
-    AppInfo, AppMap, AppMapMarkers, AppTeamInfo,
-    app_team_info::{Member, Note},
+    AppInfo, AppMap, AppMapMarkers, AppMarker, AppTeamInfo,
+    app_map::Monument,
+    app_team_info::{Note},
 };
 
 mod app;
@@ -30,7 +31,7 @@ mod utils;
 
 use crate::{
     pages::{MapSettings, Minimap, MinimapSettings, UserData},
-    utils::{Poller, Profile, ServerData, get_profile_pic},
+    utils::{Poller, ServerData},
 };
 use app::MyApp;
 
@@ -150,7 +151,7 @@ fn main() {
                         ChannelSend::UserDataUpdate(user_data) => {
                             radio_station
                                 .write_channel(DataChannel::UserDataUpdate)
-                                .user_data = Some(user_data);
+                                .user_data = user_data;
                         }
                         ChannelSend::LoadingStateUpdate(loading_state) => {
                             radio_station
@@ -210,42 +211,130 @@ fn main() {
                         ChannelSend::MapStateUpdate(map_state) => {
                             radio_station
                                 .write_channel(DataChannel::MapStateUpdate)
-                                .map_state = map_state;
-                        }
-                        ChannelSend::MapMarkersUpdate(map_markers) => {
-                            radio_station
-                                .write_channel(DataChannel::MapMarkersUpdate)
-                                .map_markers = map_markers;
-                        }
-                        ChannelSend::TeamInfoUpdate(team_info) => {
-                            radio_station
-                                .write_channel(DataChannel::TeamInfoUpdate)
-                                .team_info = if let Some(team_info) = &team_info {
-                                    TeamInfo {
-                                        leader_steam_id: Some(team_info.leader_steam_id),
-                                        members: team_info.members.clone(),
-                                        map_notes: team_info.map_notes.clone(),
-                                        leader_map_notes: team_info.leader_map_notes.clone(),
+                                .map_state = if let Some(map_state) = map_state {
+                                    MapState {
+                                        width: map_state.width,
+                                        height: map_state.height,
+                                        jpg_image: map_state.jpg_image,
+                                        ocean_margin: map_state.ocean_margin,
+                                        monuments: map_state.monuments,
+                                        background: map_state.background,
                                     }
                                 } else {
-                                    TeamInfo::default()
+                                    MapState::default()
                                 };
+                        }
+                        ChannelSend::MapMarkersUpdate(map_markers) => {
+                            let old_map_markers = radio_station
+                                .read()
+                                .map_markers
+                                .clone();
+
+                            if let Some(map_markers) = &map_markers {
+                                if old_map_markers.markers != map_markers.markers {
+                                    radio_station
+                                        .write_channel(DataChannel::MapMarkersUpdate)
+                                        .map_markers = MapMarkers {
+                                            markers: map_markers.markers.clone(),
+                                        }
+                                }
+                            }
+                            else {
+                                radio_station
+                                    .write_channel(DataChannel::MapMarkersUpdate)
+                                    .map_markers = MapMarkers::default();
+                            }
+                        }
+                        ChannelSend::TeamInfoUpdate(team_info) => {
+                            let old_team_info = radio_station.read().team_info.clone();
 
                             if let Some(team_info) = &team_info {
-                                let steam_profiles = radio_station.read().steam_profiles.clone();
+                                if old_team_info.leader_steam_id != Some(team_info.leader_steam_id) {
+                                    radio_station
+                                        .write_channel(DataChannel::TeamLeaderUpdate)
+                                        .team_info
+                                        .leader_steam_id = Some(team_info.leader_steam_id);
+                                }
+                                if old_team_info.map_notes != team_info.map_notes {
+                                    radio_station
+                                        .write_channel(DataChannel::MapNotesUpdate)
+                                        .team_info
+                                        .map_notes = team_info.map_notes.clone();
+                                }
+                                if old_team_info.leader_map_notes != team_info.leader_map_notes {
+                                    radio_station
+                                        .write_channel(DataChannel::MapNotesUpdate)
+                                        .team_info
+                                        .leader_map_notes = team_info.leader_map_notes.clone();
+                                }
+                                let old_members = old_team_info.members.clone();
+
                                 for member in &team_info.members {
-                                    if steam_profiles.contains_key(&member.steam_id) {
+                                    let old_member = old_members.get(&member.steam_id);
+                                    if old_member.is_none() {
+                                        radio_station
+                                            .write_channel(DataChannel::TeamMembersUpdate)
+                                            .team_info
+                                            .members
+                                            .insert(member.steam_id, TeamMember {
+                                            steam_id: member.steam_id,
+                                            name: member.name.clone(),
+                                            x: member.x,
+                                            y: member.y,
+                                            is_online: member.is_online,
+                                            spawn_time: member.spawn_time,
+                                            is_alive: member.is_alive,
+                                            death_time: member.death_time,
+                                            profile_icon: None,
+                                        });
                                         continue;
                                     }
-                                    let steam_profile = get_profile_pic(member.steam_id).await;
-
-                                    if let Ok(steam_profile) = steam_profile {
-                                        radio_station
-                                            .write_channel(DataChannel::SteamProfileUpdate(member.steam_id))
-                                            .steam_profiles
-                                            .insert(member.steam_id, steam_profile);
+                                    let old_member = old_member.unwrap();
+                                    if member.steam_id == old_member.steam_id
+                                    && member.name == old_member.name
+                                    && member.x == old_member.x
+                                    && member.y == old_member.y
+                                    && member.is_online == old_member.is_online
+                                    && member.spawn_time == old_member.spawn_time
+                                    && member.is_alive == old_member.is_alive
+                                    && member.death_time == old_member.death_time {
+                                        continue;
                                     }
+                                    
+                                    radio_station
+                                        .write_channel(DataChannel::TeamMemberUpdate(member.steam_id))
+                                        .team_info
+                                        .members
+                                        .insert(member.steam_id, TeamMember {
+                                        steam_id: member.steam_id,
+                                        name: member.name.clone(),
+                                        x: member.x,
+                                        y: member.y,
+                                        is_online: member.is_online,
+                                        spawn_time: member.spawn_time,
+                                        is_alive: member.is_alive,
+                                        death_time: member.death_time,
+                                        profile_icon: old_member.profile_icon.clone(),
+                                    });
                                 }
+                            }
+                            else {
+                                radio_station
+                                    .write_channel(DataChannel::TeamMembersUpdate)
+                                    .team_info
+                                    .leader_map_notes = Vec::new();
+                                radio_station
+                                    .write_channel(DataChannel::MapNotesUpdate)
+                                    .team_info
+                                    .map_notes = Vec::new();
+                                radio_station
+                                    .write_channel(DataChannel::MapNotesUpdate)
+                                    .team_info
+                                    .leader_map_notes = Vec::new();
+                                radio_station
+                                    .write_channel(DataChannel::TeamLeaderUpdate)
+                                    .team_info
+                                    .leader_steam_id = None;
                             }
                         }
                         ChannelSend::ToggleMinimap(toggle) => {
@@ -397,7 +486,7 @@ pub struct Settings {
     pub minimap_settings: MinimapSettings,
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct InfoState {
     pub name: Option<String>,
     pub header_image: Option<String>,
@@ -417,27 +506,54 @@ pub struct InfoState {
     pub cameras_enabled: Option<bool>,
 }
 
-#[derive(Default)]
+#[derive(Clone)]
+pub struct TeamMember {
+    pub steam_id: u64,
+    pub name: String,
+    pub x: f32,
+    pub y: f32,
+    pub is_online: bool,
+    pub spawn_time: u32,
+    pub is_alive: bool,
+    pub death_time: u32,
+    pub profile_icon: Option<String>,
+}
+
+#[derive(Default, Clone)]
 pub struct TeamInfo {
     pub leader_steam_id: Option<u64>,
-    pub members: Vec<Member>,
+    pub members: HashMap<u64, TeamMember>,
     pub map_notes: Vec<Note>,
     pub leader_map_notes: Vec<Note>,
 }
 
-#[derive(Default)]
+#[derive(Default, Clone, Debug)]
+pub struct MapState {
+    pub width: u32,
+    pub height: u32,
+    pub jpg_image: Vec<u8>,
+    pub ocean_margin: i32,
+    pub monuments: Vec<Monument>,
+    pub background: String,
+}
+
+#[derive(Default, Clone, Debug)]
+pub struct MapMarkers {
+    pub markers: Vec<AppMarker>,
+}
+
+#[derive(Default, Clone)]
 pub struct Data {
-    pub user_data: Option<UserData>,
+    pub user_data: UserData,
     pub servers: Vec<ServerData>,
     pub selected_server: Option<ServerData>,
     pub loading_state: String,
     pub settings: Settings,
 
     pub info_state: InfoState,
-    pub map_state: Option<AppMap>,
-    pub map_markers: Option<AppMapMarkers>,
+    pub map_state: MapState,
+    pub map_markers: MapMarkers,
     pub team_info: TeamInfo,
-    pub steam_profiles: HashMap<u64, Profile>,
 
     pub state_tx: Option<futures_channel::mpsc::UnboundedSender<ChannelSend>>,
     pub minimap_window_id: Option<WindowId>,
@@ -454,11 +570,13 @@ pub enum DataChannel {
     InfoStateUpdate,
     MapStateUpdate,
     MapMarkersUpdate,
-    TeamInfoUpdate,
+    TeamLeaderUpdate,
+    MapNotesUpdate,
+    TeamMembersUpdate,
+    TeamMemberUpdate(u64),
     SettingsUpdate,
     MapSettingsUpdate,
     MinimapSettingsUpdate,
-    SteamProfileUpdate(u64),
 }
 
 impl RadioChannel<Data> for DataChannel {}

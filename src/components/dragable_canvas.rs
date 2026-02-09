@@ -9,15 +9,10 @@ pub type Point2D = euclid::Point2D<f32, ()>;
 pub struct DragableCanvas {
     elements: Vec<Element>,
 
-    pos: Point2D,
-    zoom_state: f32,
-    children_size: State<Point2D>,
-    interactable: State<bool>,
-
-    on_zoom: Option<EventHandler<f32>>,
-    on_pos_update: Option<EventHandler<(Point2D, bool)>>,
-
-    size: State<Area>,
+    pos: Option<Writable<Point2D>>,
+    zoom: Option<Writable<f32>>,
+    children_size: Option<Readable<Point2D>>,
+    interactable: Option<Readable<bool>>,
 }
 
 #[allow(dead_code)]
@@ -25,52 +20,31 @@ impl DragableCanvas {
     pub fn new() -> Self {
         Self {
             elements: Vec::new(),
-            pos: Point2D::new(0.0, 0.0),
-            children_size: use_state(|| Point2D::new(0.0, 0.0)),
-            zoom_state: 1.0,
-            interactable: use_state(|| true),
-            size: use_state(Area::default),
 
-            on_zoom: None,
-            on_pos_update: None,
+            pos: None,
+            zoom: None,
+            children_size: None,
+            interactable: None,
         }
     }
 
-    pub fn children_size(mut self, children_size: Point2D) -> Self {
-        *self.children_size.write() = children_size;
+    pub fn pos(mut self, pos: impl Into<Writable<Point2D>>) -> Self {
+        self.pos = Some(pos.into());
         self
     }
 
-    pub fn interactable(mut self, interactable: bool) -> Self {
-        *self.interactable.write() = interactable;
+    pub fn zoom(mut self, zoom: impl Into<Writable<f32>>) -> Self {
+        self.zoom = Some(zoom.into());
         self
     }
 
-    pub fn zoom(mut self, zoom: f32) -> Self {
-        self.zoom_state = zoom;
+    pub fn children_size(mut self, children_size: impl Into<Readable<Point2D>>) -> Self {
+        self.children_size = Some(children_size.into());
         self
     }
 
-    // pub fn pos(mut self, pos: Point2D) -> Self {
-    //     self.pos = pos;
-    //     self
-    // }
-
-    pub fn pos(mut self, pos: Point2D) -> Self {
-        self.pos = Point2D::new(
-            pos.x + (self.size.read().width() / 2.0),
-            pos.y + (self.size.read().height() / 2.0),
-        );
-        self
-    }
-
-    pub fn on_zoom(mut self, on_zoom: impl Into<EventHandler<f32>>) -> Self {
-        self.on_zoom = Some(on_zoom.into());
-        self
-    }
-
-    pub fn on_pos_update(mut self, on_drag: impl Into<EventHandler<(Point2D, bool)>>) -> Self {
-        self.on_pos_update = Some(on_drag.into());
+    pub fn interactable(mut self, interactable: impl Into<Readable<bool>>) -> Self {
+        self.interactable = Some(interactable.into());
         self
     }
 }
@@ -88,6 +62,23 @@ impl Component for DragableCanvas {
         let mut mouse_coords_global: State<Point2D> = use_state(|| Point2D::new(0.0, 0.0));
         let mut mouse_coords_local: State<Point2D> = use_state(|| Point2D::new(0.0, 0.0));
 
+        let pos = use_hook(|| {
+            self.pos.clone()
+                .unwrap_or_else(|| State::create(Point2D::new(0.0, 0.0)).into())
+        });
+        let zoom = use_hook(|| self.zoom.clone().unwrap_or_else(|| State::create(1.0).into()));
+        let children_size = use_hook(|| {
+            self.children_size
+                .clone()
+                .unwrap_or_else(|| Readable::from_value(Point2D::new(0.0, 0.0)))
+        });
+        let interactable = use_hook(|| {
+            self.interactable
+                .clone()
+                .unwrap_or_else(|| Readable::from_value(true))
+        });
+        let mut size = use_state(|| Area::default());
+
         use_drop(move || {
             if hover() || dragging() {
                 Cursor::set(CursorIcon::default());
@@ -99,11 +90,10 @@ impl Component for DragableCanvas {
         rect()
             //Center map
             .on_sized({
-                let children_size = self.children_size.clone();
-                let mut size = self.size.clone();
-                let on_pos_update = self.on_pos_update.clone();
+                let children_size = children_size.clone();
+                let mut pos = pos.clone();
                 move |e: Event<SizedEventData>| {
-                    size.set(e.area);
+                    *size.write() = e.area;
                     if once() {
                         return;
                     }
@@ -112,24 +102,13 @@ impl Component for DragableCanvas {
                     }
                     *once.write() = true;
 
-                    if let Some(on_pos_update) = &on_pos_update {
-                        on_pos_update.call((
-                            center(
-                                Point2D::new(
-                                    children_size.read().x / -2.0,
-                                    children_size.read().y / -2.0,
-                                ),
-                                size(),
-                            ),
-                            false,
-                        ));
-                    }
+                    *pos.write() = Point2D::new(children_size.read().x / -2.0, children_size.read().y / -2.0);
                 }
             })
             .overflow(Overflow::Clip)
             .width(Size::Fill)
             .height(Size::Fill)
-            .maybe(*self.interactable.read(), |rect| {
+            .maybe(*interactable.read(), |rect| {
                 rect.on_mouse_down(move |e: Event<MouseEventData>| {
                     if e.button != Some(MouseButton::Left) {
                         return;
@@ -158,18 +137,13 @@ impl Component for DragableCanvas {
                     Cursor::set(CursorIcon::default());
                 })
                 .on_mouse_move({
-                    let on_pos_update = self.on_pos_update.clone();
-                    let pos = self.pos.clone();
-                    let size = self.size.clone();
+                    let mut pos = pos.clone();
                     move |e: Event<MouseEventData>| {
                         if dragging() {
                             let global_location = e.global_location.to_f32();
-                            if let Some(on_pos_update) = &on_pos_update {
-                                on_pos_update.call((
-                                    center(pos + (global_location - mouse_coords_global()), size()),
-                                    true,
-                                ));
-                            }
+                            let new_pos = *pos.read() + (global_location - mouse_coords_global());
+                            *pos.write() = new_pos;
+                            // TODO: Cancel centering
 
                             *mouse_coords_global.write() = global_location;
                         }
@@ -177,15 +151,14 @@ impl Component for DragableCanvas {
                     }
                 })
                 .on_wheel({
-                    let children_size = self.children_size.clone();
-                    let pos = self.pos.clone();
-                    let on_pos_update = self.on_pos_update.clone();
-                    let zoom = self.zoom_state.clone();
-                    let on_zoom = self.on_zoom.clone();
-                    let size = self.size.clone();
+                    let mut pos = pos.clone();
+                    let mut zoom = zoom.clone();
                     move |e: Event<WheelEventData>| {
-                        let change = zoom * e.delta_y.signum() as f32 * 0.1;
-                        let current_zoom = zoom;
+                        let current_zoom = *zoom.read();
+                        let current_pos = *pos.read();
+                        let children_size = *children_size.read();
+
+                        let change = current_zoom * e.delta_y.signum() as f32 * 0.1;
                         let new_zoom = match current_zoom + change {
                             v if v < MIN_ZOOM => MIN_ZOOM,
                             v if v > MAX_ZOOM => MAX_ZOOM,
@@ -196,34 +169,25 @@ impl Component for DragableCanvas {
                             return;
                         }
 
-                        let old_zoomd_size = children_size() * current_zoom;
-                        let new_zoomed_size = children_size() * new_zoom;
+                        let old_zoomd_size = children_size * current_zoom;
+                        let new_zoomed_size = children_size * new_zoom;
 
                         let zoom_diff = old_zoomd_size - new_zoomed_size;
 
                         let cursor_image_pos = mouse_coords_local()
-                            - pos
-                            - ((children_size() - (children_size() * current_zoom)) / 2.0);
+                            - current_pos
+                            - (size.read().size / 2.0).into()
+                            - ((children_size - (children_size * current_zoom)) / 2.0);
                         let cursor_image_pos_percent_x =
                             (cursor_image_pos.x / old_zoomd_size.x) - 0.5;
                         let cursor_image_pos_percent_y =
                             (cursor_image_pos.y / old_zoomd_size.y) - 0.5;
 
-                        if let Some(on_pos_update) = &on_pos_update {
-                            on_pos_update.call((
-                                center(
-                                    Point2D::new(
-                                        pos.x + (zoom_diff.x * cursor_image_pos_percent_x),
-                                        pos.y + (zoom_diff.y * cursor_image_pos_percent_y),
-                                    ),
-                                    size(),
-                                ),
-                                false,
-                            ));
-                        }
-                        if let Some(on_zoom) = &on_zoom {
-                            on_zoom.call(new_zoom);
-                        }
+                        *pos.write() = Point2D::new(
+                            current_pos.x + (zoom_diff.x * cursor_image_pos_percent_x),
+                            current_pos.y + (zoom_diff.y * cursor_image_pos_percent_y),
+                        );
+                        *zoom.write() = new_zoom;
                     }
                 })
             })
@@ -231,21 +195,19 @@ impl Component for DragableCanvas {
                 self.elements
                     .iter()
                     .map(|child| {
+                        let zoom = *zoom.read();
+                        let pos = *pos.read();
                         rect()
                             .position(
                                 Position::new_absolute()
-                                    .left(self.pos.x as f32)
-                                    .top(self.pos.y as f32),
+                                    .left((pos.x as f32) + (size.read().width() / 2.0))
+                                    .top((pos.y as f32) + (size.read().height() / 2.0)),
                             )
-                            .scale((self.zoom_state as f32, self.zoom_state as f32))
+                            .scale((zoom as f32, zoom as f32))
                             .child(child.clone())
                             .into()
                     })
                     .collect::<Vec<Element>>(),
             )
     }
-}
-
-fn center(pos: Point2D, size: Area) -> Point2D {
-    Point2D::new(pos.x - (size.width() / 2.0), pos.y - (size.height() / 2.0))
 }

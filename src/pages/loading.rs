@@ -265,17 +265,23 @@ impl Component for Loading {
                                     "Registering with rust plus...".to_string(),
                                 ))
                                 .unwrap();
-                            match register_with_rust_plus(user_data.token, expo_push_token.clone())
-                                .await
+                            match register_with_rust_plus(
+                                user_data.token.expect("Token should be set!"),
+                                expo_push_token.clone(),
+                            )
+                            .await
                             {
                                 Ok(new_token) => {
-                                    user_data.token = new_token;
+                                    user_data.token = Some(new_token);
                                 }
                                 Err(err) => {
                                     panic!("Error registering with Rust Plus: {}", err);
                                 }
                             }
-                            println!("Registered with Rust Plus. New token: {}", user_data.token);
+                            println!(
+                                "Registered with Rust Plus. New token: {}",
+                                user_data.token.expect("Token should be set!")
+                            );
                             expo_push_token
                         }
                     },
@@ -309,7 +315,7 @@ impl Component for Loading {
                 let servers = match load_servers() {
                     Ok(servers) => servers
                         .iter()
-                        .filter(|e| e.player_id == user_data.steam_id)
+                        .filter(|e| Some(e.player_id.clone()) == user_data.steam_id)
                         .cloned()
                         .collect(),
                     Err(err) => {
@@ -342,15 +348,21 @@ impl Component for Loading {
 }
 
 #[derive(Deserialize, Debug)]
+#[allow(dead_code)]
 struct TeamData {
     r#type: String,
-    targetId: String,
-    targetName: String,
+    #[serde(rename = "targetId")]
+    target_id: String,
+    #[serde(rename = "targetName")]
+    target_name: String,
 }
 
 #[derive(Deserialize, Debug)]
+#[allow(dead_code)]
 struct PlayerData {
     r#type: String,
-    targetId: String,
-    targetName: String,
+    #[serde(rename = "targetId")]
+    target_id: String,
+    #[serde(rename = "targetName")]
+    target_name: String,
 }

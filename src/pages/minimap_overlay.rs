@@ -28,114 +28,59 @@ impl Minimap {
 
 impl Component for Minimap {
     fn render(&self) -> impl IntoElement {
-        let minimap_settings_state =
-            use_radio::<Data, DataChannel>(DataChannel::MinimapSettingsUpdate);
+        let radio = use_radio::<Data, DataChannel>(DataChannel::MinimapSettingsUpdate);
+        let minimap_settings = radio.slice_current(|s| &s.settings.minimap_settings);
+        let grid = radio.slice_current(|s| &s.settings.minimap_settings.grid);
+        let markers = radio.slice_current(|s| &s.settings.minimap_settings.markers);
+        let deaths = radio.slice_current(|s| &s.settings.minimap_settings.deaths);
+        let monuments = radio.slice_current(|s| &s.settings.minimap_settings.monuments);
+        let shops = radio.slice_current(|s| &s.settings.minimap_settings.shops);
+        let zoom = radio.slice_mut_current(|s| &mut s.settings.minimap_settings.zoom);
 
-        use_side_effect(move || {
-            let offset_x = minimap_settings_state
-                .read()
-                .settings
-                .minimap_settings
-                .offset_x
-                .clone();
+        use_side_effect({
+            let minimap_settings = minimap_settings.clone();
+            move || {
+                let offset_x = minimap_settings.read().offset_x.clone();
 
-            let offset_y = minimap_settings_state
-                .read()
-                .settings
-                .minimap_settings
-                .offset_y
-                .clone();
+                let offset_y = minimap_settings.read().offset_y.clone();
 
-            Platform::get().with_window(None, move |window| {
-                window.set_outer_position(PhysicalPosition::new(offset_x, offset_y));
-            });
+                Platform::get().with_window(None, move |window| {
+                    window.set_outer_position(PhysicalPosition::new(offset_x, offset_y));
+                });
+            }
         });
 
-        use_side_effect(move || {
-            let size = minimap_settings_state
-                .read()
-                .settings
-                .minimap_settings
-                .size
-                .clone();
+        use_side_effect({
+            let minimap_settings = minimap_settings.clone();
+            move || {
+                let size = minimap_settings.read().size.clone();
 
-            Platform::get().with_window(None, move |window| {
-                let _ = window.request_inner_size(PhysicalSize::new(size, size));
-            });
+                Platform::get().with_window(None, move |window| {
+                    let _ = window.request_inner_size(PhysicalSize::new(size, size));
+                });
+            }
         });
 
-        let map_state_binding = use_radio::<Data, DataChannel>(DataChannel::MapStateUpdate);
-        let map_state = map_state_binding.read().map_state.clone();
-        let marker_state_binding = use_radio::<Data, DataChannel>(DataChannel::MapMarkersUpdate);
-        let marker_state = marker_state_binding.read().map_markers.clone();
-
-        if let (Some(map_state), Some(marker_state)) = (map_state, marker_state) {
-            rect()
-                .width(Size::percent(100.0))
-                .height(Size::percent(100.0))
-                .maybe(
-                    minimap_settings_state
-                        .read()
-                        .settings
-                        .minimap_settings
-                        .shape
-                        == Shape::Circle,
-                    |rect| rect.corner_radius(1000.0),
+        rect()
+            .width(Size::percent(100.0))
+            .height(Size::percent(100.0))
+            .maybe(minimap_settings.read().shape == Shape::Circle, |rect| {
+                rect.corner_radius(1000.0)
+            })
+            .overflow(Overflow::Clip)
+            .maybe_child({
+                Some(
+                    MapComponent::new()
+                        .interactable(false)
+                        .center(true)
+                        .background_opacity(minimap_settings.read().opacity / 100.0)
+                        .zoom(zoom.into_writable())
+                        .grid(grid.into_readable())
+                        .markers(markers.into_readable())
+                        .deaths(deaths.into_readable())
+                        .monuments(monuments.into_readable())
+                        .shops(shops.into_readable()),
                 )
-                .overflow(Overflow::Clip)
-                .maybe_child({
-                    Some(
-                        MapComponent::new()
-                            .interactable(false)
-                            .center(true)
-                            .background_opacity(
-                                minimap_settings_state
-                                    .read()
-                                    .settings
-                                    .minimap_settings
-                                    .opacity
-                                    / 100.0,
-                            )
-                            .zoom(minimap_settings_state.read().settings.minimap_settings.zoom)
-                            .grid(minimap_settings_state.read().settings.minimap_settings.grid)
-                            .markers(
-                                minimap_settings_state
-                                    .read()
-                                    .settings
-                                    .minimap_settings
-                                    .markers,
-                            )
-                            .deaths(
-                                minimap_settings_state
-                                    .read()
-                                    .settings
-                                    .minimap_settings
-                                    .deaths,
-                            )
-                            .monuments(
-                                minimap_settings_state
-                                    .read()
-                                    .settings
-                                    .minimap_settings
-                                    .monuments,
-                            )
-                            .shops(
-                                minimap_settings_state
-                                    .read()
-                                    .settings
-                                    .minimap_settings
-                                    .shops,
-                            ),
-                    )
-                })
-        } else {
-            rect()
-                .margin(8.0)
-                .expanded()
-                .background(Color::from_hex("#191919").unwrap())
-                .corner_radius(CornerRadius::new_all(16.0))
-                .center()
-                .child(label().text("Map data is loading..."))
-        }
+            })
     }
 }

@@ -12,10 +12,10 @@ pub struct Info {}
 impl Component for Info {
     fn render(&self) -> impl IntoElement {
         let radio = use_radio::<Data, DataChannel>(DataChannel::InfoStateUpdate);
-        let team_info_binding = use_radio::<Data, DataChannel>(DataChannel::TeamInfoUpdate);
 
-        let info_state = &radio.read().info_state;
-        let team_info = &team_info_binding.read().team_info;
+        let binding = radio.slice_current(|s| &s.info_state);
+        let info_state = binding.read();
+        let team_members = radio.slice(DataChannel::TeamMembersUpdate, |s| &s.team_info.members);
 
         rect()
             .width(Size::Fill)
@@ -234,7 +234,7 @@ impl Component for Info {
                                     .height(Size::Fill)
                                     .background(Color::from_hex("#1D1D1B").unwrap())
                                     .corner_radius(8.0)
-                                    .child(if team_info.members.len() > 0 {
+                                    .child(if team_members.read().len() > 0 {
                                         ScrollView::new()
                                             .child(
                                                 rect()
@@ -247,9 +247,10 @@ impl Component for Info {
                                                             .width(Size::flex(1.0))
                                                             .spacing(8.0)
                                                             .children(
-                                                                team_info
-                                                                    .members
-                                                                    .iter()
+                                                                team_members
+                                                                    .read()
+                                                                    .values()
+                                                                    .into_iter()
                                                                     .enumerate()
                                                                     .filter_map(|(i, member)| {
                                                                         if i % 2 == 1 {
@@ -275,9 +276,10 @@ impl Component for Info {
                                                             .width(Size::flex(1.0))
                                                             .spacing(8.0)
                                                             .children(
-                                                                team_info
-                                                                    .members
-                                                                    .iter()
+                                                                team_members
+                                                                    .read()
+                                                                    .values()
+                                                                    .into_iter()
                                                                     .enumerate()
                                                                     .filter_map(|(i, member)| {
                                                                         if i % 2 == 0 {

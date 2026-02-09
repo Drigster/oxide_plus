@@ -96,11 +96,7 @@ pub struct Shops {}
 impl Component for Shops {
     fn render(&self) -> impl IntoElement {
         let map_markers_binding = use_radio::<Data, DataChannel>(DataChannel::MapMarkersUpdate);
-        let map_markers = map_markers_binding
-            .read()
-            .map_markers
-            .clone()
-            .expect("Map markers should be loaded");
+        let map_markers = map_markers_binding.read().map_markers.clone();
 
         let items: Vec<Item> =
             serde_json::from_slice::<Vec<Item>>(ITEM_DATA).expect("Item data should be loaded");
@@ -117,7 +113,7 @@ impl Component for Shops {
                     .height(Size::px(48.0))
                     .background(Color::from_hex("#222222").unwrap())
                     .corner_radius(8.0)
-                    .children([Input::new().width(Size::Fill).into()])
+                    //.children([Input::new().width(Size::Fill).into()])
                     .into(),
                 ScrollView::new()
                     .width(Size::Fill)

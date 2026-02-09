@@ -1,33 +1,50 @@
-use freya::prelude::*;
-use rustplus_rs::app_team_info::Member;
+use freya::{prelude::*, radio::use_radio};
 
-use crate::components::markers::{Align, base_marker};
+use crate::{
+    DataChannel, components::markers::{Align, base_marker}
+};
 
 #[derive(PartialEq)]
 pub struct Player {
-    pub member: Member,
+    pub member_id: u64,
     pub map_size: f32,
     pub margin: f32,
-    pub me: bool,
 }
 
 impl Player {
-    pub fn new(member: Member, map_size: f32, margin: f32, me: bool) -> Self {
+    pub fn new(
+        member_id: u64,
+        map_size: f32,
+        margin: f32,
+    ) -> Self {
         Self {
-            member,
+            member_id: member_id,
             map_size,
             margin,
-            me: me,
         }
     }
 }
 
 impl Component for Player {
     fn render(&self) -> impl IntoElement {
-        if self.me {
+        let radio = use_radio::<crate::Data, crate::DataChannel>(crate::DataChannel::TeamMemberUpdate(self.member_id));
+        let members = radio.slice_current(|s| &s.team_info.members);
+        let member = members.read().get(&self.member_id).cloned();
+
+        let user_data = radio.slice(DataChannel::UserDataUpdate, |s| &s.user_data);
+
+        if member.is_none() {
+            return rect().into();
+        }
+
+        let steam_id: u64 = user_data.read().steam_id.clone().unwrap_or("0".to_string()).parse().unwrap_or(0);
+        let me = steam_id == self.member_id;
+        let member = member.unwrap();
+
+        if me {
             base_marker(
-                self.member.x,
-                self.member.y,
+                member.x,
+                member.y,
                 12.0,
                 self.margin,
                 self.map_size,
@@ -44,8 +61,8 @@ impl Component for Player {
             .cross_align(Alignment::Center)
         } else {
             base_marker(
-                self.member.x,
-                self.member.y,
+                member.x,
+                member.y,
                 9.0,
                 self.margin,
                 self.map_size,
@@ -68,29 +85,9 @@ impl Component for Player {
                         .color(Color::from_hex("#aaee32").unwrap())
                         .font_size(6.0)
                         .max_lines(1)
-                        .text(format!("{}", self.member.name)),
+                        .text(format!("{}", member.name)),
                 ),
             )
         }
-        // .child(
-        //     rect().offset_y(4.0).child(
-        //         label()
-        //             .width(Size::px(500.0))
-        //             .text_align(TextAlign::Center)
-        //             // Magic numbers :)
-        //             //.font_size(8.864 / self.zoom + 2.446)
-        //             .font_size(12.0)
-        //             .font_family("PermanentMarker")
-        //             .color(Color::from_hex("#191919e6").unwrap())
-        //             .text(format!(
-        //                 "{}",
-        //                 self.team_members
-        //                     .iter()
-        //                     .find(|member| member.steam_id == self.marker.steam_id)
-        //                     .unwrap()
-        //                     .name
-        //             )),
-        //     ),
-        // )
     }
 }

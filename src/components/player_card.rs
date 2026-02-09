@@ -1,9 +1,6 @@
 use freya::{prelude::*, radio::use_radio};
 
-use crate::{
-    BORDER_COLOR, Data, DataChannel, ICON_COLOR, TEXT_COLOR, components::CachedImage,
-    utils::get_profile_pic,
-};
+use crate::{BORDER_COLOR, Data, DataChannel, ICON_COLOR, TEXT_COLOR, components::CachedImage};
 
 #[derive(PartialEq)]
 pub struct PlayerCard {
@@ -24,13 +21,8 @@ impl PlayerCard {
 
 impl Component for PlayerCard {
     fn render(&self) -> impl IntoElement {
-        let steam_profiles_binding =
-            use_radio::<Data, DataChannel>(DataChannel::SteamProfileUpdate(self.steam_id));
-        let steam_profile = steam_profiles_binding
-            .read()
-            .steam_profiles
-            .get(&self.steam_id)
-            .cloned();
+        let radio = use_radio::<Data, DataChannel>(DataChannel::TeamMemberUpdate(self.steam_id));
+        let steam_profile = radio.read().team_info.members.get(&self.steam_id).cloned();
 
         rect()
             .width(Size::Fill)
@@ -53,8 +45,12 @@ impl Component for PlayerCard {
                             .fill(Color::from_hex(BORDER_COLOR).unwrap())
                             .alignment(BorderAlignment::Outer),
                     )
-                    .child(if let Some(steam_profile) = steam_profile {
-                        CachedImage::new(steam_profile.avatar_icon).into_element()
+                    .child(if let Some(steam_profile) = &steam_profile {
+                        if let Some(profile_icon) = &steam_profile.profile_icon {
+                            CachedImage::new(profile_icon.clone()).into_element()
+                        } else {
+                            rect().into_element()
+                        }
                     } else {
                         rect().into_element()
                     })
@@ -65,7 +61,11 @@ impl Component for PlayerCard {
                         label()
                             .font_size(16.0)
                             .color(Color::from_hex(TEXT_COLOR).unwrap())
-                            .text(self.username.clone())
+                            .text(if let Some(steam_profile) = &steam_profile {
+                                steam_profile.name.clone()
+                            } else {
+                                self.username.clone()
+                            })
                             .into(),
                         rect()
                             .cross_align(Alignment::Center)

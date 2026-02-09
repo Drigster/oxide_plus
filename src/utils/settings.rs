@@ -145,8 +145,8 @@ pub fn load_user_data() -> Result<Option<UserData>, Box<dyn std::error::Error>> 
                     }
                 };
                 Some(UserData {
-                    steam_id: steam_id,
-                    token: steam_token,
+                    steam_id: Some(steam_id),
+                    token: Some(steam_token),
                 })
             }
             Err(e) => {
@@ -196,13 +196,13 @@ pub fn save_user_data(user_data: UserData) -> Result<(), Box<dyn std::error::Err
 
     let app_data = match app_data {
         Some(mut existing) => {
-            existing.steam_id = Some(user_data.steam_id);
-            existing.steam_token = Some(user_data.token);
+            existing.steam_id = user_data.steam_id;
+            existing.steam_token = user_data.token;
             existing
         }
         None => AppData {
-            steam_id: Some(user_data.steam_id),
-            steam_token: Some(user_data.token),
+            steam_id: user_data.steam_id,
+            steam_token: user_data.token,
             expo_token: None,
             fcm_data: None,
         },

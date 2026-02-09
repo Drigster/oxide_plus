@@ -1,6 +1,6 @@
 use freya::{prelude::*, radio::use_radio};
 
-use crate::{Data, DataChannel, TEXT_COLOR, components::CachedImage, utils::Profile};
+use crate::{Data, DataChannel, TEXT_COLOR, components::CachedImage};
 
 #[derive(PartialEq)]
 pub struct UserCard {}
@@ -13,28 +13,27 @@ impl UserCard {
 
 impl Component for UserCard {
     fn render(&self) -> impl IntoElement {
-        let user_data_binding = use_radio::<Data, DataChannel>(DataChannel::UserDataUpdate);
-        let user_data = user_data_binding
-            .read()
-            .user_data
-            .clone()
-            .expect("User data must be loaded");
+        let radio = use_radio::<Data, DataChannel>(DataChannel::UserDataUpdate);
+        let user_data = radio.slice_current(|s| &s.user_data);
 
-        let steam_id: u64 = user_data.steam_id.parse().unwrap();
+        let steam_id = user_data.read().steam_id.clone();
 
-        let steam_profiles_binding =
-            use_radio::<Data, DataChannel>(DataChannel::SteamProfileUpdate(steam_id.clone()));
-        let steam_profile = steam_profiles_binding
-            .read()
-            .steam_profiles
-            .get(&steam_id)
-            .cloned()
-            .unwrap_or(Profile {
-                avatar_full: "".to_string(),
-                avatar_medium: "".to_string(),
-                avatar_icon: "".to_string(),
-                username: "Unknown".to_string(),
-            });
+        if steam_id.is_none() {
+            return rect().into();
+        }
+
+        let steam_id: u64 = steam_id.unwrap().parse().unwrap_or(0);
+
+        let team_members = radio.slice(DataChannel::TeamMemberUpdate(steam_id), |s| {
+            &s.team_info.members
+        });
+        let team_member = team_members.read().get(&steam_id).cloned();
+
+        if team_member.is_none() {
+            return rect().into();
+        }
+
+        let team_member = team_member.unwrap();
 
         rect()
             .direction(Direction::Horizontal)
@@ -49,7 +48,7 @@ impl Component for UserCard {
                         label()
                             .font_size(12.0)
                             .color(Color::from_hex(TEXT_COLOR).unwrap())
-                            .text(steam_profile.username)
+                            .text(team_member.name)
                             .into(),
                         label()
                             .font_size(10.0)
@@ -63,7 +62,11 @@ impl Component for UserCard {
                     .height(Size::px(32.0))
                     .width(Size::px(32.0))
                     .overflow(Overflow::Clip)
-                    .child(CachedImage::new(steam_profile.avatar_icon.clone()))
+                    .maybe_child(if let Some(profile_icon) = &team_member.profile_icon {
+                        Some(CachedImage::new(profile_icon.clone()))
+                    } else {
+                        None
+                    })
                     .into(),
             ])
     }

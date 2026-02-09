@@ -33,42 +33,23 @@ pub struct Map {}
 
 impl Component for Map {
     fn render(&self) -> impl IntoElement {
-        let map_settings_binding = use_radio::<Data, DataChannel>(DataChannel::MapSettingsUpdate);
-        let map_settings = map_settings_binding.read().settings.map_settings.clone();
+        let radio = use_radio::<Data, DataChannel>(DataChannel::MapSettingsUpdate);
+        let grid = radio.slice_current(|s| &s.settings.map_settings.grid);
+        let markers = radio.slice_current(|s| &s.settings.map_settings.markers);
+        let deaths = radio.slice_current(|s| &s.settings.map_settings.deaths);
+        let monuments = radio.slice_current(|s| &s.settings.map_settings.monuments);
+        let shops = radio.slice_current(|s| &s.settings.map_settings.shops);
+        let center = radio.slice_current(|s| &s.settings.map_settings.center);
 
-        let map_state_binding = use_radio::<Data, DataChannel>(DataChannel::MapStateUpdate);
-        let map_state = map_state_binding.read().map_state.clone();
-        let marker_state_binding = use_radio::<Data, DataChannel>(DataChannel::MapMarkersUpdate);
-        let marker_state = marker_state_binding.read().map_markers.clone();
+        let zoom: State<f32> = use_state(|| 1.0);
 
-        let mut zoom: State<f32> = use_state(|| 1.0);
-
-        if let (Some(map_state), Some(marker_state)) = (map_state, marker_state) {
-            rect().child(
-                MapComponent::new()
-                    .grid(map_settings.grid)
-                    .markers(map_settings.markers)
-                    .deaths(map_settings.deaths)
-                    .monuments(map_settings.monuments)
-                    .shops(map_settings.shops)
-                    .zoom(zoom())
-                    .center(map_settings.center)
-                    .on_zoom(move |v| {
-                        zoom.set(v);
-                    })
-                    .on_center_cancel({
-                        let mut map_settings_binding = map_settings_binding.clone();
-                        move |_| {
-                            map_settings_binding.write().settings.map_settings.center = false;
-                        }
-                    }),
-            )
-        } else {
-            rect()
-                .expanded()
-                .background(Color::from_hex("#191919e6").unwrap())
-                .center()
-                .child(label().text("Map data is loading..."))
-        }
+        MapComponent::new()
+            .grid(grid.into_readable())
+            .markers(markers.into_readable())
+            .deaths(deaths.into_readable())
+            .monuments(monuments.into_readable())
+            .shops(shops.into_readable())
+            .zoom(zoom)
+            .center(center.into_readable())
     }
 }

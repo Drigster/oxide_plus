@@ -1,6 +1,4 @@
 use crate::utils::APP_DIR_NAME;
-use image::DynamicImage;
-use image::imageops::FilterType;
 use regex::Regex;
 use std::fs;
 use std::path::PathBuf;
@@ -105,10 +103,4 @@ fn get_cache_dir() -> Result<PathBuf, Box<dyn std::error::Error>> {
 
     fs::create_dir_all(&cache_dir)?;
     Ok(cache_dir)
-}
-
-fn downscale_image(bytes: Vec<u8>, width: u32, height: u32) -> DynamicImage {
-    let image = image::load_from_memory(&bytes).unwrap();
-
-    image.resize(width, height, FilterType::Lanczos3)
 }

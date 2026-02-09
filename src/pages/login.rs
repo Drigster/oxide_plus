@@ -6,12 +6,12 @@ use serde::{Deserialize, Serialize};
 use crate::{Data, DataChannel, app::Route, utils::save_user_data};
 use futures_lite::stream::StreamExt;
 
-#[derive(Deserialize, Serialize, Clone, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug, Default)]
 pub struct UserData {
     #[serde(rename = "SteamId")]
-    pub steam_id: String,
+    pub steam_id: Option<String>,
     #[serde(rename = "Token")]
-    pub token: String,
+    pub token: Option<String>,
 }
 
 #[derive(PartialEq)]
@@ -25,7 +25,7 @@ impl Component for Login {
         use_hook(|| {
             spawn(async move {
                 while let Some(data) = data_rx.next().await {
-                    radio.write_channel(DataChannel::UserDataUpdate).user_data = Some(data.clone());
+                    radio.write_channel(DataChannel::UserDataUpdate).user_data = data.clone();
                     match save_user_data(data) {
                         Ok(_) => println!("User data saved successfully."),
                         Err(e) => println!("Failed to save user data: {:?}", e),
