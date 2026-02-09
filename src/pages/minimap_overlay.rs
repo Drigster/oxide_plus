@@ -36,6 +36,7 @@ impl Component for Minimap {
         let monuments = radio.slice_current(|s| &s.settings.minimap_settings.monuments);
         let shops = radio.slice_current(|s| &s.settings.minimap_settings.shops);
         let zoom = radio.slice_mut_current(|s| &mut s.settings.minimap_settings.zoom);
+        let opacity = radio.slice_current(|s| &s.settings.minimap_settings.opacity);
 
         use_side_effect({
             let minimap_settings = minimap_settings.clone();
@@ -73,7 +74,7 @@ impl Component for Minimap {
                     MapComponent::new()
                         .interactable(false)
                         .center(true)
-                        .background_opacity(minimap_settings.read().opacity / 100.0)
+                        .background_opacity(opacity.into_readable())
                         .zoom(zoom.into_writable())
                         .grid(grid.into_readable())
                         .markers(markers.into_readable())

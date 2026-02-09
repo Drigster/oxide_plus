@@ -43,7 +43,7 @@ impl Map {
             monuments: false.into(),
             shops: false.into(),
 
-            background_opacity: 1.0.into(),
+            background_opacity: 100.0.into(),
             zoom: None,
         }
     }
@@ -231,10 +231,9 @@ struct ImageLayer {
 impl Component for ImageLayer {
     fn render(&self) -> impl IntoElement {
         rect()
-            .background(Color::BLUE)
             .width(Size::px(self.map_size))
             .height(Size::px(self.map_size))
-            .opacity(*self.background_opacity.read())
+            .opacity(*self.background_opacity.read() / 100.0)
             .child(
                 ImageViewer::new(("map", self.image_bytes))
                     .width(Size::px(self.map_size))
