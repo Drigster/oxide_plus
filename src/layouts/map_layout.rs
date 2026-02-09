@@ -1,4 +1,9 @@
-use freya::{prelude::*, radio::use_radio, router::Outlet};
+use freya::{
+    animation::{AnimNum, Ease, Function, OnCreation, use_animation},
+    prelude::*,
+    radio::use_radio,
+    router::Outlet,
+};
 use freya_router::prelude::RouterContext;
 
 use crate::{Data, DataChannel, app::Route, components::Button};
@@ -8,6 +13,28 @@ pub struct MapLayout {}
 impl Component for MapLayout {
     fn render(&self) -> impl IntoElement {
         let mut radio = use_radio::<Data, DataChannel>(DataChannel::MapSettingsUpdate);
+
+        let mut animation = use_animation(|_| {
+            AnimNum::new(0., 100.)
+                .function(Function::Linear)
+                .ease(Ease::InOut)
+                .time(200)
+        });
+
+        use_side_effect(move || {
+            println!("{}", *animation.has_run_yet().peek());
+            if RouterContext::get().current::<Route>() == Route::Map {
+                if *animation.has_run_yet().peek() == false {
+                    animation.finish();
+                } else {
+                    animation.start();
+                }
+            } else {
+                animation.reverse();
+            }
+        });
+
+        let value = animation.read().value();
 
         rect()
             .width(Size::Fill)
@@ -33,8 +60,11 @@ impl Component for MapLayout {
                             .active(RouterContext::get().current::<Route>() == Route::Map)
                             .into(),
                         rect()
+                            .padding(Gaps::new(0.0, 4.0, 0.0, 0.0))
                             .spacing(4.0)
                             .direction(Direction::Horizontal)
+                            .overflow(Overflow::Clip)
+                            .visible_width(VisibleSize::inner_percent(value))
                             .children([
                                 Button::new()
                                     .height(Size::Fill)
@@ -93,7 +123,6 @@ impl Component for MapLayout {
                                     .into(),
                             ])
                             .into(),
-                        rect().into(),
                         Button::new()
                             .width(Size::px(110.0))
                             .height(Size::Fill)
