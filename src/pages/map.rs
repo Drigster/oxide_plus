@@ -1,6 +1,6 @@
 use freya::{prelude::*, radio::use_radio};
 
-use crate::{Data, DataChannel, TEXT_COLOR, components::Map as MapComponent};
+use crate::{Data, DataChannel, components::Map as MapComponent};
 
 #[derive(Clone)]
 pub struct MapSettings {

@@ -1,10 +1,10 @@
+use euclid::Point2D;
 use freya::{
     animation::{AnimNum, Ease, use_animation},
     prelude::*,
-    radio::*,
 };
 
-use crate::{Data, DataChannel, TEXT_COLOR, components::CachedImage};
+use crate::{TEXT_COLOR, components::CachedImage};
 
 #[derive(Clone, PartialEq)]
 pub struct Dropdown {
@@ -22,6 +22,8 @@ pub struct Dropdown {
     background_chevron: Color,
     border: Border,
     font_size: f32,
+
+    hover: bool,
 }
 
 #[allow(dead_code)]
@@ -42,6 +44,8 @@ impl Dropdown {
             background_chevron: Color::default(),
             border: Border::default(),
             font_size: 12.0,
+
+            hover: false,
         }
     }
 
@@ -104,16 +108,26 @@ impl Dropdown {
         self.font_size = font_size;
         self
     }
+
+    pub fn hover(mut self, hover: bool) -> Self {
+        self.hover = hover;
+        self
+    }
 }
 
 impl Component for Dropdown {
     fn render(&self) -> impl IntoElement {
         let mut hovering = use_state(|| false);
         let mut hovering2 = use_state(|| false);
-        let mut size = use_state(|| 0.0);
+        let mut open = use_state(|| false);
+
+        let mut size: State<Area> =
+            use_state(|| Area::new(Point2D::new(0.0, 0.0), Size2D::new(0.0, 0.0)));
+        let mut size2: State<Area> =
+            use_state(|| Area::new(Point2D::new(0.0, 0.0), Size2D::new(0.0, 0.0)));
 
         use_drop(move || {
-            if hovering() || hovering2() {
+            if hovering() || hovering2() || open() {
                 Cursor::set(CursorIcon::default());
             }
         });
@@ -125,13 +139,16 @@ impl Component for Dropdown {
             )
         });
 
-        use_side_effect(move || {
-            if hovering() || hovering2() {
-                if animation.peek().0.value() != 100.0 {
-                    animation.start();
+        use_side_effect({
+            let hover = self.hover;
+            move || {
+                if ((hovering() || hovering2()) && hover) || open() {
+                    if animation.peek().0.value() != 100.0 && !*animation.is_running().read() {
+                        animation.start();
+                    }
+                } else if animation.peek().0.value() != 0.0 && !*animation.is_running().read() {
+                    animation.reverse();
                 }
-            } else if animation.peek().0.value() != 0.0 {
-                animation.reverse();
             }
         });
 
@@ -146,7 +163,7 @@ impl Component for Dropdown {
 
         rect()
             .on_sized(move |e: Event<SizedEventData>| {
-                size.set(e.area.height());
+                size.set(e.area);
             })
             .direction(Direction::Horizontal)
             .on_pointer_enter(move |_| {
@@ -158,6 +175,22 @@ impl Component for Dropdown {
                     Cursor::set(CursorIcon::default());
                     hovering.set(false);
                 }
+            })
+            .maybe(!self.hover, |rect| {
+                rect.on_global_mouse_up(move |ev: Event<MouseEventData>| {
+                    let global_x = ev.global_location.x as f32;
+                    let global_y = ev.global_location.y as f32;
+
+                    if global_x > size.read().origin.x
+                        && global_x < size.read().origin.x + size.read().size.width
+                        && global_y > size.read().origin.y
+                        && global_y < size.read().origin.y + size.read().size.height
+                    {
+                        open.set(!open());
+                    } else {
+                        open.set(false);
+                    }
+                })
             })
             .children([
                 rect()
@@ -189,8 +222,8 @@ impl Component for Dropdown {
                             ])
                             .into(),
                         rect()
-                            .width(Size::px(*size.read()))
-                            .height(Size::px(*size.read()))
+                            .width(Size::px(size.read().height()))
+                            .height(Size::px(size.read().height()))
                             .background(self.background_chevron)
                             .center()
                             .child(
@@ -203,26 +236,37 @@ impl Component for Dropdown {
                     ])
                     .into(),
                 rect()
+                    .on_sized(move |e: Event<SizedEventData>| {
+                        size2.set(e.area);
+                    })
                     .width(self.width.clone())
                     .layer(100)
-                    .position(Position::new_absolute().top(*size.read()))
+                    .position(Position::new_absolute().top(size.read().height()))
                     .overflow(Overflow::Clip)
                     .visible_height(VisibleSize::inner_percent(height))
-                    .on_press(move |_| {
-                        if hovering2() {
-                            Cursor::set(CursorIcon::default());
-                            hovering2.set(false);
-                        }
+                    .maybe(!self.hover, |rect| {
+                        rect.on_mouse_up(move |ev: Event<MouseEventData>| {
+                            ev.stop_propagation();
+                            ev.prevent_default();
+                        })
                     })
-                    .on_pointer_enter(move |_| {
-                        Cursor::set(CursorIcon::Pointer);
-                        hovering2.set(true);
-                    })
-                    .on_pointer_leave(move |_| {
-                        if hovering2() {
-                            Cursor::set(CursorIcon::default());
-                            hovering2.set(false);
-                        }
+                    .maybe(self.hover, |rect| {
+                        rect.on_press(move |_| {
+                            if hovering2() {
+                                Cursor::set(CursorIcon::default());
+                                hovering2.set(false);
+                            }
+                        })
+                        .on_pointer_enter(move |_| {
+                            Cursor::set(CursorIcon::Pointer);
+                            hovering2.set(true);
+                        })
+                        .on_pointer_leave(move |_| {
+                            if hovering2() {
+                                Cursor::set(CursorIcon::default());
+                                hovering2.set(false);
+                            }
+                        })
                     })
                     .maybe_child(self.child.clone())
                     .into(),

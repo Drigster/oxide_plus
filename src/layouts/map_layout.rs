@@ -1,5 +1,5 @@
 use freya::{
-    animation::{AnimNum, Ease, Function, OnCreation, use_animation},
+    animation::{AnimNum, Ease, use_animation},
     prelude::*,
     radio::use_radio,
     router::Outlet,
