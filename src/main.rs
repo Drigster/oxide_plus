@@ -234,7 +234,7 @@ fn main() {
                                         jpg_image: map_state.jpg_image,
                                         ocean_margin: map_state.ocean_margin,
                                         monuments: map_state.monuments,
-                                        background: map_state.background,
+                                        background: Some(map_state.background),
                                     }
                                 } else {
                                     MapState::default()
@@ -550,7 +550,7 @@ pub struct MapState {
     pub jpg_image: Vec<u8>,
     pub ocean_margin: i32,
     pub monuments: Vec<Monument>,
-    pub background: String,
+    pub background: Option<String>,
 }
 
 #[derive(Default, Clone, Debug)]

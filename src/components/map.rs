@@ -1,12 +1,8 @@
-use std::{collections::HashMap};
+use std::collections::HashMap;
 
 use euclid::Point2D;
 use freya::{prelude::*, radio::use_radio};
-use rustplus_rs::{
-    AppMarker, AppMarkerType,
-    app_map::Monument,
-    app_team_info::{ Note},
-};
+use rustplus_rs::{AppMarker, AppMarkerType, app_map::Monument, app_team_info::Note};
 
 use crate::{
     Data, DataChannel, TeamMember,
@@ -119,39 +115,50 @@ impl Component for Map {
 
         let mut pos: State<Point2D<f32, ()>> =
             use_state(|| Point2D::new(map_size / 2.0, map_size / 2.0));
-        let zoom = use_hook(|| self.zoom.clone().unwrap_or_else(|| State::create(1.0).into()));
+        let zoom = use_hook(|| {
+            self.zoom
+                .clone()
+                .unwrap_or_else(|| State::create(1.0).into())
+        });
 
-        let me_steam_id = user_data.read().steam_id.clone().unwrap_or("0".to_string()).parse().unwrap_or(0);
-        let me_radio = radio.slice(DataChannel::TeamMemberUpdate(me_steam_id), |s| &s.team_info.members);
+        let me_steam_id = user_data
+            .read()
+            .steam_id
+            .clone()
+            .unwrap_or("0".to_string())
+            .parse()
+            .unwrap_or(0);
+        let me_radio = radio.slice(DataChannel::TeamMemberUpdate(me_steam_id), |s| {
+            &s.team_info.members
+        });
         use_side_effect({
             let center = self.center.clone();
             let zoom = zoom.clone();
             move || {
-            let binding = me_radio.read();
-            let me = binding.get(&me_steam_id);
-            if me.is_none() {
-                return;
-            }
+                let binding = me_radio.read();
+                let me = binding.get(&me_steam_id);
+                if me.is_none() {
+                    return;
+                }
 
-            let me = me.unwrap();
+                let me = me.unwrap();
 
-            let point: Point2D<f32, ()> = Point2D::new(
-                -(me.x + margin),
-                -(map_size - me.y - margin),
-            );
-            if *center.read() {
-                // Scale the position and compensate for scale offset
-                // When content is scaled from top-left, we need to offset
-                // by half the size change to keep the target centered
-                let current_zoom = *zoom.read();
-                let scale_offset = map_size * (current_zoom - 1.0) / 2.0;
-                let scaled_point = Point2D::new(
-                    point.x * current_zoom + scale_offset,
-                    point.y * current_zoom + scale_offset,
-                );
-                *pos.write() = scaled_point;
+                let point: Point2D<f32, ()> =
+                    Point2D::new(-(me.x + margin), -(map_size - me.y - margin));
+                if *center.read() {
+                    // Scale the position and compensate for scale offset
+                    // When content is scaled from top-left, we need to offset
+                    // by half the size change to keep the target centered
+                    let current_zoom = *zoom.read();
+                    let scale_offset = map_size * (current_zoom - 1.0) / 2.0;
+                    let scaled_point = Point2D::new(
+                        point.x * current_zoom + scale_offset,
+                        point.y * current_zoom + scale_offset,
+                    );
+                    *pos.write() = scaled_point;
+                }
             }
-        }});
+        });
 
         let image_bytes: &'static [u8] =
             Box::leak(map_state.read().jpg_image.clone().into_boxed_slice());
@@ -162,11 +169,18 @@ impl Component for Map {
             .height(Size::Fill)
             .main_align(Alignment::Center)
             .cross_align(Alignment::Center)
-            // .background(
-            //     Color::from_hex(&map_state.read().background)
-            //         .unwrap()
-            //         .with_a((*self.background_opacity.read() * 255.0).round() as u8),
-            // )
+            .maybe(*self.background_opacity.read() >= 100.0, |rect| {
+                rect.background(
+                    Color::from_hex(
+                        &map_state
+                            .read()
+                            .background
+                            .clone()
+                            .unwrap_or_else(|| "#0b3b4a".to_string()),
+                    )
+                    .unwrap(),
+                )
+            })
             .children([DragableCanvas::new()
                 .interactable(self.interactable)
                 .children_size(Point2D::new(map_size, map_size))
