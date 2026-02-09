@@ -157,7 +157,6 @@ impl Component for Map {
             Box::leak(map_state.read().jpg_image.clone().into_boxed_slice());
 
         rect()
-            .corner_radius(8.0)
             .overflow(Overflow::Clip)
             .width(Size::Fill)
             .height(Size::Fill)

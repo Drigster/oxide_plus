@@ -66,13 +66,16 @@ impl Component for MinimapSettingsPage {
     fn render(&self) -> impl IntoElement {
         let mut minimap_settings_state =
             use_radio::<Data, DataChannel>(DataChannel::MinimapSettingsUpdate);
-        let monitor_size = minimap_settings_state.slice(DataChannel::MonitorSizeUpdate, |s| &s.monitor_size);
+        let monitor_size =
+            minimap_settings_state.slice(DataChannel::MonitorSizeUpdate, |s| &s.monitor_size);
 
         let state_tx = minimap_settings_state.read().state_tx.clone().unwrap();
 
         use_hook(|| {
             Platform::get().with_window(None, move |window| {
-                minimap_settings_state.write_channel(DataChannel::MonitorSizeUpdate).monitor_size = Some(window.current_monitor().unwrap().size());
+                minimap_settings_state
+                    .write_channel(DataChannel::MonitorSizeUpdate)
+                    .monitor_size = Some(window.current_monitor().unwrap().size());
             });
         });
 
@@ -138,44 +141,138 @@ impl Component for MinimapSettingsPage {
                             .text("ENABLED")
                             .into(),
                             Setting::new(SettingType::Dropdown(DropdownSettings {
-                                selected: match minimap_settings_state.read().settings.minimap_settings.position {
+                                selected: match minimap_settings_state
+                                    .read()
+                                    .settings
+                                    .minimap_settings
+                                    .position
+                                {
                                     Position::TopLeft => "Top Left".to_string(),
                                     Position::TopRight => "Top Right".to_string(),
                                     Position::BottomLeft => "Bottom Left".to_string(),
                                     Position::BottomRight => "Bottom Right".to_string(),
-                                } ,
+                                },
                                 options: vec![
                                     DropdownOption {
                                         name: "Top Left".to_string(),
                                         on_select: Some(EventHandler::new(move |_| {
-                                            minimap_settings_state.write().settings.minimap_settings.position = Position::TopLeft;
+                                            minimap_settings_state
+                                                .write()
+                                                .settings
+                                                .minimap_settings
+                                                .position = Position::TopLeft;
                                         })),
-                                        selected: (minimap_settings_state.read().settings.minimap_settings.position == Position::TopLeft).into(),
+                                        selected: (minimap_settings_state
+                                            .read()
+                                            .settings
+                                            .minimap_settings
+                                            .position
+                                            == Position::TopLeft)
+                                            .into(),
                                     },
                                     DropdownOption {
                                         name: "Top Right".to_string(),
                                         on_select: Some(EventHandler::new(move |_| {
-                                            minimap_settings_state.write().settings.minimap_settings.position = Position::TopRight;
+                                            minimap_settings_state
+                                                .write()
+                                                .settings
+                                                .minimap_settings
+                                                .position = Position::TopRight;
                                         })),
-                                        selected: (minimap_settings_state.read().settings.minimap_settings.position == Position::TopRight).into(),
+                                        selected: (minimap_settings_state
+                                            .read()
+                                            .settings
+                                            .minimap_settings
+                                            .position
+                                            == Position::TopRight)
+                                            .into(),
                                     },
                                     DropdownOption {
                                         name: "Bottom Left".to_string(),
                                         on_select: Some(EventHandler::new(move |_| {
-                                            minimap_settings_state.write().settings.minimap_settings.position = Position::BottomLeft;
+                                            minimap_settings_state
+                                                .write()
+                                                .settings
+                                                .minimap_settings
+                                                .position = Position::BottomLeft;
                                         })),
-                                        selected: (minimap_settings_state.read().settings.minimap_settings.position == Position::BottomLeft).into(),
+                                        selected: (minimap_settings_state
+                                            .read()
+                                            .settings
+                                            .minimap_settings
+                                            .position
+                                            == Position::BottomLeft)
+                                            .into(),
                                     },
                                     DropdownOption {
                                         name: "Bottom Right".to_string(),
                                         on_select: Some(EventHandler::new(move |_| {
-                                            minimap_settings_state.write().settings.minimap_settings.position = Position::BottomRight;
+                                            minimap_settings_state
+                                                .write()
+                                                .settings
+                                                .minimap_settings
+                                                .position = Position::BottomRight;
                                         })),
-                                        selected: (minimap_settings_state.read().settings.minimap_settings.position == Position::BottomRight).into(),
+                                        selected: (minimap_settings_state
+                                            .read()
+                                            .settings
+                                            .minimap_settings
+                                            .position
+                                            == Position::BottomRight)
+                                            .into(),
                                     },
                                 ],
                             }))
                             .text("POSITION")
+                            .into(),
+                            Setting::new(SettingType::Dropdown(DropdownSettings {
+                                selected: match minimap_settings_state
+                                    .read()
+                                    .settings
+                                    .minimap_settings
+                                    .shape
+                                {
+                                    Shape::Circle => "Circle".to_string(),
+                                    Shape::Square => "Square".to_string(),
+                                },
+                                options: vec![
+                                    DropdownOption {
+                                        name: "Circle".to_string(),
+                                        on_select: Some(EventHandler::new(move |_| {
+                                            minimap_settings_state
+                                                .write()
+                                                .settings
+                                                .minimap_settings
+                                                .shape = Shape::Circle;
+                                        })),
+                                        selected: (minimap_settings_state
+                                            .read()
+                                            .settings
+                                            .minimap_settings
+                                            .shape
+                                            == Shape::Circle)
+                                            .into(),
+                                    },
+                                    DropdownOption {
+                                        name: "Square".to_string(),
+                                        on_select: Some(EventHandler::new(move |_| {
+                                            minimap_settings_state
+                                                .write()
+                                                .settings
+                                                .minimap_settings
+                                                .shape = Shape::Square;
+                                        })),
+                                        selected: (minimap_settings_state
+                                            .read()
+                                            .settings
+                                            .minimap_settings
+                                            .shape
+                                            == Shape::Square)
+                                            .into(),
+                                    },
+                                ],
+                            }))
+                            .text("SHAPE")
                             .into(),
                             Setting::new(SettingType::Slider(SliderSettings {
                                 value: minimap_settings_state.read().settings.minimap_settings.size,

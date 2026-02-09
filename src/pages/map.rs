@@ -40,13 +40,15 @@ impl Component for Map {
 
         let zoom: State<f32> = use_state(|| 1.0);
 
-        MapComponent::new()
-            .grid(grid.into_readable())
-            .markers(markers.into_readable())
-            .deaths(deaths.into_readable())
-            .monuments(monuments.into_readable())
-            .shops(shops.into_readable())
-            .zoom(zoom)
-            .center(center.into_readable())
+        rect().overflow(Overflow::Clip).corner_radius(8.0).child(
+            MapComponent::new()
+                .grid(grid.into_readable())
+                .markers(markers.into_readable())
+                .deaths(deaths.into_readable())
+                .monuments(monuments.into_readable())
+                .shops(shops.into_readable())
+                .zoom(zoom)
+                .center(center.into_readable()),
+        )
     }
 }

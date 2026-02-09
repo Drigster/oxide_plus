@@ -132,9 +132,7 @@ impl Component for MapLayout {
                                     == Route::MinimapSettingsPage,
                             )
                             .into(),
-                        rect()
-                            .width(Size::flex(1.0))
-                            .into(),
+                        rect().width(Size::flex(1.0)).into(),
                         rect()
                             .overflow(Overflow::Clip)
                             .visible_width(VisibleSize::inner_percent(100.0 - value))
@@ -146,16 +144,20 @@ impl Component for MapLayout {
                                     .icon(freya_icons::lucide::save())
                                     .text("SAVE")
                                     .on_press(move |_| {
-                                        let minimap_settings = radio.read().settings.minimap_settings.clone();
+                                        let minimap_settings =
+                                            radio.read().settings.minimap_settings.clone();
                                         match save_minimap_settings(&minimap_settings) {
                                             Ok(_) => {
                                                 println!("Saved minimap settings");
-                                            },
+                                            }
                                             Err(err) => {
-                                                println!("Error saving minimap settings: {:?}", err);
+                                                println!(
+                                                    "Error saving minimap settings: {:?}",
+                                                    err
+                                                );
                                             }
                                         };
-                                    })
+                                    }),
                             )
                             .into(),
                     ])
