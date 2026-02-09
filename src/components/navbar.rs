@@ -1,7 +1,7 @@
 use freya::{prelude::*, radio::use_radio, router::RouterContext};
 
 use crate::{
-    BORDER_COLOR, Data, DataChannel,
+    BACKGROUND_COLOR, BORDER_COLOR, Data, DataChannel,
     app::Route,
     components::{Dropdown, ServerCard, UserCard},
 };
@@ -27,12 +27,7 @@ impl Component for Navbar {
         rect()
             .width(Size::percent(100.0))
             .height(Size::px(48.0))
-            .background_linear_gradient(
-                LinearGradient::new()
-                    .angle(0.0)
-                    .stop((Color::from_hex("#171715").unwrap(), 0.0))
-                    .stop((Color::from_hex("#11110F").unwrap(), 100.0)),
-            )
+            .background(Color::from_hex(BACKGROUND_COLOR).unwrap())
             .direction(Direction::Horizontal)
             .main_align(Alignment::SpaceBetween)
             .cross_align(Alignment::Center)
@@ -54,30 +49,37 @@ impl Component for Navbar {
                     } else {
                         "Retrieving...".to_string()
                     })
-                    .children(
-                        servers
-                            .into_iter()
-                            .map({
-                                let state_tx = state_tx.clone();
-                                move |server| {
-                                    ServerCard::new(server.logo.clone(), server.name.clone())
-                                        .on_press({
-                                            let state_tx = state_tx.clone();
-                                            move |_| {
-                                                state_tx
+                    .child(
+                        rect()
+                            .children(
+                                servers
+                                    .into_iter()
+                                    .map({
+                                        let state_tx = state_tx.clone();
+                                        move |server| {
+                                            ServerCard::new(
+                                                server.logo.clone(),
+                                                server.name.clone(),
+                                            )
+                                            .on_press({
+                                                let state_tx = state_tx.clone();
+                                                move |_| {
+                                                    state_tx
                                                     .unbounded_send(
                                                         crate::ChannelSend::SelectedServerUpdate(
                                                             Some(server.clone()),
                                                         ),
                                                     )
                                                     .unwrap();
-                                                RouterContext::get().replace(Route::Info);
-                                            }
-                                        })
-                                        .into()
-                                }
-                            })
-                            .collect::<Vec<Element>>(),
+                                                    RouterContext::get().replace(Route::Info);
+                                                }
+                                            })
+                                            .into()
+                                        }
+                                    })
+                                    .collect::<Vec<Element>>(),
+                            )
+                            .into(),
                     )
                     .into(),
                 UserCard::new().into(),

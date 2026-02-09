@@ -4,13 +4,13 @@ version = "0.2.1"
 edition = "2024"
 
 [dependencies]
-freya = { git = "https://github.com/marc2332/freya", features = [
+freya = { git = "https://github.com/marc2332/freya", branch = "main", features = [
     "radio",
     "router",
     "tray",
     "webview",
 ] }
-freya-icons = { git = "https://github.com/marc2332/freya", features = [
+freya-icons = { git = "https://github.com/marc2332/freya", branch = "main", features = [
     "lucide",
 ] }
 openssl = { version = "0.10", features = ["vendored"] }

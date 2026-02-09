@@ -43,6 +43,8 @@ const SIDEBAR_BUTTON_BACKGROUND_HOVER: &str = "#FFFFFF1A";
 const TEXT_COLOR: &str = "#E4DAD1";
 const ICON_COLOR: &str = "#605B55";
 const BORDER_COLOR: &str = "#393834";
+const INPUT_BACKGROUND: &str = "#434140";
+const BACKGROUND_COLOR: &str = "#1D1D1B";
 
 fn main() {
     let mut radio_station = RadioStation::create_global(Data::default());
@@ -449,7 +451,7 @@ fn main() {
                 }
             })
         .with_plugin(WebViewPlugin::new())
-        .with_tray(tray_icon, tray_handler)
+        //.with_tray(tray_icon, tray_handler)
         .with_window(
             WindowConfig::new_app(MyApp { radio_station })
         .with_size(1200.0, 800.0)

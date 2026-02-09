@@ -1,6 +1,6 @@
 use freya::{prelude::*, router::Outlet};
 
-use crate::{TEXT_COLOR, app::Route};
+use crate::{BACKGROUND_COLOR, TEXT_COLOR, app::Route};
 
 #[derive(PartialEq)]
 pub struct LoginLayout;
@@ -10,12 +10,7 @@ impl Component for LoginLayout {
             .width(Size::Fill)
             .height(Size::Fill)
             .cross_align(Alignment::Center)
-            .background_linear_gradient(
-                LinearGradient::new()
-                    .angle(0.0)
-                    .stop((Color::from_hex("#1D1D1B").unwrap(), 0.0))
-                    .stop((Color::from_hex("#0E0E0D").unwrap(), 100.0)),
-            )
+            .background(Color::from_hex(BACKGROUND_COLOR).unwrap())
             .content(Content::Flex)
             .children([
                 rect()

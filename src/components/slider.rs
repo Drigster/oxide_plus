@@ -1,6 +1,6 @@
 use freya::prelude::*;
 
-use crate::{SELECT_COLOR, TEXT_COLOR};
+use crate::{INPUT_BACKGROUND, SELECT_COLOR, TEXT_COLOR};
 
 #[derive(Clone, PartialEq)]
 pub struct Slider {
@@ -24,7 +24,7 @@ impl Slider {
             max: 100.0,
             step: 1.0,
             background: Color::from_hex(SELECT_COLOR).unwrap(),
-            background_fill: Color::from_hex("#434140").unwrap(),
+            background_fill: Color::from_hex(INPUT_BACKGROUND).unwrap(),
             on_changed: None,
         }
     }
@@ -87,9 +87,17 @@ impl Component for Slider {
                     .main_align(Alignment::Center)
                     .child(
                         label()
+                            .margin((0.0, 2.0))
                             .font_size(16.0)
+                            .font_weight(FontWeight::BOLD)
                             .color(Color::from_hex(TEXT_COLOR).unwrap())
-                            .text(self.value.to_string()),
+                            .text(if self.step < 0.1 {
+                                format!("{:.2}", self.value)
+                            } else if self.step < 1.0 {
+                                format!("{:.1}", self.value)
+                            } else {
+                                format!("{:.0}", self.value)
+                            }),
                     )
                     .into(),
                 rect()
@@ -101,7 +109,7 @@ impl Component for Slider {
                             .angle(-90.0)
                             .stop((Color::from_hex(SELECT_COLOR).unwrap(), 0.0))
                             .stop((Color::from_hex(SELECT_COLOR).unwrap(), slider_pos()))
-                            .stop((Color::from_hex("#434140").unwrap(), slider_pos())),
+                            .stop((Color::from_hex(INPUT_BACKGROUND).unwrap(), slider_pos())),
                     )
                     .on_mouse_down(move |e: Event<MouseEventData>| {
                         if e.button != Some(MouseButton::Left) {

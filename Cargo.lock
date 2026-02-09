@@ -1951,7 +1951,7 @@ dependencies = [
 [[package]]
 name = "freya"
 version = "0.4.0-rc.7"
-source = "git+https://github.com/marc2332/freya#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
+source = "git+https://github.com/marc2332/freya?branch=main#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
 dependencies = [
  "cfg-if",
  "freya-animation",
@@ -1971,7 +1971,7 @@ dependencies = [
 [[package]]
 name = "freya-animation"
 version = "0.4.0-rc.7"
-source = "git+https://github.com/marc2332/freya#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
+source = "git+https://github.com/marc2332/freya?branch=main#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
 dependencies = [
  "async-io",
  "easer",
@@ -1981,7 +1981,7 @@ dependencies = [
 [[package]]
 name = "freya-clipboard"
 version = "0.4.0-rc.7"
-source = "git+https://github.com/marc2332/freya#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
+source = "git+https://github.com/marc2332/freya?branch=main#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
 dependencies = [
  "copypasta",
  "freya-core",
@@ -1990,7 +1990,7 @@ dependencies = [
 [[package]]
 name = "freya-components"
 version = "0.4.0-rc.7"
-source = "git+https://github.com/marc2332/freya#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
+source = "git+https://github.com/marc2332/freya?branch=main#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
 dependencies = [
  "accesskit",
  "anyhow",
@@ -2014,7 +2014,7 @@ dependencies = [
 [[package]]
 name = "freya-core"
 version = "0.4.0-rc.7"
-source = "git+https://github.com/marc2332/freya#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
+source = "git+https://github.com/marc2332/freya?branch=main#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
 dependencies = [
  "accesskit",
  "async-broadcast",
@@ -2041,7 +2041,7 @@ dependencies = [
 [[package]]
 name = "freya-edit"
 version = "0.4.0-rc.7"
-source = "git+https://github.com/marc2332/freya#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
+source = "git+https://github.com/marc2332/freya?branch=main#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
 dependencies = [
  "bitflags 2.10.0",
  "freya-clipboard",
@@ -2055,7 +2055,7 @@ dependencies = [
 [[package]]
 name = "freya-engine"
 version = "0.4.0-rc.7"
-source = "git+https://github.com/marc2332/freya#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
+source = "git+https://github.com/marc2332/freya?branch=main#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
 dependencies = [
  "bitflags 2.10.0",
  "glutin",
@@ -2065,7 +2065,7 @@ dependencies = [
 [[package]]
 name = "freya-icons"
 version = "0.4.0-rc.7"
-source = "git+https://github.com/marc2332/freya#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
+source = "git+https://github.com/marc2332/freya?branch=main#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
 dependencies = [
  "bytes",
 ]
@@ -2073,7 +2073,7 @@ dependencies = [
 [[package]]
 name = "freya-radio"
 version = "0.4.0-rc.7"
-source = "git+https://github.com/marc2332/freya#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
+source = "git+https://github.com/marc2332/freya?branch=main#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
 dependencies = [
  "freya-core",
 ]
@@ -2081,7 +2081,7 @@ dependencies = [
 [[package]]
 name = "freya-router"
 version = "0.4.0-rc.7"
-source = "git+https://github.com/marc2332/freya#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
+source = "git+https://github.com/marc2332/freya?branch=main#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
 dependencies = [
  "freya-core",
  "freya-router-macro",
@@ -2093,7 +2093,7 @@ dependencies = [
 [[package]]
 name = "freya-router-macro"
 version = "0.4.0-rc.7"
-source = "git+https://github.com/marc2332/freya#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
+source = "git+https://github.com/marc2332/freya?branch=main#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2104,7 +2104,7 @@ dependencies = [
 [[package]]
 name = "freya-sdk"
 version = "0.4.0-rc.7"
-source = "git+https://github.com/marc2332/freya#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
+source = "git+https://github.com/marc2332/freya?branch=main#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
 dependencies = [
  "async-io",
  "freya-core",
@@ -2114,7 +2114,7 @@ dependencies = [
 [[package]]
 name = "freya-webview"
 version = "0.4.0-rc.7"
-source = "git+https://github.com/marc2332/freya#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
+source = "git+https://github.com/marc2332/freya?branch=main#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
 dependencies = [
  "accesskit",
  "freya-core",
@@ -2132,7 +2132,7 @@ dependencies = [
 [[package]]
 name = "freya-winit"
 version = "0.4.0-rc.7"
-source = "git+https://github.com/marc2332/freya#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
+source = "git+https://github.com/marc2332/freya?branch=main#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
 dependencies = [
  "accesskit",
  "accesskit_winit",
@@ -4337,7 +4337,7 @@ checksum = "df94ce210e5bc13cb6651479fa48d14f601d9858cfe0467f43ae157023b938d3"
 [[package]]
 name = "pathgraph"
 version = "0.4.0-rc.7"
-source = "git+https://github.com/marc2332/freya#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
+source = "git+https://github.com/marc2332/freya?branch=main#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
 
 [[package]]
 name = "pem-rfc7468"
@@ -4892,7 +4892,7 @@ checksum = "69cdb34c158ceb288df11e18b4bd39de994f6657d83847bdffdbd7f346754b0f"
 [[package]]
 name = "ragnarok"
 version = "0.4.0-rc.7"
-source = "git+https://github.com/marc2332/freya#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
+source = "git+https://github.com/marc2332/freya?branch=main#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
 dependencies = [
  "euclid",
  "hotpath",
@@ -6454,7 +6454,7 @@ checksum = "ab16f14aed21ee8bfd8ec22513f7287cd4a91aa92e44edfe2c17ddd004e92607"
 [[package]]
 name = "torin"
 version = "0.4.0-rc.7"
-source = "git+https://github.com/marc2332/freya#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
+source = "git+https://github.com/marc2332/freya?branch=main#2fbf3ca4f6feab76b737fe4626be2e9682659f94"
 dependencies = [
  "euclid",
  "itertools 0.14.0",

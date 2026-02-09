@@ -34,7 +34,7 @@ impl Component for MapLayout {
             .width(Size::Fill)
             .height(Size::Fill)
             .padding(8.0)
-            .spacing(4.0)
+            .spacing(8.0)
             .children([
                 rect()
                     .width(Size::Fill)

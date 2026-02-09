@@ -3,7 +3,7 @@ use freya::{prelude::*, radio::use_radio};
 use timeago::Formatter;
 
 use crate::{
-    Data, DataChannel, ICON_COLOR, TEXT_COLOR,
+    BACKGROUND_COLOR, Data, DataChannel, ICON_COLOR, TEXT_COLOR,
     components::{CachedImage, PlayerCard},
 };
 
@@ -58,7 +58,7 @@ impl Component for Info {
                             .padding(8.0)
                             .spacing(8.0)
                             .layer(Layer::Relative(2))
-                            .background(Color::from_hex("#1D1D1B").unwrap().with_a(191))
+                            .background(Color::from_hex(BACKGROUND_COLOR).unwrap().with_a(191))
                             .corner_radius(CornerRadius {
                                 top_left: 8.0,
                                 top_right: 0.0,
@@ -106,7 +106,7 @@ impl Component for Info {
                                     .width(Size::flex(1.0))
                                     .height(Size::Fill)
                                     .padding(8.0)
-                                    .background(Color::from_hex("#1D1D1B").unwrap())
+                                    .background(Color::from_hex(BACKGROUND_COLOR).unwrap())
                                     .corner_radius(8.0)
                                     .main_align(Alignment::SpaceBetween)
                                     .children([
@@ -149,7 +149,7 @@ impl Component for Info {
                                     .width(Size::flex(1.0))
                                     .height(Size::Fill)
                                     .padding(8.0)
-                                    .background(Color::from_hex("#1D1D1B").unwrap())
+                                    .background(Color::from_hex(BACKGROUND_COLOR).unwrap())
                                     .corner_radius(8.0)
                                     .main_align(Alignment::SpaceBetween)
                                     .cross_align(Alignment::End)
@@ -165,7 +165,9 @@ impl Component for Info {
                                                     .margin(8.0)
                                                     .width(Size::px(70.0))
                                                     .height(Size::px(70.0))
-                                                    .background(Color::from_hex("#1D1D1B").unwrap())
+                                                    .background(
+                                                        Color::from_hex(BACKGROUND_COLOR).unwrap(),
+                                                    )
                                                     .corner_radius(1000.0)
                                                     .overflow(Overflow::Clip)
                                                     .maybe_child(
@@ -232,7 +234,7 @@ impl Component for Info {
                                 rect()
                                     .width(Size::flex(1.0))
                                     .height(Size::Fill)
-                                    .background(Color::from_hex("#1D1D1B").unwrap())
+                                    .background(Color::from_hex(BACKGROUND_COLOR).unwrap())
                                     .corner_radius(8.0)
                                     .child(if team_members.read().len() > 0 {
                                         ScrollView::new()
@@ -319,7 +321,7 @@ impl Component for Info {
                                 rect()
                                     .width(Size::flex(1.0))
                                     .height(Size::Fill)
-                                    .background(Color::from_hex("#1D1D1B").unwrap())
+                                    .background(Color::from_hex(BACKGROUND_COLOR).unwrap())
                                     .corner_radius(8.0)
                                     .child(
                                         if let Some(selected_server) = &radio.read().selected_server
@@ -384,7 +386,7 @@ impl Component for InfoCard {
                     .width(Size::px(36.0))
                     .height(Size::px(36.0))
                     .padding(6.0)
-                    .background(Color::from_hex("#1D1D1B").unwrap())
+                    .background(Color::from_hex(BACKGROUND_COLOR).unwrap())
                     .corner_radius(4.0)
                     .child(
                         svg(self.icon.clone())

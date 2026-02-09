@@ -1,8 +1,11 @@
 use freya::{prelude::*, radio::use_radio};
 
 use crate::{
-    Data, DataChannel, SELECT_COLOR, TEXT_COLOR,
-    components::{MAX_ZOOM, MIN_ZOOM, Setting, SettingType, SliderSettings, ToggleSettings},
+    BACKGROUND_COLOR, Data, DataChannel, SELECT_COLOR, TEXT_COLOR,
+    components::{
+        DropdownOption, DropdownSettings, MAX_ZOOM, MIN_ZOOM, Setting, SettingType, SliderSettings,
+        ToggleSettings,
+    },
     pages::Shape,
 };
 
@@ -88,243 +91,266 @@ impl Component for MinimapSettingsPage {
         rect()
             .width(Size::Fill)
             .height(Size::Fill)
-            .padding(8.0)
+            .background(Color::from_hex(BACKGROUND_COLOR).unwrap())
+            .corner_radius(8.0)
             .child(
                 ScrollView::new()
                     .width(Size::Fill)
                     .height(Size::Fill)
-                    .spacing(4.0)
-                    .children([
-                        rect()
-                            .width(Size::Fill)
-                            .height(Size::px(48.0))
-                            .padding(8.0)
-                            .spacing(8.0)
-                            .direction(Direction::Horizontal)
-                            .cross_align(Alignment::Center)
-                            .children([
-                                svg(freya_icons::lucide::map())
-                                    .height(Size::Fill)
-                                    .color(Color::from_hex(SELECT_COLOR).unwrap())
-                                    .into(),
-                                label()
-                                    .font_size(24.0)
-                                    .font_weight(FontWeight::BOLD)
-                                    .color(Color::from_hex(TEXT_COLOR).unwrap())
-                                    .text("POSITION")
-                                    .into(),
-                            ])
+                    .child(
+                        rect().padding(8.0).spacing(4.0).children([
+                            rect()
+                                .width(Size::Fill)
+                                .height(Size::px(48.0))
+                                .padding(8.0)
+                                .spacing(8.0)
+                                .direction(Direction::Horizontal)
+                                .cross_align(Alignment::Center)
+                                .children([
+                                    svg(freya_icons::lucide::map())
+                                        .height(Size::Fill)
+                                        .color(Color::from_hex(SELECT_COLOR).unwrap())
+                                        .into(),
+                                    label()
+                                        .font_size(24.0)
+                                        .font_weight(FontWeight::BOLD)
+                                        .color(Color::from_hex(TEXT_COLOR).unwrap())
+                                        .text("POSITION")
+                                        .into(),
+                                ])
+                                .into(),
+                            Setting::new(SettingType::Toggle(ToggleSettings {
+                                value: minimap_settings_state
+                                    .read()
+                                    .settings
+                                    .minimap_settings
+                                    .enabled,
+                                on_change: Some(EventHandler::new(move |value: bool| {
+                                    state_tx
+                                        .unbounded_send(crate::ChannelSend::ToggleMinimap(value))
+                                        .unwrap();
+                                    minimap_settings_state
+                                        .write()
+                                        .settings
+                                        .minimap_settings
+                                        .enabled = value;
+                                })),
+                            }))
+                            .text("ENABLED")
                             .into(),
-                        Setting::new(SettingType::Toggle(ToggleSettings {
-                            value: minimap_settings_state
-                                .read()
-                                .settings
-                                .minimap_settings
-                                .enabled,
-                            on_change: Some(EventHandler::new(move |value: bool| {
-                                state_tx
-                                    .unbounded_send(crate::ChannelSend::ToggleMinimap(value))
-                                    .unwrap();
-                                minimap_settings_state
-                                    .write()
-                                    .settings
-                                    .minimap_settings
-                                    .enabled = value;
-                            })),
-                        }))
-                        .text("ENABLED")
-                        .into(),
-                        Setting::new(SettingType::Toggle(ToggleSettings {
-                            value: false,
-                            on_change: None,
-                        }))
-                        .text("POSITION")
-                        .into(),
-                        Setting::new(SettingType::Slider(SliderSettings {
-                            value: minimap_settings_state.read().settings.minimap_settings.size,
-                            min: 100.0,
-                            max: 500.0,
-                            step: 10.0,
-                            on_change: Some(EventHandler::new(move |value: f32| {
-                                println!("New size: {}", value);
-                                minimap_settings_state
-                                    .write()
-                                    .settings
-                                    .minimap_settings
-                                    .size = value;
-                            })),
-                        }))
-                        .text("SIZE")
-                        .into(),
-                        Setting::new(SettingType::Slider(SliderSettings {
-                            value: minimap_settings_state.read().settings.minimap_settings.zoom,
-                            min: MIN_ZOOM as f32,
-                            max: MAX_ZOOM as f32,
-                            step: 0.1,
-                            on_change: Some(EventHandler::new(move |value: f32| {
-                                minimap_settings_state
-                                    .write()
-                                    .settings
-                                    .minimap_settings
-                                    .zoom = value;
-                            })),
-                        }))
-                        .text("ZOOM")
-                        .into(),
-                        Setting::new(SettingType::Slider(SliderSettings {
-                            value: minimap_settings_state
-                                .read()
-                                .settings
-                                .minimap_settings
-                                .offset_x,
-                            min: 0.0,
-                            max: max_offset_x,
-                            step: 1.0,
-                            on_change: Some(EventHandler::new(move |value: f32| {
-                                minimap_settings_state
-                                    .write()
-                                    .settings
-                                    .minimap_settings
-                                    .offset_x = value;
-                            })),
-                        }))
-                        .text("OFFSET_X")
-                        .into(),
-                        Setting::new(SettingType::Slider(SliderSettings {
-                            value: minimap_settings_state
-                                .read()
-                                .settings
-                                .minimap_settings
-                                .offset_y,
-                            min: 0.0,
-                            max: max_offset_y,
-                            step: 1.0,
-                            on_change: Some(EventHandler::new(move |value: f32| {
-                                minimap_settings_state
-                                    .write()
-                                    .settings
-                                    .minimap_settings
-                                    .offset_y = value;
-                            })),
-                        }))
-                        .text("OFFSET_Y")
-                        .into(),
-                        Setting::new(SettingType::Slider(SliderSettings {
-                            value: minimap_settings_state
-                                .read()
-                                .settings
-                                .minimap_settings
-                                .opacity,
-                            min: 1.0,
-                            max: 100.0,
-                            step: 1.0,
-                            on_change: Some(EventHandler::new(move |value: f32| {
-                                minimap_settings_state
-                                    .write()
-                                    .settings
-                                    .minimap_settings
-                                    .opacity = value;
-                            })),
-                        }))
-                        .text("OPACITY")
-                        .into(),
-                        rect()
-                            .width(Size::Fill)
-                            .height(Size::px(48.0))
-                            .padding(8.0)
-                            .spacing(8.0)
-                            .direction(Direction::Horizontal)
-                            .cross_align(Alignment::Center)
-                            .children([
-                                svg(freya_icons::lucide::toggle_left())
-                                    .height(Size::Fill)
-                                    .color(Color::from_hex(SELECT_COLOR).unwrap())
-                                    .into(),
-                                label()
-                                    .font_size(24.0)
-                                    .font_weight(FontWeight::BOLD)
-                                    .color(Color::from_hex(TEXT_COLOR).unwrap())
-                                    .text("TOGGLES")
-                                    .into(),
-                            ])
+                            Setting::new(SettingType::Dropdown(DropdownSettings {
+                                selected: "Top Left".to_string(),
+                                options: vec![
+                                    DropdownOption {
+                                        name: "Top Left".to_string(),
+                                        on_select: None,
+                                        selected: true.into(),
+                                    },
+                                    DropdownOption {
+                                        name: "Top Right".to_string(),
+                                        on_select: None,
+                                        selected: false.into(),
+                                    },
+                                    DropdownOption {
+                                        name: "Bottom Left".to_string(),
+                                        on_select: None,
+                                        selected: false.into(),
+                                    },
+                                    DropdownOption {
+                                        name: "Bottom Right".to_string(),
+                                        on_select: None,
+                                        selected: false.into(),
+                                    },
+                                ],
+                            }))
+                            .text("POSITION")
                             .into(),
-                        Setting::new(SettingType::Toggle(ToggleSettings {
-                            value: minimap_settings_state
-                                .read()
-                                .settings
-                                .minimap_settings
-                                .deaths,
-                            on_change: Some(EventHandler::new(move |value: bool| {
-                                minimap_settings_state
-                                    .write()
+                            Setting::new(SettingType::Slider(SliderSettings {
+                                value: minimap_settings_state.read().settings.minimap_settings.size,
+                                min: 100.0,
+                                max: 500.0,
+                                step: 10.0,
+                                on_change: Some(EventHandler::new(move |value: f32| {
+                                    println!("New size: {}", value);
+                                    minimap_settings_state
+                                        .write()
+                                        .settings
+                                        .minimap_settings
+                                        .size = value;
+                                })),
+                            }))
+                            .text("SIZE")
+                            .into(),
+                            Setting::new(SettingType::Slider(SliderSettings {
+                                value: minimap_settings_state.read().settings.minimap_settings.zoom,
+                                min: MIN_ZOOM as f32,
+                                max: MAX_ZOOM as f32,
+                                step: 0.1,
+                                on_change: Some(EventHandler::new(move |value: f32| {
+                                    minimap_settings_state
+                                        .write()
+                                        .settings
+                                        .minimap_settings
+                                        .zoom = value;
+                                })),
+                            }))
+                            .text("ZOOM")
+                            .into(),
+                            Setting::new(SettingType::Slider(SliderSettings {
+                                value: minimap_settings_state
+                                    .read()
                                     .settings
                                     .minimap_settings
-                                    .deaths = value;
-                            })),
-                        }))
-                        .text("DEATHS")
-                        .into(),
-                        Setting::new(SettingType::Toggle(ToggleSettings {
-                            value: minimap_settings_state.read().settings.minimap_settings.grid,
-                            on_change: Some(EventHandler::new(move |value: bool| {
-                                minimap_settings_state
-                                    .write()
+                                    .offset_x,
+                                min: 0.0,
+                                max: max_offset_x,
+                                step: 1.0,
+                                on_change: Some(EventHandler::new(move |value: f32| {
+                                    minimap_settings_state
+                                        .write()
+                                        .settings
+                                        .minimap_settings
+                                        .offset_x = value;
+                                })),
+                            }))
+                            .text("OFFSET_X")
+                            .into(),
+                            Setting::new(SettingType::Slider(SliderSettings {
+                                value: minimap_settings_state
+                                    .read()
                                     .settings
                                     .minimap_settings
-                                    .grid = value;
-                            })),
-                        }))
-                        .text("GRID")
-                        .into(),
-                        Setting::new(SettingType::Toggle(ToggleSettings {
-                            value: minimap_settings_state
-                                .read()
-                                .settings
-                                .minimap_settings
-                                .markers,
-                            on_change: Some(EventHandler::new(move |value: bool| {
-                                minimap_settings_state
-                                    .write()
+                                    .offset_y,
+                                min: 0.0,
+                                max: max_offset_y,
+                                step: 1.0,
+                                on_change: Some(EventHandler::new(move |value: f32| {
+                                    minimap_settings_state
+                                        .write()
+                                        .settings
+                                        .minimap_settings
+                                        .offset_y = value;
+                                })),
+                            }))
+                            .text("OFFSET_Y")
+                            .into(),
+                            Setting::new(SettingType::Slider(SliderSettings {
+                                value: minimap_settings_state
+                                    .read()
                                     .settings
                                     .minimap_settings
-                                    .markers = value;
-                            })),
-                        }))
-                        .text("MARKERS")
-                        .into(),
-                        Setting::new(SettingType::Toggle(ToggleSettings {
-                            value: minimap_settings_state
-                                .read()
-                                .settings
-                                .minimap_settings
-                                .monuments,
-                            on_change: Some(EventHandler::new(move |value: bool| {
-                                minimap_settings_state
-                                    .write()
+                                    .opacity,
+                                min: 1.0,
+                                max: 100.0,
+                                step: 1.0,
+                                on_change: Some(EventHandler::new(move |value: f32| {
+                                    minimap_settings_state
+                                        .write()
+                                        .settings
+                                        .minimap_settings
+                                        .opacity = value;
+                                })),
+                            }))
+                            .text("OPACITY")
+                            .into(),
+                            rect()
+                                .width(Size::Fill)
+                                .height(Size::px(48.0))
+                                .padding(8.0)
+                                .spacing(8.0)
+                                .direction(Direction::Horizontal)
+                                .cross_align(Alignment::Center)
+                                .children([
+                                    svg(freya_icons::lucide::toggle_left())
+                                        .height(Size::Fill)
+                                        .color(Color::from_hex(SELECT_COLOR).unwrap())
+                                        .into(),
+                                    label()
+                                        .font_size(24.0)
+                                        .font_weight(FontWeight::BOLD)
+                                        .color(Color::from_hex(TEXT_COLOR).unwrap())
+                                        .text("TOGGLES")
+                                        .into(),
+                                ])
+                                .into(),
+                            Setting::new(SettingType::Toggle(ToggleSettings {
+                                value: minimap_settings_state
+                                    .read()
                                     .settings
                                     .minimap_settings
-                                    .monuments = value;
-                            })),
-                        }))
-                        .text("MONUMENTS")
-                        .into(),
-                        Setting::new(SettingType::Toggle(ToggleSettings {
-                            value: minimap_settings_state
-                                .read()
-                                .settings
-                                .minimap_settings
-                                .shops,
-                            on_change: Some(EventHandler::new(move |value: bool| {
-                                minimap_settings_state
-                                    .write()
+                                    .deaths,
+                                on_change: Some(EventHandler::new(move |value: bool| {
+                                    minimap_settings_state
+                                        .write()
+                                        .settings
+                                        .minimap_settings
+                                        .deaths = value;
+                                })),
+                            }))
+                            .text("DEATHS")
+                            .into(),
+                            Setting::new(SettingType::Toggle(ToggleSettings {
+                                value: minimap_settings_state.read().settings.minimap_settings.grid,
+                                on_change: Some(EventHandler::new(move |value: bool| {
+                                    minimap_settings_state
+                                        .write()
+                                        .settings
+                                        .minimap_settings
+                                        .grid = value;
+                                })),
+                            }))
+                            .text("GRID")
+                            .into(),
+                            Setting::new(SettingType::Toggle(ToggleSettings {
+                                value: minimap_settings_state
+                                    .read()
                                     .settings
                                     .minimap_settings
-                                    .shops = value;
-                            })),
-                        }))
-                        .text("SHOPS")
-                        .into(),
-                    ]),
+                                    .markers,
+                                on_change: Some(EventHandler::new(move |value: bool| {
+                                    minimap_settings_state
+                                        .write()
+                                        .settings
+                                        .minimap_settings
+                                        .markers = value;
+                                })),
+                            }))
+                            .text("MARKERS")
+                            .into(),
+                            Setting::new(SettingType::Toggle(ToggleSettings {
+                                value: minimap_settings_state
+                                    .read()
+                                    .settings
+                                    .minimap_settings
+                                    .monuments,
+                                on_change: Some(EventHandler::new(move |value: bool| {
+                                    minimap_settings_state
+                                        .write()
+                                        .settings
+                                        .minimap_settings
+                                        .monuments = value;
+                                })),
+                            }))
+                            .text("MONUMENTS")
+                            .into(),
+                            Setting::new(SettingType::Toggle(ToggleSettings {
+                                value: minimap_settings_state
+                                    .read()
+                                    .settings
+                                    .minimap_settings
+                                    .shops,
+                                on_change: Some(EventHandler::new(move |value: bool| {
+                                    minimap_settings_state
+                                        .write()
+                                        .settings
+                                        .minimap_settings
+                                        .shops = value;
+                                })),
+                            }))
+                            .text("SHOPS")
+                            .into(),
+                        ]),
+                    ),
             )
     }
 }
