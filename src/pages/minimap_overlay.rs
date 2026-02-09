@@ -38,12 +38,41 @@ impl Component for Minimap {
         let zoom = radio.slice_mut_current(|s| &mut s.settings.minimap_settings.zoom);
         let opacity = radio.slice_current(|s| &s.settings.minimap_settings.opacity);
 
+        let minimap_size = radio.slice(DataChannel::MinimapSettingsUpdate, |s| &s.settings.minimap_settings.size);
+        let monitor_size = radio.slice(DataChannel::MonitorSizeUpdate, |s| &s.monitor_size);
+
         use_side_effect({
             let minimap_settings = minimap_settings.clone();
             move || {
-                let offset_x = minimap_settings.read().offset_x.clone();
+                let monitor_size = monitor_size.read().unwrap_or(PhysicalSize::new(1920, 1080));
 
-                let offset_y = minimap_settings.read().offset_y.clone();
+                let (offset_x, offset_y) = match minimap_settings.read().position {
+                    super::Position::TopLeft => {
+                        (
+                            minimap_settings.read().offset_x.clone(), 
+                            minimap_settings.read().offset_y.clone()
+                        )
+                    },
+                    super::Position::TopRight => {
+                        (
+                            monitor_size.width as f32 - minimap_size.read().clone() as f32 - minimap_settings.read().offset_x.clone(), 
+                            minimap_settings.read().offset_y.clone()
+                        )
+                    },
+                    super::Position::BottomLeft => {
+                        (
+                            minimap_settings.read().offset_x.clone(), 
+                            monitor_size.height as f32 - minimap_size.read().clone() as f32 - minimap_settings.read().offset_y.clone()
+                        )
+                    },
+                    super::Position::BottomRight => {
+                        (
+                            monitor_size.width as f32 - minimap_size.read().clone() as f32 - minimap_settings.read().offset_x.clone(), 
+                            monitor_size.height as f32 - minimap_size.read().clone() as f32 - minimap_settings.read().offset_y.clone()
+                        )
+                    },
+                };
+                
 
                 Platform::get().with_window(None, move |window| {
                     window.set_outer_position(PhysicalPosition::new(offset_x, offset_y));

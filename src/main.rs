@@ -10,7 +10,7 @@ use freya::{
     radio::{RadioChannel, RadioStation},
     tray::{
         TrayEvent, TrayIconBuilder,
-        dpi::PhysicalPosition,
+        dpi::{PhysicalPosition, PhysicalSize},
         menu::{Menu, MenuEvent, MenuItem},
     },
     webview::WebViewPlugin,
@@ -451,7 +451,7 @@ fn main() {
                 }
             })
         .with_plugin(WebViewPlugin::new())
-        //.with_tray(tray_icon, tray_handler)
+        .with_tray(tray_icon, tray_handler)
         .with_window(
             WindowConfig::new_app(MyApp { radio_station })
         .with_size(1200.0, 800.0)
@@ -559,6 +559,8 @@ pub struct Data {
 
     pub state_tx: Option<futures_channel::mpsc::UnboundedSender<ChannelSend>>,
     pub minimap_window_id: Option<WindowId>,
+
+    pub monitor_size: Option<PhysicalSize<u32>>,
 }
 
 #[derive(PartialEq, Eq, Clone, Debug, Copy, Hash)]
@@ -579,6 +581,7 @@ pub enum DataChannel {
     SettingsUpdate,
     MapSettingsUpdate,
     MinimapSettingsUpdate,
+    MonitorSizeUpdate,
 }
 
 impl RadioChannel<Data> for DataChannel {}

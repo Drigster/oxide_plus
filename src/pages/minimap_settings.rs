@@ -9,7 +9,7 @@ use crate::{
     pages::Shape,
 };
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 #[allow(dead_code)]
 pub enum Position {
     TopLeft,
@@ -65,15 +65,13 @@ impl Component for MinimapSettingsPage {
     fn render(&self) -> impl IntoElement {
         let mut minimap_settings_state =
             use_radio::<Data, DataChannel>(DataChannel::MinimapSettingsUpdate);
-
-        let mut monitor_size: State<Option<freya::tray::dpi::PhysicalSize<u32>>> =
-            use_state(|| None);
+        let monitor_size = minimap_settings_state.slice(DataChannel::MonitorSizeUpdate, |s| &s.monitor_size);
 
         let state_tx = minimap_settings_state.read().state_tx.clone().unwrap();
 
         use_hook(|| {
             Platform::get().with_window(None, move |window| {
-                *monitor_size.write() = Some(window.current_monitor().unwrap().size());
+                minimap_settings_state.write_channel(DataChannel::MonitorSizeUpdate).monitor_size = Some(window.current_monitor().unwrap().size());
             });
         });
 
@@ -115,7 +113,7 @@ impl Component for MinimapSettingsPage {
                                         .font_size(24.0)
                                         .font_weight(FontWeight::BOLD)
                                         .color(Color::from_hex(TEXT_COLOR).unwrap())
-                                        .text("POSITION")
+                                        .text("MINIMAP")
                                         .into(),
                                 ])
                                 .into(),
@@ -139,27 +137,40 @@ impl Component for MinimapSettingsPage {
                             .text("ENABLED")
                             .into(),
                             Setting::new(SettingType::Dropdown(DropdownSettings {
-                                selected: "Top Left".to_string(),
+                                selected: match minimap_settings_state.read().settings.minimap_settings.position {
+                                    Position::TopLeft => "Top Left".to_string(),
+                                    Position::TopRight => "Top Right".to_string(),
+                                    Position::BottomLeft => "Bottom Left".to_string(),
+                                    Position::BottomRight => "Bottom Right".to_string(),
+                                } ,
                                 options: vec![
                                     DropdownOption {
                                         name: "Top Left".to_string(),
-                                        on_select: None,
-                                        selected: true.into(),
+                                        on_select: Some(EventHandler::new(move |_| {
+                                            minimap_settings_state.write().settings.minimap_settings.position = Position::TopLeft;
+                                        })),
+                                        selected: (minimap_settings_state.read().settings.minimap_settings.position == Position::TopLeft).into(),
                                     },
                                     DropdownOption {
                                         name: "Top Right".to_string(),
-                                        on_select: None,
-                                        selected: false.into(),
+                                        on_select: Some(EventHandler::new(move |_| {
+                                            minimap_settings_state.write().settings.minimap_settings.position = Position::TopRight;
+                                        })),
+                                        selected: (minimap_settings_state.read().settings.minimap_settings.position == Position::TopRight).into(),
                                     },
                                     DropdownOption {
                                         name: "Bottom Left".to_string(),
-                                        on_select: None,
-                                        selected: false.into(),
+                                        on_select: Some(EventHandler::new(move |_| {
+                                            minimap_settings_state.write().settings.minimap_settings.position = Position::BottomLeft;
+                                        })),
+                                        selected: (minimap_settings_state.read().settings.minimap_settings.position == Position::BottomLeft).into(),
                                     },
                                     DropdownOption {
                                         name: "Bottom Right".to_string(),
-                                        on_select: None,
-                                        selected: false.into(),
+                                        on_select: Some(EventHandler::new(move |_| {
+                                            minimap_settings_state.write().settings.minimap_settings.position = Position::BottomRight;
+                                        })),
+                                        selected: (minimap_settings_state.read().settings.minimap_settings.position == Position::BottomRight).into(),
                                     },
                                 ],
                             }))
