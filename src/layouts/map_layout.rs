@@ -14,22 +14,16 @@ impl Component for MapLayout {
     fn render(&self) -> impl IntoElement {
         let mut radio = use_radio::<Data, DataChannel>(DataChannel::MapSettingsUpdate);
 
-        let mut animation = use_animation(|_| {
-            AnimNum::new(0., 100.)
-                .function(Function::Linear)
-                .ease(Ease::InOut)
-                .time(200)
-        });
+        let mut animation = use_animation(|_| AnimNum::new(0., 100.).ease(Ease::InOut).time(200));
 
         use_side_effect(move || {
-            println!("{}", *animation.has_run_yet().peek());
             if RouterContext::get().current::<Route>() == Route::Map {
                 if *animation.has_run_yet().peek() == false {
                     animation.finish();
-                } else {
+                } else if animation.peek().value() != 100.0 {
                     animation.start();
                 }
-            } else {
+            } else if animation.peek().value() != 0.0 {
                 animation.reverse();
             }
         });
