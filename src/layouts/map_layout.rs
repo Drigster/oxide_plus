@@ -6,7 +6,7 @@ use freya::{
 };
 use freya_router::prelude::RouterContext;
 
-use crate::{Data, DataChannel, app::Route, components::Button};
+use crate::{Data, DataChannel, app::Route, components::Button, utils::save_minimap_settings};
 
 #[derive(PartialEq)]
 pub struct MapLayout {}
@@ -41,6 +41,7 @@ impl Component for MapLayout {
                     .height(Size::px(40.0))
                     .spacing(4.0)
                     .direction(Direction::Horizontal)
+                    .content(Content::Flex)
                     .children([
                         Button::new()
                             .width(Size::px(110.0))
@@ -129,6 +130,32 @@ impl Component for MapLayout {
                             .active(
                                 RouterContext::get().current::<Route>()
                                     == Route::MinimapSettingsPage,
+                            )
+                            .into(),
+                        rect()
+                            .width(Size::flex(1.0))
+                            .into(),
+                        rect()
+                            .overflow(Overflow::Clip)
+                            .visible_width(VisibleSize::inner_percent(100.0 - value))
+                            .child(
+                                Button::new()
+                                    .width(Size::px(110.0))
+                                    .height(Size::Fill)
+                                    .align(Alignment::Center)
+                                    .icon(freya_icons::lucide::save())
+                                    .text("SAVE")
+                                    .on_press(move |_| {
+                                        let minimap_settings = radio.read().settings.minimap_settings.clone();
+                                        match save_minimap_settings(&minimap_settings) {
+                                            Ok(_) => {
+                                                println!("Saved minimap settings");
+                                            },
+                                            Err(err) => {
+                                                println!("Error saving minimap settings: {:?}", err);
+                                            }
+                                        };
+                                    })
                             )
                             .into(),
                     ])

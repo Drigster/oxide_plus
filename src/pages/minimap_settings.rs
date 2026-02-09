@@ -1,4 +1,5 @@
 use freya::{prelude::*, radio::use_radio};
+use serde::{Deserialize, Serialize};
 
 use crate::{
     BACKGROUND_COLOR, Data, DataChannel, SELECT_COLOR, TEXT_COLOR,
@@ -9,7 +10,7 @@ use crate::{
     pages::Shape,
 };
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[allow(dead_code)]
 pub enum Position {
     TopLeft,
@@ -18,7 +19,7 @@ pub enum Position {
     BottomRight,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 #[allow(dead_code)]
 pub struct MinimapSettings {
     pub enabled: bool,

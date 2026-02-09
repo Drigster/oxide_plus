@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::pages::UserData;
+use crate::pages::{MinimapSettings, UserData};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct ServerData {
@@ -40,6 +40,7 @@ pub struct AppData {
 pub const APP_DIR_NAME: &str = "OxidePlus";
 const SERVERS_FILENAME: &str = "servers.json";
 const APP_DATA_FILENAME: &str = "user_data.json";
+const MINIMAP_SETTINGS_FILENAME: &str = "config.json";
 
 pub fn load_servers() -> Result<Vec<ServerData>, Box<dyn std::error::Error>> {
     let config_dir = dirs::config_dir().unwrap();
@@ -470,6 +471,57 @@ pub fn save_last_persistent_id(last_persistent_id: &str) -> Result<(), Box<dyn s
     };
 
     std::fs::write(config_path, serde_json::to_string_pretty(&app_data)?)?;
+
+    Ok(())
+}
+
+pub fn load_minimap_settings() -> Result<Option<MinimapSettings>, Box<dyn std::error::Error>> {
+    let config_dir = dirs::config_dir().unwrap();
+    let config_path = config_dir.join(APP_DIR_NAME).join(MINIMAP_SETTINGS_FILENAME);
+
+    if !config_path.exists() {
+        std::fs::create_dir_all(config_dir.join(APP_DIR_NAME))?;
+    }
+
+    let data = match std::fs::read_to_string(&config_path) {
+        Ok(content) => Ok(Some(content)),
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
+            println!("[load_minimap_settings] No {MINIMAP_SETTINGS_FILENAME} found...");
+            Ok(None)
+        }
+        Err(e) => Err(e),
+    }?;
+
+    let minimap_settings = match data {
+        Some(content) => match serde_json::from_str::<MinimapSettings>(&content) {
+            Ok(minimap_settings) => Some(minimap_settings),
+            Err(e) => {
+                println!(
+                    "[load_minimap_settings] Failed to parse {MINIMAP_SETTINGS_FILENAME}: {:?}",
+                    e
+                );
+                None
+            }
+        },
+        None => None,
+    };
+
+    return Ok(minimap_settings);
+}
+
+pub fn save_minimap_settings(minimap_settings: &MinimapSettings) -> Result<(), Box<dyn std::error::Error>> {
+    let config_dir = dirs::config_dir().unwrap();
+    let config_path = config_dir.join(APP_DIR_NAME).join(MINIMAP_SETTINGS_FILENAME);
+
+    if !config_path.exists() {
+        std::fs::create_dir_all(config_dir.join(APP_DIR_NAME))?;
+    }
+
+    let mut minimap_settings = minimap_settings.clone();
+
+    minimap_settings.enabled = false;
+
+    std::fs::write(config_path, serde_json::to_string_pretty(&minimap_settings)?)?;
 
     Ok(())
 }

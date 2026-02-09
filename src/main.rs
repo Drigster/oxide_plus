@@ -31,7 +31,7 @@ mod utils;
 
 use crate::{
     pages::{MapSettings, Minimap, MinimapSettings, UserData},
-    utils::{Poller, ServerData},
+    utils::{Poller, ServerData, load_minimap_settings},
 };
 use app::MyApp;
 
@@ -147,6 +147,20 @@ fn main() {
                 let mut poller = Poller::new(None, state_tx.clone());
 
                 let mut window_id: Option<WindowId> = None;
+
+                radio_station.write_channel(DataChannel::MinimapSettingsUpdate).settings.minimap_settings = match load_minimap_settings() {
+                    Ok(minimap_settings) => {
+                        println!("Loaded minimap settings {:?}", minimap_settings);
+                        match minimap_settings {
+                            Some(minimap_settings) => minimap_settings,
+                            None => MinimapSettings::default(),
+                        }
+                    },
+                    Err(err) => {
+                        println!("Error loading minimap settings: {:?}", err);
+                        MinimapSettings::default()
+                    }
+                };
 
                 while let Some(channel_data) = state_rx.next().await {
                     match channel_data {

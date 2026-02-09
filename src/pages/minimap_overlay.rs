@@ -3,13 +3,14 @@ use freya::{
     radio::use_radio,
     tray::dpi::{PhysicalPosition, PhysicalSize},
 };
+use serde::{Deserialize, Serialize};
 
 use crate::{
     components::Map as MapComponent,
     {Data, DataChannel},
 };
 
-#[derive(PartialEq, Clone, Debug)]
+#[derive(PartialEq, Clone, Debug, Serialize, Deserialize)]
 #[allow(dead_code)]
 pub enum Shape {
     Circle,
