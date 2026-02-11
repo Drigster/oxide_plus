@@ -3,6 +3,13 @@ name = "oxide_plus"
 version = "0.2.1"
 edition = "2024"
 
+[package.metadata.winresource]
+InternalName = "oxide_plus"
+ProductName = "Oxide+"
+FileDescription = "Oxide+"
+OriginalFilename = "Oxide+.exe"
+LegalCopyright = "Copyright © 2026  drigster/oxide_plus"
+
 [dependencies]
 freya = { git = "https://github.com/marc2332/freya", branch = "main", features = [
     "radio",
@@ -35,3 +42,6 @@ euclid = "0.22.13"
 smol = "2.0.2"
 url = "2.5.8"
 quick-xml = { version = "0.39.0", features = ["serialize"] }
+
+[build-dependencies]
+winresource = "0.1"

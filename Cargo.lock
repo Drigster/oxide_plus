@@ -4248,6 +4248,7 @@ dependencies = [
  "ureq",
  "url",
  "uuid",
+ "winresource",
 ]
 
 [[package]]
@@ -7652,6 +7653,16 @@ checksum = "524e57b2c537c0f9b1e69f1965311ec12182b4122e45035b1508cd24d2adadb1"
 dependencies = [
  "cfg-if",
  "windows-sys 0.48.0",
+]
+
+[[package]]
+name = "winresource"
+version = "0.1.30"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e287ced0f21cd11f4035fe946fd3af145f068d1acb708afd248100f89ec7432d"
+dependencies = [
+ "toml 0.9.11+spec-1.1.0",
+ "version_check",
 ]
 
 [[package]]
