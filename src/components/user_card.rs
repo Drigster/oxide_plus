@@ -1,6 +1,6 @@
 use freya::{prelude::*, radio::use_radio};
 
-use crate::{Data, DataChannel, TEXT_COLOR, components::CachedImage};
+use crate::{Data, DataChannel, colors, components::CachedImage};
 
 #[derive(PartialEq)]
 pub struct UserCard {}
@@ -47,7 +47,7 @@ impl Component for UserCard {
                     .children([
                         label()
                             .font_size(12.0)
-                            .color(Color::from_hex(TEXT_COLOR).unwrap())
+                            .color(Color::from_hex(colors::TEXT).unwrap())
                             .text(team_member.name)
                             .into(),
                         label()

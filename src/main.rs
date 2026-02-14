@@ -28,6 +28,7 @@ mod components;
 mod layouts;
 mod pages;
 mod utils;
+mod colors;
 
 use crate::{
     pages::{MapSettings, Minimap, MinimapSettings, UserData},
@@ -36,15 +37,6 @@ use crate::{
 use app::MyApp;
 
 const ICON: &[u8] = include_bytes!("./assets/oxide_plus_icon.png");
-const SELECT_COLOR: &str = "#135C4F";
-const ACCENT_COLOR: &str = "#13455C";
-const SIDEBAR_BUTTON_BACKGROUND: &str = "#00000066";
-const SIDEBAR_BUTTON_BACKGROUND_HOVER: &str = "#FFFFFF1A";
-const TEXT_COLOR: &str = "#E4DAD1";
-const ICON_COLOR: &str = "#605B55";
-const BORDER_COLOR: &str = "#393834";
-const INPUT_BACKGROUND: &str = "#434140";
-const BACKGROUND_COLOR: &str = "#1D1D1B";
 
 fn main() {
     let mut radio_station = RadioStation::create_global(Data::default());

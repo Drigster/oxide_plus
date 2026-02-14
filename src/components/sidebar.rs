@@ -1,8 +1,8 @@
 use freya::prelude::*;
 use freya_router::prelude::RouterContext;
 
-use crate::ACCENT_COLOR;
 use crate::app::Route;
+use crate::colors;
 use crate::components::Button;
 
 #[derive(Clone, PartialEq)]
@@ -24,8 +24,8 @@ impl Component for Sidebar {
             .background_linear_gradient(
                 LinearGradient::new()
                     .angle(0.0)
-                    .stop((Color::from_hex(ACCENT_COLOR).unwrap().with_a(13), 5.0))
-                    .stop((Color::from_hex(ACCENT_COLOR).unwrap(), 100.0)),
+                    .stop((Color::from_hex(colors::ACCENT).unwrap().with_a(13), 5.0))
+                    .stop((Color::from_hex(colors::ACCENT).unwrap(), 100.0)),
             )
             .children([
                 Button::new()

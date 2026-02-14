@@ -1,6 +1,6 @@
 use freya::prelude::*;
 
-use crate::{INPUT_BACKGROUND, SELECT_COLOR, TEXT_COLOR};
+use crate::colors;
 
 #[derive(Clone, PartialEq)]
 pub struct Slider {
@@ -23,8 +23,8 @@ impl Slider {
             min: 0.0,
             max: 100.0,
             step: 1.0,
-            background: Color::from_hex(SELECT_COLOR).unwrap(),
-            background_fill: Color::from_hex(INPUT_BACKGROUND).unwrap(),
+            background: Color::from_hex(colors::SELECT).unwrap(),
+            background_fill: Color::from_hex(colors::INPUT_BACKGROUND).unwrap(),
             on_changed: None,
         }
     }
@@ -90,7 +90,7 @@ impl Component for Slider {
                             .margin((0.0, 2.0))
                             .font_size(16.0)
                             .font_weight(FontWeight::BOLD)
-                            .color(Color::from_hex(TEXT_COLOR).unwrap())
+                            .color(Color::from_hex(colors::TEXT).unwrap())
                             .text(if self.step < 0.1 {
                                 format!("{:.2}", self.value)
                             } else if self.step < 1.0 {
@@ -107,9 +107,12 @@ impl Component for Slider {
                     .background_linear_gradient(
                         LinearGradient::new()
                             .angle(-90.0)
-                            .stop((Color::from_hex(SELECT_COLOR).unwrap(), 0.0))
-                            .stop((Color::from_hex(SELECT_COLOR).unwrap(), slider_pos()))
-                            .stop((Color::from_hex(INPUT_BACKGROUND).unwrap(), slider_pos())),
+                            .stop((Color::from_hex(colors::SELECT).unwrap(), 0.0))
+                            .stop((Color::from_hex(colors::SELECT).unwrap(), slider_pos()))
+                            .stop((
+                                Color::from_hex(colors::INPUT_BACKGROUND).unwrap(),
+                                slider_pos(),
+                            )),
                     )
                     .on_mouse_down(move |e: Event<MouseEventData>| {
                         if e.button != Some(MouseButton::Left) {

@@ -3,7 +3,7 @@ use freya::{prelude::*, radio::use_radio};
 use timeago::Formatter;
 
 use crate::{
-    BACKGROUND_COLOR, Data, DataChannel, ICON_COLOR, TEXT_COLOR,
+    Data, DataChannel, colors,
     components::{CachedImage, PlayerCard},
 };
 
@@ -58,7 +58,7 @@ impl Component for Info {
                             .padding(8.0)
                             .spacing(8.0)
                             .layer(Layer::Relative(2))
-                            .background(Color::from_hex(BACKGROUND_COLOR).unwrap().with_a(191))
+                            .background(Color::from_hex(colors::BACKGROUND).unwrap().with_a(191))
                             .corner_radius(CornerRadius {
                                 top_left: 8.0,
                                 top_right: 0.0,
@@ -106,7 +106,7 @@ impl Component for Info {
                                     .width(Size::flex(1.0))
                                     .height(Size::Fill)
                                     .padding(8.0)
-                                    .background(Color::from_hex(BACKGROUND_COLOR).unwrap())
+                                    .background(Color::from_hex(colors::BACKGROUND).unwrap())
                                     .corner_radius(8.0)
                                     .main_align(Alignment::SpaceBetween)
                                     .children([
@@ -115,7 +115,7 @@ impl Component for Info {
                                             .font_family("WDXL Lubrifont")
                                             .font_size(24.0)
                                             .font_weight(FontWeight::BOLD)
-                                            .color(Color::from_hex(TEXT_COLOR).unwrap())
+                                            .color(Color::from_hex(colors::TEXT).unwrap())
                                             .max_lines(1)
                                             .text_overflow(TextOverflow::Custom("...".to_string()))
                                             .text(
@@ -129,7 +129,7 @@ impl Component for Info {
                                             .font_family("WDXL Lubrifont")
                                             .font_size(16.0)
                                             .font_weight(FontWeight::BOLD)
-                                            .color(Color::from_hex(ICON_COLOR).unwrap())
+                                            .color(Color::from_hex(colors::ICON).unwrap())
                                             .text(if let Some(wipe_time) = &info_state.wipe_time {
                                                 let formatter = Formatter::new();
                                                 let timestamp = DateTime::from_timestamp(
@@ -149,7 +149,7 @@ impl Component for Info {
                                     .width(Size::flex(1.0))
                                     .height(Size::Fill)
                                     .padding(8.0)
-                                    .background(Color::from_hex(BACKGROUND_COLOR).unwrap())
+                                    .background(Color::from_hex(colors::BACKGROUND).unwrap())
                                     .corner_radius(8.0)
                                     .main_align(Alignment::SpaceBetween)
                                     .cross_align(Alignment::End)
@@ -158,7 +158,9 @@ impl Component for Info {
                                             .position(
                                                 Position::new_absolute().top(-55.0).left(-55.0),
                                             )
-                                            .background(Color::from_hex("#0e0e0d").unwrap())
+                                            .background(
+                                                Color::from_hex(colors::BACKGROUND_DARK).unwrap(),
+                                            )
                                             .corner_radius(1000.0)
                                             .child(
                                                 rect()
@@ -166,7 +168,8 @@ impl Component for Info {
                                                     .width(Size::px(70.0))
                                                     .height(Size::px(70.0))
                                                     .background(
-                                                        Color::from_hex(BACKGROUND_COLOR).unwrap(),
+                                                        Color::from_hex(colors::BACKGROUND)
+                                                            .unwrap(),
                                                     )
                                                     .corner_radius(1000.0)
                                                     .overflow(Overflow::Clip)
@@ -192,7 +195,7 @@ impl Component for Info {
                                             .font_family("WDXL Lubrifont")
                                             .font_size(24.0)
                                             .font_weight(FontWeight::BOLD)
-                                            .color(Color::from_hex(TEXT_COLOR).unwrap())
+                                            .color(Color::from_hex(colors::TEXT).unwrap())
                                             .max_lines(1)
                                             .text_overflow(TextOverflow::Custom("...".to_string()))
                                             .text(if let Some(players) = &info_state.players {
@@ -209,7 +212,7 @@ impl Component for Info {
                                             .font_family("WDXL Lubrifont")
                                             .font_size(16.0)
                                             .font_weight(FontWeight::BOLD)
-                                            .color(Color::from_hex(ICON_COLOR).unwrap())
+                                            .color(Color::from_hex(colors::ICON).unwrap())
                                             .text(
                                                 if let Some(queued_players) =
                                                     &info_state.queued_players
@@ -234,7 +237,7 @@ impl Component for Info {
                                 rect()
                                     .width(Size::flex(1.0))
                                     .height(Size::Fill)
-                                    .background(Color::from_hex(BACKGROUND_COLOR).unwrap())
+                                    .background(Color::from_hex(colors::BACKGROUND).unwrap())
                                     .corner_radius(8.0)
                                     .child(if team_members.read().len() > 0 {
                                         ScrollView::new()
@@ -312,7 +315,7 @@ impl Component for Info {
                                             .center()
                                             .child(
                                                 label()
-                                                    .color(Color::from_hex(TEXT_COLOR).unwrap())
+                                                    .color(Color::from_hex(colors::TEXT).unwrap())
                                                     .text("Retrieving..."),
                                             )
                                             .into_element()
@@ -321,7 +324,7 @@ impl Component for Info {
                                 rect()
                                     .width(Size::flex(1.0))
                                     .height(Size::Fill)
-                                    .background(Color::from_hex(BACKGROUND_COLOR).unwrap())
+                                    .background(Color::from_hex(colors::BACKGROUND).unwrap())
                                     .corner_radius(8.0)
                                     .child(
                                         if let Some(selected_server) = &radio.read().selected_server
@@ -331,7 +334,9 @@ impl Component for Info {
                                                     label()
                                                         .font_size(16.0)
                                                         .font_weight(FontWeight::BOLD)
-                                                        .color(Color::from_hex(TEXT_COLOR).unwrap())
+                                                        .color(
+                                                            Color::from_hex(colors::TEXT).unwrap(),
+                                                        )
                                                         .margin(8.0)
                                                         .text(selected_server.desc.clone()),
                                                 )
@@ -342,7 +347,9 @@ impl Component for Info {
                                                 .center()
                                                 .child(
                                                     label()
-                                                        .color(Color::from_hex(TEXT_COLOR).unwrap())
+                                                        .color(
+                                                            Color::from_hex(colors::TEXT).unwrap(),
+                                                        )
                                                         .text("Retrieving..."),
                                                 )
                                                 .into_element()
@@ -386,13 +393,13 @@ impl Component for InfoCard {
                     .width(Size::px(36.0))
                     .height(Size::px(36.0))
                     .padding(6.0)
-                    .background(Color::from_hex(BACKGROUND_COLOR).unwrap())
+                    .background(Color::from_hex(colors::BACKGROUND).unwrap())
                     .corner_radius(4.0)
                     .child(
                         svg(self.icon.clone())
                             .width(Size::Fill)
                             .height(Size::Fill)
-                            .color(Color::from_hex(TEXT_COLOR).unwrap()),
+                            .color(Color::from_hex(colors::TEXT).unwrap()),
                     )
                     .into(),
                 rect()
@@ -401,7 +408,7 @@ impl Component for InfoCard {
                         label()
                             .font_size(12.0)
                             .font_weight(FontWeight::BOLD)
-                            .color(Color::from_hex(TEXT_COLOR).unwrap())
+                            .color(Color::from_hex(colors::TEXT).unwrap())
                             .text(self.title.clone())
                             .into(),
                         label()

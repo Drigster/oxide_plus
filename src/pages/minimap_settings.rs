@@ -2,7 +2,7 @@ use freya::{prelude::*, radio::use_radio};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    BACKGROUND_COLOR, Data, DataChannel, SELECT_COLOR, TEXT_COLOR,
+    Data, DataChannel, colors,
     components::{
         DropdownOption, DropdownSettings, MAX_ZOOM, MIN_ZOOM, Setting, SettingType, SliderSettings,
         ToggleSettings,
@@ -93,7 +93,7 @@ impl Component for MinimapSettingsPage {
         rect()
             .width(Size::Fill)
             .height(Size::Fill)
-            .background(Color::from_hex(BACKGROUND_COLOR).unwrap())
+            .background(Color::from_hex(colors::BACKGROUND).unwrap())
             .corner_radius(8.0)
             .child(
                 ScrollView::new()
@@ -111,12 +111,12 @@ impl Component for MinimapSettingsPage {
                                 .children([
                                     svg(freya_icons::lucide::map())
                                         .height(Size::Fill)
-                                        .color(Color::from_hex(SELECT_COLOR).unwrap())
+                                        .color(Color::from_hex(colors::SELECT).unwrap())
                                         .into(),
                                     label()
                                         .font_size(24.0)
                                         .font_weight(FontWeight::BOLD)
-                                        .color(Color::from_hex(TEXT_COLOR).unwrap())
+                                        .color(Color::from_hex(colors::TEXT).unwrap())
                                         .text("MINIMAP")
                                         .into(),
                                 ])
@@ -372,12 +372,12 @@ impl Component for MinimapSettingsPage {
                                 .children([
                                     svg(freya_icons::lucide::toggle_left())
                                         .height(Size::Fill)
-                                        .color(Color::from_hex(SELECT_COLOR).unwrap())
+                                        .color(Color::from_hex(colors::SELECT).unwrap())
                                         .into(),
                                     label()
                                         .font_size(24.0)
                                         .font_weight(FontWeight::BOLD)
-                                        .color(Color::from_hex(TEXT_COLOR).unwrap())
+                                        .color(Color::from_hex(colors::TEXT).unwrap())
                                         .text("TOGGLES")
                                         .into(),
                                 ])

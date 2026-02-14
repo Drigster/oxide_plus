@@ -1,8 +1,9 @@
 use freya::{prelude::*, radio::use_radio, router::RouterContext};
 
 use crate::{
-    BACKGROUND_COLOR, BORDER_COLOR, Data, DataChannel,
+    Data, DataChannel,
     app::Route,
+    colors,
     components::{Dropdown, ServerCard, UserCard},
 };
 
@@ -27,7 +28,7 @@ impl Component for Navbar {
         rect()
             .width(Size::percent(100.0))
             .height(Size::px(48.0))
-            .background(Color::from_hex(BACKGROUND_COLOR).unwrap())
+            .background(Color::from_hex(colors::BACKGROUND).unwrap())
             .direction(Direction::Horizontal)
             .main_align(Alignment::SpaceBetween)
             .cross_align(Alignment::Center)
@@ -40,7 +41,7 @@ impl Component for Navbar {
                         left: 0.0,
                     })
                     .alignment(BorderAlignment::Outer)
-                    .fill(Color::from_hex(BORDER_COLOR).unwrap()),
+                    .fill(Color::from_hex(colors::BORDER).unwrap()),
             )
             .children([
                 Dropdown::new()

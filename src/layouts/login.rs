@@ -1,6 +1,6 @@
 use freya::{prelude::*, router::Outlet};
 
-use crate::{BACKGROUND_COLOR, TEXT_COLOR, app::Route};
+use crate::{app::Route, colors};
 
 #[derive(PartialEq)]
 pub struct LoginLayout;
@@ -10,7 +10,7 @@ impl Component for LoginLayout {
             .width(Size::Fill)
             .height(Size::Fill)
             .cross_align(Alignment::Center)
-            .background(Color::from_hex(BACKGROUND_COLOR).unwrap())
+            .background(Color::from_hex(colors::BACKGROUND).unwrap())
             .content(Content::Flex)
             .children([
                 rect()
@@ -18,7 +18,7 @@ impl Component for LoginLayout {
                     .padding(16.0)
                     .child(
                         label()
-                            .color(Color::from_hex(TEXT_COLOR).unwrap())
+                            .color(Color::from_hex(colors::TEXT).unwrap())
                             .font_size(80.0)
                             .font_weight(FontWeight::BOLD)
                             .text("Oxide+"),

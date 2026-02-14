@@ -4,7 +4,7 @@ use freya::{
     prelude::*,
 };
 
-use crate::{TEXT_COLOR, components::CachedImage};
+use crate::{colors, components::CachedImage};
 
 #[derive(Clone, PartialEq)]
 pub struct Dropdown {
@@ -215,7 +215,7 @@ impl Component for Dropdown {
                                 },
                                 label()
                                     .font_weight(FontWeight::BOLD)
-                                    .color(Color::from_hex(TEXT_COLOR).unwrap())
+                                    .color(Color::from_hex(colors::TEXT).unwrap())
                                     .font_size(self.font_size)
                                     .text(self.title.clone())
                                     .into(),
@@ -230,7 +230,7 @@ impl Component for Dropdown {
                                 svg(freya_icons::lucide::chevron_up())
                                     .rotate(rotation)
                                     .height(Size::Fill)
-                                    .color(Color::from_hex(TEXT_COLOR).unwrap()),
+                                    .color(Color::from_hex(colors::TEXT).unwrap()),
                             )
                             .into(),
                     ])

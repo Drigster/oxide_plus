@@ -1,0 +1,10 @@
+pub const SELECT: &str = "#135C4F";
+pub const ACCENT: &str = "#13455C";
+pub const SIDEBAR_BUTTON_BACKGROUND: &str = "#00000066";
+pub const SIDEBAR_BUTTON_BACKGROUND_HOVER: &str = "#FFFFFF1A";
+pub const TEXT: &str = "#E4DAD1";
+pub const ICON: &str = "#605B55";
+pub const BORDER: &str = "#393834";
+pub const INPUT_BACKGROUND: &str = "#434140";
+pub const BACKGROUND: &str = "#1D1D1B";
+pub const BACKGROUND_DARK: &str = "#0E0E0D";

@@ -2,6 +2,7 @@ use freya::{prelude::*, router::Outlet};
 
 use crate::{
     app::Route,
+    colors,
     components::{Navbar, Sidebar},
 };
 
@@ -18,7 +19,7 @@ impl Component for MainLayout {
                 rect()
                     .width(Size::percent(100.0))
                     .height(Size::Fill)
-                    .background(Color::from_hex("#0E0E0D").unwrap())
+                    .background(Color::from_hex(colors::BACKGROUND_DARK).unwrap())
                     .direction(Direction::Horizontal)
                     .children([
                         Sidebar::new().into(),

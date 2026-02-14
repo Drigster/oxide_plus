@@ -1,6 +1,6 @@
 use freya::{prelude::*, radio::use_radio};
 
-use crate::{BORDER_COLOR, Data, DataChannel, ICON_COLOR, TEXT_COLOR, components::CachedImage};
+use crate::{Data, DataChannel, colors, components::CachedImage};
 
 #[derive(PartialEq)]
 pub struct PlayerCard {
@@ -42,7 +42,7 @@ impl Component for PlayerCard {
                     .border(
                         Border::new()
                             .width(1.0)
-                            .fill(Color::from_hex(BORDER_COLOR).unwrap())
+                            .fill(Color::from_hex(colors::BORDER).unwrap())
                             .alignment(BorderAlignment::Outer),
                     )
                     .child(if let Some(steam_profile) = &steam_profile {
@@ -60,7 +60,7 @@ impl Component for PlayerCard {
                     .children([
                         label()
                             .font_size(16.0)
-                            .color(Color::from_hex(TEXT_COLOR).unwrap())
+                            .color(Color::from_hex(colors::TEXT).unwrap())
                             .text(if let Some(steam_profile) = &steam_profile {
                                 steam_profile.name.clone()
                             } else {
@@ -80,7 +80,7 @@ impl Component for PlayerCard {
                                         Color::from_hex(if self.is_online {
                                             "#aaee32"
                                         } else {
-                                            ICON_COLOR
+                                            colors::ICON
                                         })
                                         .unwrap(),
                                     ),
@@ -93,7 +93,7 @@ impl Component for PlayerCard {
                                         Color::from_hex(if self.is_online {
                                             "#aaee32"
                                         } else {
-                                            ICON_COLOR
+                                            colors::ICON
                                         })
                                         .unwrap(),
                                     )

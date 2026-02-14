@@ -2,10 +2,7 @@ use std::borrow::Cow;
 
 use freya::prelude::*;
 
-use crate::{
-    ICON_COLOR, SELECT_COLOR, SIDEBAR_BUTTON_BACKGROUND, SIDEBAR_BUTTON_BACKGROUND_HOVER,
-    TEXT_COLOR,
-};
+use crate::colors;
 
 #[derive(Clone, PartialEq)]
 pub struct Button {
@@ -34,12 +31,12 @@ impl Button {
             text: None,
             on_press: None,
             active: false,
-            background: Color::from_hex(SIDEBAR_BUTTON_BACKGROUND).unwrap(),
-            background_hover: Color::from_hex(SIDEBAR_BUTTON_BACKGROUND_HOVER).unwrap(),
-            background_active: Color::from_hex(SELECT_COLOR).unwrap(),
-            icon_color: Color::from_hex(ICON_COLOR).unwrap(),
-            icon_color_active: Color::from_hex(TEXT_COLOR).unwrap(),
-            color: Color::from_hex(TEXT_COLOR).unwrap(),
+            background: Color::from_hex(colors::SIDEBAR_BUTTON_BACKGROUND).unwrap(),
+            background_hover: Color::from_hex(colors::SIDEBAR_BUTTON_BACKGROUND_HOVER).unwrap(),
+            background_active: Color::from_hex(colors::SELECT).unwrap(),
+            icon_color: Color::from_hex(colors::ICON).unwrap(),
+            icon_color_active: Color::from_hex(colors::TEXT).unwrap(),
+            color: Color::from_hex(colors::TEXT).unwrap(),
             align: Alignment::Start,
         }
     }
@@ -172,7 +169,7 @@ impl Component for Button {
                     label()
                         .font_size(16.0)
                         .font_weight(FontWeight::BOLD)
-                        .color(Color::from_hex(TEXT_COLOR).unwrap())
+                        .color(Color::from_hex(colors::TEXT).unwrap())
                         .text(text.clone()),
                 )
             } else {

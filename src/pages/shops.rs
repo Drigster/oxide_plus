@@ -3,7 +3,7 @@ use rustplus_rs::AppMarkerType;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use crate::{Data, DataChannel, TEXT_COLOR, components::CachedImage};
+use crate::{Data, DataChannel, colors, components::CachedImage};
 
 static ITEM_DATA: &'static [u8] = include_bytes!("./../assets/item_data.json");
 
@@ -69,7 +69,7 @@ impl Component for OrderPart {
                             })
                             .into(),
                         label()
-                            .color(Color::from_hex(TEXT_COLOR).unwrap())
+                            .color(Color::from_hex(colors::TEXT).unwrap())
                             .font_size(16.0)
                             .font_weight(FontWeight::BOLD)
                             .text(self.amount.to_string())
@@ -136,7 +136,7 @@ impl Component for Shops {
                                         .direction(Direction::Horizontal)
                                         .main_align(Alignment::SpaceBetween)
                                         .cross_align(Alignment::Center)
-                                        .color(Color::from_hex(TEXT_COLOR).unwrap())
+                                        .color(Color::from_hex(colors::TEXT).unwrap())
                                         .font_size(15.0)
                                         .font_weight(FontWeight::BOLD)
                                         .children([
