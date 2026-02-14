@@ -17,6 +17,7 @@ use freya::{
     winit::window::{ WindowId, WindowLevel},
 };
 use futures_lite::StreamExt;
+use rand::Rng;
 use rustplus_rs::{
     AppInfo, AppMap, AppMapMarkers, AppMarker, AppTeamInfo,
     app_map::Monument,
@@ -31,8 +32,7 @@ mod utils;
 mod colors;
 
 use crate::{
-    pages::{MapSettings, Minimap, MinimapSettings, UserData},
-    utils::{Poller, ServerData, load_minimap_settings},
+    components::{Timeout, Toast}, pages::{MapSettings, Minimap, MinimapSettings, UserData}, utils::{Poller, ServerData, load_minimap_settings}
 };
 use app::MyApp;
 
@@ -142,7 +142,6 @@ fn main() {
 
                 radio_station.write_channel(DataChannel::MinimapSettingsUpdate).settings.minimap_settings = match load_minimap_settings() {
                     Ok(minimap_settings) => {
-                        println!("Loaded minimap settings {:?}", minimap_settings);
                         match minimap_settings {
                             Some(minimap_settings) => minimap_settings,
                             None => MinimapSettings::default(),
@@ -150,6 +149,18 @@ fn main() {
                     },
                     Err(err) => {
                         println!("Error loading minimap settings: {:?}", err);
+                        let mut rng = rand::rng();
+                            let toast_id: u64 = rng.next_u64();
+                            radio_station.write_channel(DataChannel::ToastsUpdate).toasts.insert(
+                                toast_id,
+                                Toast {
+                                    id: toast_id,
+                                    title: "Error loading minimap settings".to_string(),
+                                    message: "Failed to load minimap settings.".to_string(),
+                                    timeout: Timeout::Default,
+                                    on_press: None,
+                                },
+                            );
                         MinimapSettings::default()
                     }
                 };
@@ -453,6 +464,20 @@ fn main() {
                                 }
                             }
                         }
+                        ChannelSend::AddToast(toast_data) => {
+                            let mut rng = rand::rng();
+                            let toast_id: u64 = rng.next_u64();
+                            radio_station.write_channel(DataChannel::ToastsUpdate).toasts.insert(
+                                toast_id,
+                                Toast {
+                                    id: toast_id,
+                                    title: toast_data.title,
+                                    message: toast_data.message,
+                                    timeout: toast_data.timeout,
+                                    on_press: toast_data.on_press.map(EventHandler::new),
+                                },
+                            );
+                        },
                     }
                 }
             })
@@ -567,6 +592,8 @@ pub struct Data {
     pub minimap_window_id: Option<WindowId>,
 
     pub monitor_size: Option<PhysicalSize<u32>>,
+
+    pub toasts: HashMap<u64, Toast>,
 }
 
 #[derive(PartialEq, Eq, Clone, Debug, Copy, Hash)]
@@ -588,9 +615,17 @@ pub enum DataChannel {
     MapSettingsUpdate,
     MinimapSettingsUpdate,
     MonitorSizeUpdate,
+    ToastsUpdate,
 }
 
 impl RadioChannel<Data> for DataChannel {}
+
+pub struct ToastData {
+    pub title: String,
+    pub message: String,
+    pub timeout: Timeout,
+    pub on_press: Option<Box<dyn FnMut(()) + Send + 'static>>,
+}
 
 pub enum ChannelSend {
     UserDataUpdate(UserData),
@@ -603,4 +638,5 @@ pub enum ChannelSend {
     MapMarkersUpdate(Option<AppMapMarkers>),
     TeamInfoUpdate(Option<AppTeamInfo>),
     ToggleMinimap(bool),
+    AddToast(ToastData),
 }

@@ -6,7 +6,12 @@ use freya::{
 };
 use freya_router::prelude::RouterContext;
 
-use crate::{Data, DataChannel, app::Route, components::Button, utils::save_minimap_settings};
+use crate::{
+    Data, DataChannel,
+    app::Route,
+    components::{Button, Timeout},
+    utils::{create_toast, save_minimap_settings},
+};
 
 #[derive(PartialEq)]
 pub struct MapLayout {}
@@ -146,12 +151,30 @@ impl Component for MapLayout {
                                     .on_press(move |_| {
                                         let minimap_settings =
                                             radio.read().settings.minimap_settings.clone();
+                                        let toasts = radio
+                                            .slice_mut(DataChannel::ToastsUpdate, |s| {
+                                                &mut s.toasts
+                                            });
                                         match save_minimap_settings(&minimap_settings) {
                                             Ok(_) => {
-                                                println!("Saved minimap settings");
+                                                create_toast(
+                                                    toasts.into_writable(),
+                                                    "Minimap settings saved".to_string(),
+                                                    "Successfully saved minimap settings"
+                                                        .to_string(),
+                                                    Timeout::Default,
+                                                    None::<fn(())>,
+                                                );
                                             }
                                             Err(err) => {
-                                                println!(
+                                                create_toast(
+                                                    toasts.into_writable(),
+                                                    "Minimap settings error".to_string(),
+                                                    "Error saving minimap settings".to_string(),
+                                                    Timeout::Default,
+                                                    None::<fn(())>,
+                                                );
+                                                eprintln!(
                                                     "Error saving minimap settings: {:?}",
                                                     err
                                                 );

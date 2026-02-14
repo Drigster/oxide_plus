@@ -15,6 +15,34 @@ pub use text_utils::*;
 mod steam_utils;
 pub use steam_utils::*;
 
+use crate::components::{Timeout, Toast};
+use freya::{prelude::EventHandler, radio::Writable};
+use rand::Rng;
+use std::collections::HashMap;
+pub fn create_toast(
+    mut toasts: Writable<HashMap<u64, Toast>>,
+    title: String,
+    message: String,
+    timeout: Timeout,
+    on_press: Option<impl FnMut(()) + 'static>,
+) {
+    let mut rng = rand::rng();
+    let toast_id: u64 = rng.next_u64();
+    toasts.write().insert(
+        toast_id,
+        Toast {
+            id: toast_id,
+            title,
+            message,
+            timeout: timeout,
+            on_press: match on_press {
+                Some(on_press) => Some(EventHandler::new(on_press)),
+                None => None,
+            },
+        },
+    );
+}
+
 #[cfg(target_os = "linux")]
 pub enum SystemType {
     Wayland,

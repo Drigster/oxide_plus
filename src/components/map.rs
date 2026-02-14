@@ -365,7 +365,7 @@ impl Component for MapNoteLayer {
                             )
                         }
                         _ => {
-                            println!("Unused marker: {:?}", map_note);
+                            eprintln!("Unused marker: {:?}", map_note);
                             None
                         }
                     }),
@@ -451,7 +451,7 @@ impl Component for MarkerLayer {
                         if *self.markers.read() == false {
                             return None;
                         }
-                        println!("Unknown marker: {:?}", marker);
+                        eprintln!("Unknown marker: {:?}", marker);
                         Some(
                             rect()
                                 .width(Size::px(4.0))

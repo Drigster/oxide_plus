@@ -1,19 +1,11 @@
-use std::{collections::HashSet, sync::Arc};
+use std::{collections::HashSet, fs::OpenOptions, io::Write, sync::Arc};
 
 use freya::{prelude::*, radio::*};
 use freya_router::prelude::RouterContext;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::{
-    ChannelSend, Data, DataChannel,
-    app::Route,
-    colors,
-    utils::{
-        FcmData, ServerData, create_fcm_client, get_expo_push_token, load_expo_push_token,
-        load_fcm_data, load_last_persistent_id, load_servers, load_user_data,
-        register_with_rust_plus, save_expo_push_token, save_fcm_data, save_last_persistent_id,
-        save_server,
-    },
+    ChannelSend, Data, DataChannel, ToastData, app::Route, colors, components::Timeout, utils::*,
 };
 
 #[derive(PartialEq)]
@@ -21,6 +13,7 @@ pub struct Loading {}
 impl Component for Loading {
     fn render(&self) -> impl IntoElement {
         let radio = use_radio::<Data, DataChannel>(DataChannel::LoadingStateUpdate);
+        let toasts = radio.slice_mut(DataChannel::ToastsUpdate, |s| &mut s.toasts);
 
         use_future(move || {
             let state_tx = radio.read().state_tx.clone().unwrap();
@@ -48,7 +41,14 @@ impl Component for Loading {
                         }
                     },
                     Err(err) => {
-                        println!("Error loading user data. {:?}", err);
+                        create_toast(
+                            toasts.into_writable(),
+                            "Error loading user data".to_string(),
+                            err.to_string(),
+                            Timeout::Default,
+                            None::<fn(())>,
+                        );
+                        eprintln!("Error loading user data. {:?}", err);
                         RouterContext::get().replace(Route::Login);
                         return;
                     }
@@ -101,8 +101,8 @@ impl Component for Loading {
 
                         if let Some(id) = payload.persistent_id {
                             match save_last_persistent_id(&id) {
-                                Ok(_) => println!("Last persistent ID saved successfully."),
-                                Err(e) => println!("Failed to save last persistent ID: {:?}", e),
+                                Ok(_) => {}
+                                Err(e) => eprintln!("Failed to save last persistent ID: {:?}", e),
                             };
                         }
 
@@ -113,18 +113,13 @@ impl Component for Loading {
                                     match server_data {
                                         Ok(data) => {
                                             state_tx
-                                                .unbounded_send(ChannelSend::AddServer(
-                                                    data.clone(),
-                                                ))
+                                                .unbounded_send(ChannelSend::AddToast(ToastData {
+                                                    title: "New server paring request".to_string(),
+                                                    message: "Click here to pair".to_string(),
+                                                    timeout: Timeout::Infinite,
+                                                    on_press: None,
+                                                }))
                                                 .unwrap();
-                                            match save_server(data) {
-                                                Ok(_) => {
-                                                    println!("Server data saved successfully.");
-                                                }
-                                                Err(err) => {
-                                                    println!("Error saving server data: {}", err);
-                                                }
-                                            }
                                         }
                                         Err(err) => {
                                             println!("Error parsing server data: {}", err);
@@ -136,6 +131,19 @@ impl Component for Loading {
                                     match team_data {
                                         Ok(data) => {
                                             println!("Received team data: {:?}", data);
+                                            let mut file = OpenOptions::new()
+                                                .write(true)
+                                                .append(true)
+                                                .create(true) // Creates file if it doesn't exist
+                                                .open("team_notif.json")
+                                                .unwrap();
+
+                                            file.write(
+                                                serde_json::to_string_pretty(&data)
+                                                    .unwrap()
+                                                    .as_bytes(),
+                                            )
+                                            .unwrap();
                                         }
                                         Err(err) => {
                                             println!("Error parsing team data: {}", err);
@@ -147,14 +155,36 @@ impl Component for Loading {
                                     match player_data {
                                         Ok(data) => {
                                             println!("Received player data: {:?}", data);
+                                            let mut file = OpenOptions::new()
+                                                .write(true)
+                                                .append(true)
+                                                .create(true) // Creates file if it doesn't exist
+                                                .open("player_notif.json")
+                                                .unwrap();
+                                            file.write(
+                                                serde_json::to_string_pretty(&data)
+                                                    .unwrap()
+                                                    .as_bytes(),
+                                            )
+                                            .unwrap();
                                         }
                                         Err(err) => {
                                             println!("Error parsing player data: {}", err);
                                         }
                                     }
                                 }
-                                _ => {
+                                data => {
                                     println!("Unknown channel ID: {}", channel_id);
+                                    let mut file = OpenOptions::new()
+                                        .write(true)
+                                        .append(true)
+                                        .create(true) // Creates file if it doesn't exist
+                                        .open("unknown_notif.json")
+                                        .unwrap();
+                                    file.write(
+                                        serde_json::to_string_pretty(&data).unwrap().as_bytes(),
+                                    )
+                                    .unwrap();
                                 }
                             }
                         } else {
@@ -304,6 +334,14 @@ impl Component for Loading {
                             .unwrap();
                     }
                     Err(err) => {
+                        state_tx_clone
+                            .unbounded_send(ChannelSend::AddToast(ToastData {
+                                title: "FCM listener failed!".to_owned(),
+                                message: "Reconnecting!".to_owned(),
+                                timeout: Timeout::Infinite,
+                                on_press: None,
+                            }))
+                            .unwrap();
                         panic!("Error starting FCM listening: {}", err);
                     }
                 });
@@ -348,7 +386,7 @@ impl Component for Loading {
     }
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 #[allow(dead_code)]
 struct TeamData {
     r#type: String,
@@ -358,7 +396,7 @@ struct TeamData {
     target_name: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 #[allow(dead_code)]
 struct PlayerData {
     r#type: String,

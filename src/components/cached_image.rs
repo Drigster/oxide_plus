@@ -52,7 +52,7 @@ impl Component for CachedImage {
                         path.set(Some(image_path));
                     }
                     Err(e) => {
-                        println!("Image failed to load: {} - Error: {}", image_uri, e);
+                        eprintln!("Image failed to load: {} - Error: {}", image_uri, e);
                     }
                 }
             });
