@@ -153,43 +153,47 @@ impl Component for Info {
                                     .corner_radius(8.0)
                                     .main_align(Alignment::SpaceBetween)
                                     .cross_align(Alignment::End)
-                                    .children([
-                                        rect()
-                                            .position(
-                                                Position::new_absolute().top(-55.0).left(-55.0),
-                                            )
-                                            .background(
-                                                Color::from_hex(colors::BACKGROUND_DARK).unwrap(),
-                                            )
-                                            .corner_radius(1000.0)
-                                            .child(
+                                    .maybe_child(
+                                        if let Some(logo_image) = &info_state.logo_image
+                                            && !logo_image.is_empty()
+                                        {
+                                            Some(
                                                 rect()
-                                                    .margin(8.0)
-                                                    .width(Size::px(70.0))
-                                                    .height(Size::px(70.0))
+                                                    .position(
+                                                        Position::new_absolute()
+                                                            .top(-55.0)
+                                                            .left(-55.0),
+                                                    )
                                                     .background(
-                                                        Color::from_hex(colors::BACKGROUND)
+                                                        Color::from_hex(colors::BACKGROUND_DARK)
                                                             .unwrap(),
                                                     )
                                                     .corner_radius(1000.0)
-                                                    .overflow(Overflow::Clip)
-                                                    .maybe_child(
-                                                        if let Some(logo_image) =
-                                                            &info_state.logo_image
-                                                        {
-                                                            Some(
+                                                    .child(
+                                                        rect()
+                                                            .margin(8.0)
+                                                            .width(Size::px(70.0))
+                                                            .height(Size::px(70.0))
+                                                            .background(
+                                                                Color::from_hex(colors::BACKGROUND)
+                                                                    .unwrap(),
+                                                            )
+                                                            .corner_radius(1000.0)
+                                                            .overflow(Overflow::Clip)
+                                                            .child(
                                                                 CachedImage::new(
                                                                     logo_image.to_string(),
                                                                 )
                                                                 .width(Size::px(70.0))
                                                                 .height(Size::px(70.0)),
-                                                            )
-                                                        } else {
-                                                            None
-                                                        },
+                                                            ),
                                                     ),
                                             )
-                                            .into(),
+                                        } else {
+                                            None
+                                        },
+                                    )
+                                    .children([
                                         label()
                                             .max_width(Size::percent(90.0))
                                             .font_family("WDXL Lubrifont")
