@@ -127,12 +127,12 @@ impl Component for Toast {
                     move |e: Event<PressEventData>| {
                         if let Some(on_press) = &on_press {
                             on_press.call(());
-                        } else {
                             e.stop_propagation();
+                            pos_animation.reverse();
                         }
                     }
                 })
-                .children([
+                .child(
                     rect()
                         .width(Size::Fill)
                         .height(Size::Fill)
@@ -155,21 +155,25 @@ impl Component for Toast {
                                 .text_overflow(TextOverflow::Custom("...".to_owned()))
                                 .text(self.message.clone())
                                 .into(),
-                        ])
-                        .into(),
-                    rect()
-                        .width(Size::Fill)
-                        .height(Size::px(2.0))
-                        .position(Position::new_absolute().bottom(0.0))
-                        .background_linear_gradient(
-                            LinearGradient::new()
-                                .angle(-90.0)
-                                .stop((Color::TRANSPARENT, timeout_value))
-                                .stop((Color::from_hex(colors::SELECT).unwrap(), timeout_value))
-                                .stop((Color::from_hex(colors::SELECT).unwrap(), 100.0)),
-                        )
-                        .into(),
-                ]),
+                        ]),
+                )
+                .maybe_child(if self.timeout != Timeout::Infinite {
+                    Some(
+                        rect()
+                            .width(Size::Fill)
+                            .height(Size::px(2.0))
+                            .position(Position::new_absolute().bottom(0.0))
+                            .background_linear_gradient(
+                                LinearGradient::new()
+                                    .angle(-90.0)
+                                    .stop((Color::TRANSPARENT, timeout_value))
+                                    .stop((Color::from_hex(colors::SELECT).unwrap(), timeout_value))
+                                    .stop((Color::from_hex(colors::SELECT).unwrap(), 100.0)),
+                            ),
+                    )
+                } else {
+                    None
+                }),
         )
     }
 }
