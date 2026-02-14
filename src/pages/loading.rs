@@ -5,7 +5,11 @@ use freya_router::prelude::RouterContext;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    ChannelSend, Data, DataChannel, ToastData, app::Route, colors, components::Timeout, utils::*,
+    ChannelSend, Data, DataChannel, ToastData,
+    app::Route,
+    colors,
+    components::{Modal, ModalType, Timeout},
+    utils::*,
 };
 
 #[derive(PartialEq)]
@@ -111,13 +115,29 @@ impl Component for Loading {
                                 "pairing" => {
                                     let server_data = serde_json::from_str::<ServerData>(&message);
                                     match server_data {
-                                        Ok(data) => {
+                                        Ok(mut data) => {
+                                            data.desc = data.desc.replace("\\n", "\n");
                                             state_tx
                                                 .unbounded_send(ChannelSend::AddToast(ToastData {
                                                     title: "New server paring request".to_string(),
                                                     message: "Click here to pair".to_string(),
                                                     timeout: Timeout::Infinite,
-                                                    on_press: None,
+                                                    on_press: Some(Box::new({
+                                                        let state_tx = state_tx.clone();
+                                                        move |_| {
+                                                            state_tx
+                                                                .unbounded_send(
+                                                                    ChannelSend::ModalUpdate(Some(
+                                                                        Modal::new(
+                                                                            ModalType::ServerPair(
+                                                                                data.clone(),
+                                                                            ),
+                                                                        ),
+                                                                    )),
+                                                                )
+                                                                .unwrap();
+                                                        }
+                                                    })),
                                                 }))
                                                 .unwrap();
                                         }
@@ -353,9 +373,14 @@ impl Component for Loading {
                     .unwrap();
                 let servers = match load_servers() {
                     Ok(servers) => servers
-                        .iter()
-                        .filter(|e| Some(e.player_id.clone()) == user_data.steam_id)
-                        .cloned()
+                        .into_iter()
+                        .filter_map(|e| {
+                            if Some(e.player_id.clone()) == user_data.steam_id {
+                                Some((e.id.clone(), e.clone()))
+                            } else {
+                                None
+                            }
+                        })
                         .collect(),
                     Err(err) => {
                         panic!("Error loading servers: {}", err);

@@ -10,7 +10,7 @@ impl Component for LoginLayout {
             .width(Size::Fill)
             .height(Size::Fill)
             .cross_align(Alignment::Center)
-            .background(Color::from_hex(colors::BACKGROUND).unwrap())
+            .background(Color::from_hex(colors::BACKGROUND_DARK).unwrap())
             .content(Content::Flex)
             .children([
                 rect()

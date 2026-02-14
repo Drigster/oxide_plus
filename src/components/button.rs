@@ -8,6 +8,9 @@ use crate::colors;
 pub struct Button {
     pub width: Size,
     pub height: Size,
+    pub padding: Gaps,
+    pub spacing: f32,
+    pub corner_radius: CornerRadius,
     pub icon: Option<Bytes>,
     pub text: Option<Cow<'static, str>>,
     pub on_press: Option<EventHandler<Event<PressEventData>>>,
@@ -27,6 +30,9 @@ impl Button {
         Self {
             width: Size::default(),
             height: Size::default(),
+            padding: Gaps::new_all(8.0),
+            corner_radius: CornerRadius::default(),
+            spacing: 8.0,
             icon: None,
             text: None,
             on_press: None,
@@ -48,6 +54,21 @@ impl Button {
 
     pub fn height(mut self, height: Size) -> Self {
         self.height = height;
+        self
+    }
+
+    pub fn padding(mut self, padding: impl Into<Gaps>) -> Self {
+        self.padding = padding.into();
+        self
+    }
+
+    pub fn corner_radius(mut self, corner_radius: impl Into<CornerRadius>) -> Self {
+        self.corner_radius = corner_radius.into();
+        self
+    }
+
+    pub fn spacing(mut self, spacing: f32) -> Self {
+        self.spacing = spacing;
         self
     }
 
@@ -137,8 +158,9 @@ impl Component for Button {
             .height(self.height.clone())
             .background(background_color)
             .direction(Direction::Horizontal)
-            .padding(8.0)
-            .spacing(8.0)
+            .padding(self.padding.clone())
+            .spacing(self.spacing)
+            .corner_radius(self.corner_radius.clone())
             .cross_align(Alignment::Center)
             .main_align(self.align.clone())
             .on_pointer_enter(move |_| {

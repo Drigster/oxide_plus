@@ -32,7 +32,7 @@ mod utils;
 mod colors;
 
 use crate::{
-    components::{Timeout, Toast}, pages::{MapSettings, Minimap, MinimapSettings, UserData}, utils::{Poller, ServerData, load_minimap_settings}
+    components::{Modal, Timeout, Toast}, pages::{MapSettings, Minimap, MinimapSettings, UserData}, utils::{Poller, ServerData, load_minimap_settings}
 };
 use app::MyApp;
 
@@ -186,7 +186,7 @@ fn main() {
                             radio_station
                                 .write_channel(DataChannel::ServersUpdate)
                                 .servers
-                                .push(server);
+                                .insert(server.id.clone(), server);
                         }
                         ChannelSend::SelectedServerUpdate(selected_server) => {
                             match &selected_server {
@@ -319,7 +319,7 @@ fn main() {
                                     && member.death_time == old_member.death_time {
                                         continue;
                                     }
-                                    
+            
                                     radio_station
                                         .write_channel(DataChannel::TeamMemberUpdate(member.steam_id))
                                         .team_info
@@ -478,6 +478,11 @@ fn main() {
                                 },
                             );
                         },
+                        ChannelSend::ModalUpdate(overlay) => {
+                            radio_station
+                                .write_channel(DataChannel::ModalUpdate)
+                                .modal = overlay;
+                        },
                     }
                 }
             })
@@ -578,7 +583,7 @@ pub struct MapMarkers {
 #[derive(Default, Clone)]
 pub struct Data {
     pub user_data: UserData,
-    pub servers: Vec<ServerData>,
+    pub servers: HashMap<String, ServerData>,
     pub selected_server: Option<ServerData>,
     pub loading_state: String,
     pub settings: Settings,
@@ -594,6 +599,7 @@ pub struct Data {
     pub monitor_size: Option<PhysicalSize<u32>>,
 
     pub toasts: HashMap<u64, Toast>,
+    pub modal: Option<Modal>,
 }
 
 #[derive(PartialEq, Eq, Clone, Debug, Copy, Hash)]
@@ -616,6 +622,7 @@ pub enum DataChannel {
     MinimapSettingsUpdate,
     MonitorSizeUpdate,
     ToastsUpdate,
+    ModalUpdate,
 }
 
 impl RadioChannel<Data> for DataChannel {}
@@ -630,7 +637,7 @@ pub struct ToastData {
 pub enum ChannelSend {
     UserDataUpdate(UserData),
     LoadingStateUpdate(String),
-    ServersUpdate(Vec<ServerData>),
+    ServersUpdate(HashMap<String, ServerData>),
     AddServer(ServerData),
     SelectedServerUpdate(Option<ServerData>),
     InfoStateUpdate(Option<AppInfo>),
@@ -639,4 +646,5 @@ pub enum ChannelSend {
     TeamInfoUpdate(Option<AppTeamInfo>),
     ToggleMinimap(bool),
     AddToast(ToastData),
+    ModalUpdate(Option<Modal>),
 }

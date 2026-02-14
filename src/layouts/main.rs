@@ -13,13 +13,12 @@ impl Component for MainLayout {
         rect()
             .width(Size::percent(100.0))
             .height(Size::percent(100.0))
-            .background(Color::from_hex("#1e1e1e").unwrap())
+            .background(Color::from_hex(colors::BACKGROUND_DARK).unwrap())
             .children([
                 Navbar::new().into(),
                 rect()
                     .width(Size::percent(100.0))
                     .height(Size::Fill)
-                    .background(Color::from_hex(colors::BACKGROUND_DARK).unwrap())
                     .direction(Direction::Horizontal)
                     .children([
                         Sidebar::new().into(),

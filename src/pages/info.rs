@@ -25,7 +25,7 @@ impl Component for Info {
             .children([
                 rect()
                     .width(Size::Fill)
-                    .height(Size::px(420.0))
+                    .height(Size::px(418.0))
                     .child(
                         rect()
                             .width(Size::Fill)

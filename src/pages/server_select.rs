@@ -15,7 +15,8 @@ impl Component for ServerSelect {
                 radio
                     .read()
                     .servers
-                    .clone()
+                    .values()
+                    .cloned()
                     .into_iter()
                     .filter_map(|server| {
                         Some(

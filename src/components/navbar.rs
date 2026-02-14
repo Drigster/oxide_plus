@@ -54,6 +54,8 @@ impl Component for Navbar {
                         rect()
                             .children(
                                 servers
+                                    .values()
+                                    .cloned()
                                     .into_iter()
                                     .map({
                                         let state_tx = state_tx.clone();

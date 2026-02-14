@@ -27,3 +27,5 @@ mod player_card;
 pub use player_card::*;
 mod toast;
 pub use toast::*;
+mod modal;
+pub use modal::*;

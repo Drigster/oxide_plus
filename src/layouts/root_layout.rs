@@ -9,6 +9,9 @@ impl Component for RootLayout {
         let radio = use_radio(DataChannel::ToastsUpdate);
         let toasts = radio.slice_current(|s| &s.toasts);
 
+        let binding = radio.slice(DataChannel::ModalUpdate, |s| &s.modal);
+        let modal = binding.read().clone();
+
         rect()
             .width(Size::Fill)
             .height(Size::Fill)
@@ -30,6 +33,21 @@ impl Component for RootLayout {
                             .collect::<Vec<Element>>(),
                     ),
             )
+            .maybe_child(if modal.is_some() {
+                Some(
+                    rect()
+                        .width(Size::Fill)
+                        .height(Size::Fill)
+                        .layer(Layer::RelativeOverlay(2))
+                        .position(Position::new_absolute())
+                        .main_align(Alignment::Center)
+                        .cross_align(Alignment::Center)
+                        .background(Color::from_hex("#00000080").unwrap())
+                        .child(modal.unwrap()),
+                )
+            } else {
+                None
+            })
             .child(Outlet::<Route>::new())
     }
 }
