@@ -30,12 +30,11 @@ const GRID_CELL_SIZE: f32 = 146.25;
 
 impl Component for Grid {
     fn render(&self) -> impl IntoElement {
-
         let text_margin = 4.0;
 
         let active_area_size = self.map_size as f32 - (self.margin * 2.0);
 
-        let cells = cmp::max(1, ((active_area_size / GRID_CELL_SIZE).round()) as u32);
+        let cells = cmp::max(1, ((active_area_size / GRID_CELL_SIZE).floor()) as u32);
 
         let converted_grid_size = active_area_size / cells as f32;
 
