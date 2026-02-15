@@ -42,6 +42,20 @@ impl Poller {
         let handle = thread::spawn(move || {
             smol::block_on(async move {
                 println!("Polling thread started");
+
+                state_tx
+                    .unbounded_send(ChannelSend::InfoStateUpdate(None))
+                    .unwrap();
+                state_tx
+                    .unbounded_send(ChannelSend::MapStateUpdate(None))
+                    .unwrap();
+                state_tx
+                    .unbounded_send(ChannelSend::MapMarkersUpdate(None))
+                    .unwrap();
+                state_tx
+                    .unbounded_send(ChannelSend::TeamInfoUpdate(None))
+                    .unwrap();
+
                 let server_data = {
                     let d = details.lock().unwrap();
                     d.clone()
