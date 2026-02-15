@@ -94,13 +94,27 @@ impl Component for Loading {
                     let state_tx = state_tx.clone();
                     move |payload| {
                         let mut channel_id: Option<String> = None;
+                        let mut body: Option<String> = None;
+                        let mut title: Option<String> = None;
                         let mut message: Option<String> = None;
                         for data in dbg!(&payload).app_data.iter() {
                             match data.key.as_str() {
                                 "channelId" => channel_id = Some(data.value.clone()),
-                                "body" => message = Some(data.value.clone()),
+                                "body" => body = Some(data.value.clone()),
+                                "title" => title = Some(data.value.clone()),
+                                "message" => message = Some(data.value.clone()),
                                 _ => {}
                             }
+                        }
+
+                        if channel_id.is_some() && channel_id.clone().unwrap() != "pairing" {
+                            let mut file = OpenOptions::new()
+                                .write(true)
+                                .append(true)
+                                .create(true) // Creates file if it doesn't exist
+                                .open("on_raw_message.json")
+                                .unwrap();
+                            file.write(format!("{:?}\n\n", payload).as_bytes()).unwrap();
                         }
 
                         if let Some(id) = payload.persistent_id {
@@ -110,17 +124,18 @@ impl Component for Loading {
                             };
                         }
 
-                        if let (Some(channel_id), Some(message)) = (channel_id, message) {
+                        if let (Some(channel_id), Some(body)) = (channel_id, body) {
                             match channel_id.as_str() {
                                 "pairing" => {
-                                    let server_data = serde_json::from_str::<ServerData>(&message);
+                                    let server_data = serde_json::from_str::<ServerData>(&body);
                                     match server_data {
                                         Ok(mut data) => {
                                             data.desc = data.desc.replace("\\n", "\n");
                                             state_tx
                                                 .unbounded_send(ChannelSend::AddToast(ToastData {
-                                                    title: "New server paring request".to_string(),
-                                                    message: "Click here to pair".to_string(),
+                                                    title: data.name.clone(),
+                                                    message: "Click here to see pairing request"
+                                                        .to_string(),
                                                     timeout: Timeout::Infinite,
                                                     on_press: Some(Box::new({
                                                         let state_tx = state_tx.clone();
@@ -147,23 +162,21 @@ impl Component for Loading {
                                     }
                                 }
                                 "team" => {
-                                    let team_data = serde_json::from_str::<TeamData>(&message);
+                                    let team_data = serde_json::from_str::<TeamData>(&body);
                                     match team_data {
                                         Ok(data) => {
-                                            println!("Received team data: {:?}", data);
-                                            let mut file = OpenOptions::new()
-                                                .write(true)
-                                                .append(true)
-                                                .create(true) // Creates file if it doesn't exist
-                                                .open("team_notif.json")
+                                            state_tx
+                                                .unbounded_send(ChannelSend::AddToast(ToastData {
+                                                    title: message.unwrap_or_else(|| {
+                                                        "Unknown server".to_string()
+                                                    }),
+                                                    message: title.unwrap_or_else(|| {
+                                                        "Empty team message".to_string()
+                                                    }),
+                                                    timeout: Timeout::Custom(15),
+                                                    on_press: None,
+                                                }))
                                                 .unwrap();
-
-                                            file.write(
-                                                serde_json::to_string_pretty(&data)
-                                                    .unwrap()
-                                                    .as_bytes(),
-                                            )
-                                            .unwrap();
                                         }
                                         Err(err) => {
                                             println!("Error parsing team data: {}", err);
@@ -171,22 +184,21 @@ impl Component for Loading {
                                     }
                                 }
                                 "player" => {
-                                    let player_data = serde_json::from_str::<PlayerData>(&message);
+                                    let player_data = serde_json::from_str::<PlayerData>(&body);
                                     match player_data {
                                         Ok(data) => {
-                                            println!("Received player data: {:?}", data);
-                                            let mut file = OpenOptions::new()
-                                                .write(true)
-                                                .append(true)
-                                                .create(true) // Creates file if it doesn't exist
-                                                .open("player_notif.json")
+                                            state_tx
+                                                .unbounded_send(ChannelSend::AddToast(ToastData {
+                                                    title: message.unwrap_or_else(|| {
+                                                        "Unknown server".to_string()
+                                                    }),
+                                                    message: title.unwrap_or_else(|| {
+                                                        "Empty player message".to_string()
+                                                    }),
+                                                    timeout: Timeout::Custom(15),
+                                                    on_press: None,
+                                                }))
                                                 .unwrap();
-                                            file.write(
-                                                serde_json::to_string_pretty(&data)
-                                                    .unwrap()
-                                                    .as_bytes(),
-                                            )
-                                            .unwrap();
                                         }
                                         Err(err) => {
                                             println!("Error parsing player data: {}", err);
@@ -414,6 +426,14 @@ impl Component for Loading {
 #[derive(Deserialize, Serialize, Debug)]
 #[allow(dead_code)]
 struct TeamData {
+    id: String,
+    name: String,
+    desc: String,
+    img: String,
+    logo: String,
+    url: String,
+    ip: String,
+    port: String,
     r#type: String,
     #[serde(rename = "targetId")]
     target_id: String,
@@ -424,6 +444,14 @@ struct TeamData {
 #[derive(Deserialize, Serialize, Debug)]
 #[allow(dead_code)]
 struct PlayerData {
+    id: String,
+    name: String,
+    desc: String,
+    img: String,
+    logo: String,
+    url: String,
+    ip: String,
+    port: String,
     r#type: String,
     #[serde(rename = "targetId")]
     target_id: String,
