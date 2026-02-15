@@ -1,7 +1,8 @@
 use freya::{prelude::*, radio::use_radio};
 
 use crate::{
-    DataChannel, components::markers::{Align, base_marker}
+    DataChannel, colors,
+    components::markers::{Align, base_marker},
 };
 
 #[derive(PartialEq)]
@@ -12,11 +13,7 @@ pub struct Player {
 }
 
 impl Player {
-    pub fn new(
-        member_id: u64,
-        map_size: f32,
-        margin: f32,
-    ) -> Self {
+    pub fn new(member_id: u64, map_size: f32, margin: f32) -> Self {
         Self {
             member_id: member_id,
             map_size,
@@ -27,7 +24,9 @@ impl Player {
 
 impl Component for Player {
     fn render(&self) -> impl IntoElement {
-        let radio = use_radio::<crate::Data, crate::DataChannel>(crate::DataChannel::TeamMemberUpdate(self.member_id));
+        let radio = use_radio::<crate::Data, crate::DataChannel>(
+            crate::DataChannel::TeamMemberUpdate(self.member_id),
+        );
         let members = radio.slice_current(|s| &s.team_info.members);
         let member = members.read().get(&self.member_id).cloned();
 
@@ -37,7 +36,13 @@ impl Component for Player {
             return rect().into();
         }
 
-        let steam_id: u64 = user_data.read().steam_id.clone().unwrap_or("0".to_string()).parse().unwrap_or(0);
+        let steam_id: u64 = user_data
+            .read()
+            .steam_id
+            .clone()
+            .unwrap_or("0".to_string())
+            .parse()
+            .unwrap_or(0);
         let me = steam_id == self.member_id;
         let member = member.unwrap();
 
@@ -51,7 +56,14 @@ impl Component for Player {
                 Align::Center,
             )
             .corner_radius(CornerRadius::new_all(1000.0))
-            .background(Color::from_hex("#f3c86d").unwrap())
+            .background(
+                Color::from_hex(if member.is_online {
+                    "#f3c86d"
+                } else {
+                    colors::ICON
+                })
+                .unwrap(),
+            )
             .border(
                 Border::new()
                     .fill(Color::from_hex("#000000d0").unwrap())
@@ -69,7 +81,14 @@ impl Component for Player {
                 Align::Center,
             )
             .corner_radius(CornerRadius::new_all(1000.0))
-            .background(Color::from_hex("#aaee32").unwrap())
+            .background(
+                Color::from_hex(if member.is_online {
+                    "#aaee32"
+                } else {
+                    colors::ICON
+                })
+                .unwrap(),
+            )
             .border(
                 Border::new()
                     .fill(Color::from_hex("#000000d0").unwrap())
@@ -82,7 +101,14 @@ impl Component for Player {
                     label()
                         .font_family("Roboto Condensed")
                         .font_weight(FontWeight::SEMI_BOLD)
-                        .color(Color::from_hex("#aaee32").unwrap())
+                        .color(
+                            Color::from_hex(if member.is_online {
+                                "#aaee32"
+                            } else {
+                                colors::ICON
+                            })
+                            .unwrap(),
+                        )
                         .font_size(6.0)
                         .max_lines(1)
                         .text(format!("{}", member.name)),
